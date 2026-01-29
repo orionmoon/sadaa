@@ -37,17 +37,17 @@ $languages = getActiveLanguages();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sada | Écho Spirituel</title>
+    <title>Sadaa | Écho Spirituel</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@200;300;400;500;600&family=Noto+Naskh+Arabic:wght@400;500;700&family=Reem+Kufi:wght@400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@200;300;400;500;600&family=Noto+Naskh+Arabic:wght@400;500;700&family=Reem+Kufi:wght@400;500;600;700&family=Crimson+Text:wght@400;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Iconify -->
-    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -58,16 +58,7 @@ $languages = getActiveLanguages();
         <!-- Logo Section -->
         <header class="logo-section">
             <h1 class="logo-arabic">صَــدَى</h1>
-            <p class="tagline">
-                <?php
-                $taglines = [
-                    'ar' => 'صدى الحكمة للروح',
-                    'fr' => 'Écho de sagesse pour l\'âme',
-                    'en' => 'Echo of wisdom for the soul'
-                ];
-                echo $taglines[$currentLang] ?? $taglines['fr'];
-                ?>
-            </p>
+            <p class="tagline"><?= __('public.tagline') ?></p>
         </header>
 
         <!-- Type Tabs -->
@@ -109,14 +100,14 @@ $languages = getActiveLanguages();
         <!-- Description Section -->
         <section class="description-section">
             <p class="profile-description" id="profile-description">
-                Sélectionnez une intention...
+                <?= __('public.select_intention') ?>
             </p>
         </section>
 
         <!-- CTA Button -->
         <section class="cta-section">
             <button class="cta-button" id="btn-start">
-                <?= $currentLang === 'ar' ? 'ابدأ' : ($currentLang === 'en' ? 'Start' : 'Commencer') ?>
+                <?= __('actions.start') ?>
             </button>
         </section>
 
@@ -158,6 +149,7 @@ $languages = getActiveLanguages();
         // Data passed from PHP
         const categoriesData = <?= json_encode($categoriesByType) ?>;
         const currentLang = '<?= $currentLang ?>';
+        const translations = <?= json_encode(getJsTranslations()) ?>;
 
         // State
         let currentCategories = [];
@@ -251,7 +243,7 @@ $languages = getActiveLanguages();
             if (currentCategories[currentIndex]) {
                 descEl.textContent = getLocalized(currentCategories[currentIndex].description);
             } else {
-                descEl.textContent = "Aucune catégorie disponible";
+                descEl.textContent = translations.no_category || "No category available";
             }
 
             // 4. Update arrows
@@ -278,11 +270,16 @@ $languages = getActiveLanguages();
 
         // Theme Toggle
         document.getElementById('theme-toggle').addEventListener('click', () => {
+            const html = document.documentElement;
             const body = document.body;
-            body.classList.toggle('dark');
-            const theme = body.classList.contains('dark') ? 'dark' : 'light';
-            document.cookie = `sadaa_theme=${theme};path=/;max-age=31536000`;
-            body.setAttribute('class', theme);
+            const current = html.classList.contains('dark') ? 'dark' : 'light';
+            const next = current === 'dark' ? 'light' : 'dark';
+
+            html.classList.remove(current);
+            html.classList.add(next);
+            body.classList.remove(current);
+            body.classList.add(next);
+            document.cookie = `sadaa_theme=${next};path=/;max-age=31536000`;
         });
 
         // Language

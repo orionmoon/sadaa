@@ -54,12 +54,11 @@ try {
             $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
 
             if ($categoryId) {
-                // Get surahs that have ayahs in this category
+                // Get surahs that have assignment groups in this category
                 $stmt = $pdo->prepare("
                     SELECT DISTINCT s.* FROM surahs s
-                    INNER JOIN ayahs a ON a.surah_id = s.id
-                    INNER JOIN ayah_categories ac ON ac.ayah_id = a.id
-                    WHERE ac.category_id = ?
+                    INNER JOIN assignment_groups ag ON ag.surah_id = s.id
+                    WHERE ag.category_id = ?
                     ORDER BY s.number ASC
                 ");
                 $stmt->execute([$categoryId]);
@@ -74,11 +73,11 @@ try {
 
         case 'ayahs':
         case 'get_ayahs':
+            // Logic for flat ayahs list (if still needed)
             $surahId = isset($_GET['surah_id']) ? (int) $_GET['surah_id'] : null;
             $surahNumber = isset($_GET['surah_number']) ? (int) $_GET['surah_number'] : null;
             $categoryId = isset($_GET['category_id']) ? (int) $_GET['category_id'] : null;
 
-            // Get surah ID from number if needed
             if (!$surahId && $surahNumber) {
                 $stmt = $pdo->prepare("SELECT id FROM surahs WHERE number = ? LIMIT 1");
                 $stmt->execute([$surahNumber]);
@@ -90,18 +89,8 @@ try {
                 break;
             }
 
-            if ($categoryId) {
-                $stmt = $pdo->prepare("
-                    SELECT a.* FROM ayahs a
-                    INNER JOIN ayah_categories ac ON ac.ayah_id = a.id
-                    WHERE a.surah_id = ? AND ac.category_id = ?
-                    ORDER BY a.ayah_number ASC
-                ");
-                $stmt->execute([$surahId, $categoryId]);
-            } else {
-                $stmt = $pdo->prepare("SELECT * FROM ayahs WHERE surah_id = ? ORDER BY ayah_number ASC");
-                $stmt->execute([$surahId]);
-            }
+            $stmt = $pdo->prepare("SELECT * FROM ayahs WHERE surah_id = ? ORDER BY ayah_number ASC");
+            $stmt->execute([$surahId]);
             $response['data'] = $stmt->fetchAll();
             break;
 
@@ -120,33 +109,51 @@ try {
                 break;
             }
 
-            // 2. Get Ayahs
+            // 2. Get Groups or Ayahs
+            $groups = [];
             $ayahs = [];
+
             if ($categoryId) {
+                // Fetch groups with their ayahs
                 $stmt = $pdo->prepare("
-                    SELECT a.* FROM ayahs a 
-                    INNER JOIN ayah_categories ac ON a.id = ac.ayah_id 
-                    WHERE a.surah_id = ? AND ac.category_id = ?
-                    ORDER BY a.ayah_number ASC
+                    SELECT ag.* FROM assignment_groups ag
+                    WHERE ag.category_id = ? AND ag.surah_id = ?
+                    ORDER BY ag.created_at ASC
                 ");
-                $stmt->execute([$surah['id'], $categoryId]);
+                $stmt->execute([$categoryId, $surah['id']]);
+                $groups = $stmt->fetchAll();
+
+                // Hydrate groups with ayahs
+                foreach ($groups as &$group) {
+                    $stmt = $pdo->prepare("
+                        SELECT a.* FROM ayahs a
+                        INNER JOIN ayah_categories ac ON a.id = ac.ayah_id
+                        WHERE ac.assignment_group_id = ?
+                        ORDER BY a.ayah_number ASC
+                    ");
+                    $stmt->execute([$group['id']]);
+                    $group['ayahs'] = $stmt->fetchAll();
+                }
+
+                // Also populate flat 'ayahs' mainly for fallback or raw access if needed, 
+                // but frontend should now prefer 'groups'.
+                // Ideally, we just return groups for category view.
             } else {
+                // Fallback for full Quran reading (no category)
                 $stmt = $pdo->prepare("SELECT * FROM ayahs WHERE surah_id = ? ORDER BY ayah_number ASC");
                 $stmt->execute([$surah['id']]);
+                $ayahs = $stmt->fetchAll();
             }
-            $ayahs = $stmt->fetchAll();
 
-            // 3. Find Next/Prev Surah (context aware of category)
+            // 3. Find Next/Prev Surah
             $prevSurah = null;
             $nextSurah = null;
 
-            // Get list of available surahs numbers to find neighbors
             if ($categoryId) {
                 $stmt = $pdo->prepare("
                     SELECT DISTINCT s.number FROM surahs s
-                    INNER JOIN ayahs a ON a.surah_id = s.id
-                    INNER JOIN ayah_categories ac ON ac.ayah_id = a.id
-                    WHERE ac.category_id = ?
+                    INNER JOIN assignment_groups ag ON ag.surah_id = s.id
+                    WHERE ag.category_id = ?
                     ORDER BY s.number ASC
                 ");
                 $stmt->execute([$categoryId]);
@@ -171,7 +178,8 @@ try {
 
             $response['data'] = [
                 'surah' => $surah,
-                'ayahs' => $ayahs,
+                'groups' => $groups,
+                'ayahs' => $ayahs, // populated only if no category
                 'prev_surah' => $prevSurah,
                 'next_surah' => $nextSurah
             ];

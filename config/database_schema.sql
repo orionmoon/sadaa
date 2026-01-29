@@ -135,16 +135,34 @@ CREATE TABLE IF NOT EXISTS ayahs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
--- Ayah Categories (Many-to-Many)
+-- Assignment Groups Table
+-- ============================================
+CREATE TABLE IF NOT EXISTS assignment_groups (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    category_id INT NOT NULL,
+    surah_id INT NOT NULL,
+    title VARCHAR(255),
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
+    FOREIGN KEY (surah_id) REFERENCES surahs(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- Ayah Categories (Many-to-Many via Groups)
 -- ============================================
 CREATE TABLE IF NOT EXISTS ayah_categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ayah_id INT NOT NULL,
     category_id INT NOT NULL,
+    assignment_group_id INT,
+    sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (ayah_id) REFERENCES ayahs(id) ON DELETE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE,
-    UNIQUE KEY unique_ayah_category (ayah_id, category_id)
+    FOREIGN KEY (assignment_group_id) REFERENCES assignment_groups(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_ayah_category_group (ayah_id, category_id, assignment_group_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
@@ -160,6 +178,11 @@ CREATE TABLE IF NOT EXISTS imports (
     total_surahs INT DEFAULT 114,
     ayahs_imported INT DEFAULT 0,
     error_message TEXT,
+    quran_edition VARCHAR(100) DEFAULT NULL COMMENT 'Edition du Coran (ex: quran-uthmani)',
+    quran_version VARCHAR(50) DEFAULT NULL COMMENT 'Version de l''édition',
+    translation_references JSON DEFAULT NULL COMMENT 'Références des traductions par langue',
+    metadata JSON DEFAULT NULL COMMENT 'Autres métadonnées de l''import',
+    notes TEXT DEFAULT NULL COMMENT 'Notes sur l''import',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     started_at TIMESTAMP NULL,
     completed_at TIMESTAMP NULL

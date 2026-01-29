@@ -1,9 +1,12 @@
 <?php
 /**
  * Sadaa (صدى) - Database Configuration
- * 
+ *
  * Update these settings to match your MySQL server configuration.
  */
+
+// Include internationalization system
+require_once __DIR__ . '/i18n.php';
 
 // Database connection settings
 define('DB_HOST', 'localhost');

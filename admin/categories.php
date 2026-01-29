@@ -8,6 +8,15 @@ require_once __DIR__ . '/layout.php';
 $message = '';
 $error = '';
 
+// Get all active languages for dynamic form fields
+$activeLanguages = [];
+try {
+    $stmt = $pdo->query("SELECT * FROM languages WHERE is_active = 1 ORDER BY sort_order ASC");
+    $activeLanguages = $stmt->fetchAll();
+} catch (PDOException $e) {
+    $error = 'Erreur chargement langues: ' . $e->getMessage();
+}
+
 // Get all types for dropdown
 $types = [];
 try {
@@ -21,16 +30,16 @@ try {
 if ($_POST) {
     if (isset($_POST['add_category'])) {
         try {
-            $name = json_encode([
-                'ar' => trim($_POST['name_ar'] ?? ''),
-                'fr' => trim($_POST['name_fr'] ?? ''),
-                'en' => trim($_POST['name_en'] ?? ''),
-            ]);
-            $description = json_encode([
-                'ar' => trim($_POST['desc_ar'] ?? ''),
-                'fr' => trim($_POST['desc_fr'] ?? ''),
-                'en' => trim($_POST['desc_en'] ?? ''),
-            ]);
+            // Build name and description arrays dynamically from active languages
+            $nameArray = [];
+            $descArray = [];
+            foreach ($activeLanguages as $lang) {
+                $code = $lang['code'];
+                $nameArray[$code] = trim($_POST['name_' . $code] ?? '');
+                $descArray[$code] = trim($_POST['desc_' . $code] ?? '');
+            }
+            $name = json_encode($nameArray);
+            $description = json_encode($descArray);
             $typeId = (int) $_POST['type_id'];
             $icon = trim($_POST['icon'] ?? 'mdi:tag-outline');
             $color = trim($_POST['color'] ?? '#C99B35');
@@ -44,6 +53,36 @@ if ($_POST) {
                                    VALUES (?, ?, ?, ?, ?, ?, (SELECT COALESCE(MAX(c.sort_order), 0) + 1 FROM categories c WHERE c.type_id = ?))");
             $stmt->execute([$typeId, $name, $description, $icon, $color, $slug, $typeId]);
             $message = 'Catégorie ajoutée avec succès';
+        } catch (PDOException $e) {
+            $error = 'Erreur: ' . $e->getMessage();
+        }
+    }
+
+    if (isset($_POST['edit_category'])) {
+        try {
+            $categoryId = (int) $_POST['category_id'];
+            // Build name and description arrays dynamically from active languages
+            $nameArray = [];
+            $descArray = [];
+            foreach ($activeLanguages as $lang) {
+                $code = $lang['code'];
+                $nameArray[$code] = trim($_POST['name_' . $code] ?? '');
+                $descArray[$code] = trim($_POST['desc_' . $code] ?? '');
+            }
+            $name = json_encode($nameArray);
+            $description = json_encode($descArray);
+            $typeId = (int) $_POST['type_id'];
+            $icon = trim($_POST['icon'] ?? 'mdi:tag-outline');
+            $color = trim($_POST['color'] ?? '#C99B35');
+            $slug = trim($_POST['slug'] ?? '');
+
+            if (!$slug) {
+                $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $_POST['name_en'] ?? $_POST['name_fr'] ?? 'category'));
+            }
+
+            $stmt = $pdo->prepare("UPDATE categories SET type_id = ?, name = ?, description = ?, icon = ?, color = ?, slug = ? WHERE id = ?");
+            $stmt->execute([$typeId, $name, $description, $icon, $color, $slug, $categoryId]);
+            $message = 'Catégorie modifiée avec succès';
         } catch (PDOException $e) {
             $error = 'Erreur: ' . $e->getMessage();
         }
@@ -175,34 +214,35 @@ adminHeader('Gestion des Catégories');
                 </div>
             </div>
 
+            <!-- Dynamic Name Fields -->
             <div class="grid grid-3">
-                <div class="form-group">
-                    <label class="form-label">Nom (Arabe)</label>
-                    <input type="text" name="name_ar" class="form-input font-arabic" placeholder="المؤمنون" dir="rtl">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nom (Français) *</label>
-                    <input type="text" name="name_fr" class="form-input" placeholder="Croyants" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Nom (Anglais)</label>
-                    <input type="text" name="name_en" class="form-input" placeholder="Believers">
-                </div>
+                <?php foreach ($activeLanguages as $lang):
+                    $langName = json_decode($lang['name'], true);
+                    $isRtl = $lang['is_rtl'];
+                    $isRequired = $lang['code'] === 'fr';
+                    ?>
+                    <div class="form-group">
+                        <label class="form-label">Nom
+                            (<?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>)<?= $isRequired ? ' *' : '' ?></label>
+                        <input type="text" name="name_<?= $lang['code'] ?>"
+                            class="form-input<?= $isRtl ? ' font-arabic' : '' ?>" <?= $isRtl ? 'dir="rtl"' : '' ?>         <?= $isRequired ? 'required' : '' ?>>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
+            <!-- Dynamic Description Fields -->
             <div class="grid grid-3">
-                <div class="form-group">
-                    <label class="form-label">Description (Arabe)</label>
-                    <input type="text" name="desc_ar" class="form-input font-arabic" dir="rtl">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description (Français)</label>
-                    <input type="text" name="desc_fr" class="form-input">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">Description (Anglais)</label>
-                    <input type="text" name="desc_en" class="form-input">
-                </div>
+                <?php foreach ($activeLanguages as $lang):
+                    $langName = json_decode($lang['name'], true);
+                    $isRtl = $lang['is_rtl'];
+                    ?>
+                    <div class="form-group">
+                        <label class="form-label">Description
+                            (<?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>)</label>
+                        <input type="text" name="desc_<?= $lang['code'] ?>"
+                            class="form-input<?= $isRtl ? ' font-arabic' : '' ?>" <?= $isRtl ? 'dir="rtl"' : '' ?>>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="form-group">
@@ -225,6 +265,93 @@ adminHeader('Gestion des Catégories');
         </form>
     </div>
 <?php endif; ?>
+
+<!-- Edit Category Form (Hidden by default) -->
+<div class="card" id="edit-category-form" style="display: none;">
+    <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 class="card-title">Modifier une Catégorie</h2>
+        <button type="button" class="btn btn-sm" onclick="cancelEdit()">
+            <iconify-icon icon="mdi:close"></iconify-icon>
+            Annuler
+        </button>
+    </div>
+    <form method="post" id="edit-form">
+        <input type="hidden" name="category_id" id="edit-category-id">
+
+        <div class="grid grid-3">
+            <div class="form-group">
+                <label class="form-label">Type parent *</label>
+                <select name="type_id" id="edit-type-id" class="form-select" required>
+                    <option value="">-- Sélectionner --</option>
+                    <?php foreach ($types as $type):
+                        $typeName = json_decode($type['name'], true);
+                        ?>
+                        <option value="<?= $type['id'] ?>">
+                            <?= htmlspecialchars($typeName['fr'] ?? $typeName['en'] ?? '') ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Slug</label>
+                <input type="text" name="slug" id="edit-slug" class="form-input" placeholder="croyants">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Couleur</label>
+                <input type="color" name="color" id="edit-color" class="form-input"
+                    style="height: 42px; padding: 0.25rem;">
+            </div>
+        </div>
+
+        <!-- Dynamic Name Fields -->
+        <div class="grid grid-3">
+            <?php foreach ($activeLanguages as $lang):
+                $langName = json_decode($lang['name'], true);
+                $isRtl = $lang['is_rtl'];
+                $isRequired = $lang['code'] === 'fr';
+                ?>
+                <div class="form-group">
+                    <label class="form-label">Nom
+                        (<?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>)<?= $isRequired ? ' *' : '' ?></label>
+                    <input type="text" name="name_<?= $lang['code'] ?>" id="edit-name-<?= $lang['code'] ?>"
+                        class="form-input<?= $isRtl ? ' font-arabic' : '' ?>" <?= $isRtl ? 'dir="rtl"' : '' ?>     <?= $isRequired ? 'required' : '' ?>>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Dynamic Description Fields -->
+        <div class="grid grid-3">
+            <?php foreach ($activeLanguages as $lang):
+                $langName = json_decode($lang['name'], true);
+                $isRtl = $lang['is_rtl'];
+                ?>
+                <div class="form-group">
+                    <label class="form-label">Description
+                        (<?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>)</label>
+                    <input type="text" name="desc_<?= $lang['code'] ?>" id="edit-desc-<?= $lang['code'] ?>"
+                        class="form-input<?= $isRtl ? ' font-arabic' : '' ?>" <?= $isRtl ? 'dir="rtl"' : '' ?>>
+                </div>
+            <?php endforeach; ?>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Icône</label>
+            <input type="text" name="icon" id="edit-icon-input" class="form-input" placeholder="mdi:tag-outline">
+            <div class="icon-picker mt-1" id="edit-icon-picker">
+                <?php foreach ($commonIcons as $icon): ?>
+                    <div class="icon-option" data-icon="<?= $icon ?>">
+                        <iconify-icon icon="<?= $icon ?>"></iconify-icon>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <button type="submit" name="edit_category" class="btn btn-primary">
+            <iconify-icon icon="mdi:content-save"></iconify-icon>
+            Enregistrer les modifications
+        </button>
+    </form>
+</div>
 
 <!-- Filter by Type -->
 <div class="card">
@@ -289,6 +416,20 @@ adminHeader('Gestion des Catégories');
                             </span>
                         </td>
                         <td>
+                            <?php
+                            $catJson = htmlspecialchars(json_encode([
+                                "id" => $cat["id"],
+                                "type_id" => $cat["type_id"],
+                                "name" => json_decode($cat["name"], true),
+                                "description" => json_decode($cat["description"], true),
+                                "icon" => $cat["icon"],
+                                "color" => $cat["color"],
+                                "slug" => $cat["slug"]
+                            ]), ENT_QUOTES, 'UTF-8');
+                            ?>
+                            <button type="button" class="btn btn-sm btn-secondary" onclick='editCategory(<?= $catJson ?>)'>
+                                <iconify-icon icon="mdi:pencil"></iconify-icon>
+                            </button>
                             <a href="assignments.php?category_id=<?= $cat['id'] ?>" class="btn btn-sm btn-secondary">
                                 <iconify-icon icon="mdi:link-variant"></iconify-icon>
                             </a>
@@ -308,14 +449,62 @@ adminHeader('Gestion des Catégories');
 </div>
 
 <script>
-    // Icon picker
+    // Active language codes for dynamic form handling
+    const languageCodes = <?= json_encode(array_column($activeLanguages, 'code')) ?>;
+
+    // Icon picker for both add and edit forms
     document.querySelectorAll('.icon-option').forEach(option => {
         option.addEventListener('click', () => {
-            document.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+            const isEditForm = option.closest('#edit-icon-picker');
+            document.querySelectorAll(isEditForm ? '#edit-icon-picker .icon-option' : '.icon-picker .icon-option')
+                .forEach(o => o.classList.remove('selected'));
             option.classList.add('selected');
-            document.getElementById('icon-input').value = option.dataset.icon;
+            const inputId = isEditForm ? 'edit-icon-input' : 'icon-input';
+            document.getElementById(inputId).value = option.dataset.icon;
         });
     });
+
+    function editCategory(category) {
+        // Show edit form
+        document.getElementById('edit-category-form').style.display = 'block';
+
+        // Populate form fields
+        document.getElementById('edit-category-id').value = category.id;
+        document.getElementById('edit-type-id').value = category.type_id;
+
+        // Dynamically populate name and description fields for all languages
+        languageCodes.forEach(code => {
+            const nameField = document.getElementById('edit-name-' + code);
+            const descField = document.getElementById('edit-desc-' + code);
+            if (nameField) nameField.value = (category.name && category.name[code]) || '';
+            if (descField) descField.value = (category.description && category.description[code]) || '';
+        });
+
+        document.getElementById('edit-slug').value = category.slug || '';
+        document.getElementById('edit-color').value = category.color || '#C99B35';
+        document.getElementById('edit-icon-input').value = category.icon || 'mdi:tag-outline';
+
+        // Select the icon in the picker
+        document.querySelectorAll('#edit-icon-picker .icon-option').forEach(o => o.classList.remove('selected'));
+        const selectedIcon = document.querySelector(`#edit-icon-picker .icon-option[data-icon="${category.icon}"]`);
+        if (selectedIcon) {
+            selectedIcon.classList.add('selected');
+        }
+
+        // Scroll to edit form
+        document.getElementById('edit-category-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function cancelEdit() {
+        // Hide edit form
+        document.getElementById('edit-category-form').style.display = 'none';
+
+        // Clear form fields
+        document.getElementById('edit-form').reset();
+
+        // Clear icon selection
+        document.querySelectorAll('#edit-icon-picker .icon-option').forEach(o => o.classList.remove('selected'));
+    }
 </script>
 
 <?php adminFooter(); ?>

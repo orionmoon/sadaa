@@ -30,12 +30,12 @@ if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
         // Show login form
         ?>
         <!DOCTYPE html>
-        <html lang="fr">
+        <html lang="<?= getCurrentLocale() ?>" dir="<?= isRtl() ? 'rtl' : 'ltr' ?>">
 
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Admin Login - صدى Sadaa</title>
+            <title><?= __('auth.login') ?> - صدى Sadaa</title>
             <link rel="preconnect" href="https://fonts.googleapis.com">
             <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -138,20 +138,20 @@ if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
         <body>
             <div class="login-card">
                 <div class="logo">صدى</div>
-                <p class="title">Administration</p>
+                <p class="title"><?= __('auth.administration') ?></p>
 
                 <?php if (isset($_POST['password'])): ?>
-                    <div class="error">Mot de passe incorrect</div>
+                    <div class="error"><?= __('auth.wrong_password') ?></div>
                 <?php endif; ?>
 
                 <form method="post">
                     <div class="form-group">
-                        <label for="password">Mot de passe</label>
+                        <label for="password"><?= __('auth.password') ?></label>
                         <input type="password" id="password" name="password" required autofocus>
                     </div>
                     <button type="submit">
                         <iconify-icon icon="mdi:login" style="vertical-align: middle; margin-right: 0.5rem;"></iconify-icon>
-                        Connexion
+                        <?= __('auth.login') ?>
                     </button>
                 </form>
             </div>
@@ -168,23 +168,25 @@ $currentPage = basename($_SERVER['PHP_SELF'], '.php');
 
 // Admin navigation items
 $navItems = [
-    ['page' => 'index', 'icon' => 'mdi:view-dashboard', 'label' => 'Tableau de bord'],
-    ['page' => 'books', 'icon' => 'mdi:book-open-page-variant', 'label' => 'Livres'],
-    ['page' => 'types', 'icon' => 'mdi:shape', 'label' => 'Types'],
-    ['page' => 'categories', 'icon' => 'mdi:tag-multiple', 'label' => 'Catégories'],
-    ['page' => 'assignments', 'icon' => 'mdi:link-variant', 'label' => 'Assignations'],
-    ['page' => 'import', 'icon' => 'mdi:cloud-download', 'label' => 'Import Coran'],
-    ['page' => 'imports', 'icon' => 'mdi:history', 'label' => 'Historique'],
-    ['page' => 'settings', 'icon' => 'mdi:cog', 'label' => 'Paramètres'],
+    ['page' => 'index', 'icon' => 'mdi:view-dashboard', 'label' => __('nav.dashboard')],
+    ['page' => 'books', 'icon' => 'mdi:book-open-page-variant', 'label' => __('nav.books')],
+    ['page' => 'types', 'icon' => 'mdi:shape', 'label' => __('nav.types')],
+    ['page' => 'categories', 'icon' => 'mdi:tag-multiple', 'label' => __('nav.categories')],
+    ['page' => 'assignments', 'icon' => 'mdi:link-variant', 'label' => __('nav.assignments')],
+    ['page' => 'import', 'icon' => 'mdi:cloud-download', 'label' => __('nav.import')],
+    ['page' => 'imports', 'icon' => 'mdi:history', 'label' => __('nav.history')],
+    ['page' => 'backup', 'icon' => 'mdi:database-sync', 'label' => __('nav.backup')],
+    ['page' => 'settings', 'icon' => 'mdi:cog', 'label' => __('nav.settings')],
 ];
 
 // Function to render the layout
 function adminHeader($title = 'Administration')
 {
     global $currentPage, $navItems;
+    $currentLang = getCurrentLocale();
     ?>
     <!DOCTYPE html>
-    <html lang="fr">
+    <html lang="<?= $currentLang ?>" dir="<?= isRtl() ? 'rtl' : 'ltr' ?>">
 
     <head>
         <meta charset="UTF-8">
@@ -655,7 +657,57 @@ function adminHeader($title = 'Administration')
             .font-arabic {
                 font-family: 'Noto Naskh Arabic', serif;
             }
+
+            /* Language selector for admin */
+            .lang-select-admin {
+                width: 100%;
+                padding: 0.5rem;
+                margin-bottom: 0.75rem;
+                background-color: var(--bg-dark);
+                border: 1px solid var(--border-color);
+                border-radius: 0.5rem;
+                color: var(--text-primary);
+                font-size: 0.875rem;
+                cursor: pointer;
+            }
+
+            .lang-select-admin:focus {
+                outline: none;
+                border-color: var(--color-primary);
+            }
+
+            /* RTL Support */
+            [dir="rtl"] .sidebar {
+                right: 0;
+                left: auto;
+                border-right: none;
+                border-left: 1px solid var(--border-color);
+            }
+
+            [dir="rtl"] .main-content {
+                margin-left: 0;
+                margin-right: 250px;
+            }
+
+            [dir="rtl"] .nav-item {
+                flex-direction: row-reverse;
+            }
+
+            [dir="rtl"] .logout-btn {
+                flex-direction: row-reverse;
+            }
+
+            [dir="rtl"] .table th,
+            [dir="rtl"] .table td {
+                text-align: right;
+            }
         </style>
+        <script>
+            function changeAdminLang(code) {
+                document.cookie = `sadaa_lang=${code};path=/;max-age=31536000`;
+                window.location.reload();
+            }
+        </script>
     </head>
 
     <body>
@@ -675,9 +727,21 @@ function adminHeader($title = 'Administration')
                     <?php endforeach; ?>
                 </nav>
                 <div class="sidebar-footer">
+                    <select class="lang-select-admin" onchange="changeAdminLang(this.value)">
+                        <?php
+                        $languages = getActiveLanguages();
+                        $currentLang = getCurrentLocale();
+                        foreach ($languages as $lang):
+                            $langName = getLocalizedValue($lang['name'], $currentLang);
+                            ?>
+                            <option value="<?= $lang['code'] ?>" <?= $currentLang === $lang['code'] ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($langName) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                     <a href="?logout=1" class="logout-btn">
                         <iconify-icon icon="mdi:logout"></iconify-icon>
-                        <span>Déconnexion</span>
+                        <span><?= __('nav.logout') ?></span>
                     </a>
                 </div>
             </aside>

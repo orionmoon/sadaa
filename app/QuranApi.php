@@ -83,6 +83,61 @@ class QuranApi
     }
 
     /**
+     * Get metadata for a specific edition
+     */
+    public function getEditionMetadata(string $editionIdentifier): ?array
+    {
+        try {
+            $allEditions = $this->getEditions();
+            foreach ($allEditions as $edition) {
+                if ($edition['identifier'] === $editionIdentifier) {
+                    return $edition;
+                }
+            }
+            return null;
+        } catch (Exception $e) {
+            error_log("Failed to get edition metadata: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Build translation references metadata for import
+     *
+     * @param array $languages Array of language codes
+     * @param PDO|null $pdo Optional database connection to check for custom editions
+     */
+    public function buildTranslationReferences(array $languages, ?PDO $pdo = null): array
+    {
+        $references = [];
+        foreach ($languages as $lang) {
+            // First check database for custom edition, then fallback to static list
+            $edition = null;
+            if ($pdo) {
+                $stmt = $pdo->prepare("SELECT quran_edition FROM languages WHERE code = ? AND quran_edition IS NOT NULL AND quran_edition != ''");
+                $stmt->execute([$lang]);
+                $edition = $stmt->fetchColumn();
+            }
+            if (!$edition) {
+                $edition = self::getEditionForLanguage($lang);
+            }
+
+            if ($edition) {
+                $metadata = $this->getEditionMetadata($edition);
+                $references[$lang] = [
+                    'identifier' => $edition,
+                    'name' => $metadata['name'] ?? $edition,
+                    'language' => $metadata['language'] ?? $lang,
+                    'englishName' => $metadata['englishName'] ?? '',
+                    'format' => $metadata['format'] ?? 'text',
+                    'type' => $metadata['type'] ?? 'translation'
+                ];
+            }
+        }
+        return $references;
+    }
+
+    /**
      * Get surah list
      */
     public function getSurahList(): array
@@ -164,8 +219,17 @@ class QuranApi
             array_unshift($languages, 'ar');
         }
 
+        // Get Arabic edition from database or use default
+        $arabicEdition = 'quran-uthmani';
+        $stmt = $pdo->prepare("SELECT quran_edition FROM languages WHERE code = 'ar' AND quran_edition IS NOT NULL AND quran_edition != ''");
+        $stmt->execute();
+        $dbArabicEdition = $stmt->fetchColumn();
+        if ($dbArabicEdition) {
+            $arabicEdition = $dbArabicEdition;
+        }
+
         // Get surah info from Arabic version
-        $arabicData = $this->getSurah($surahNumber, 'quran-uthmani');
+        $arabicData = $this->getSurah($surahNumber, $arabicEdition);
 
         // Prepare surah name in all languages
         $surahName = ['ar' => $arabicData['englishName']]; // API returns transliteration
@@ -209,7 +273,13 @@ class QuranApi
             if ($lang === 'ar')
                 continue;
 
-            $edition = self::getEditionForLanguage($lang);
+            // First check database for custom edition, then fallback to static list
+            $edition = null;
+            $stmt = $pdo->prepare("SELECT quran_edition FROM languages WHERE code = ? AND quran_edition IS NOT NULL AND quran_edition != ''");
+            $stmt->execute([$lang]);
+            $dbEdition = $stmt->fetchColumn();
+            $edition = $dbEdition ?: self::getEditionForLanguage($lang);
+
             if (!$edition)
                 continue;
 
@@ -293,6 +363,132 @@ class QuranApi
             'total_surahs' => $totalSurahs,
             'ayahs_imported' => $totalAyahs,
             'languages' => $languages,
+            'errors' => $errors
+        ];
+    }
+
+    /**
+     * Add a language to existing surahs (merge mode)
+     * This preserves existing translations and ayah_categories assignments
+     *
+     * @param PDO $pdo Database connection
+     * @param int $surahNumber 1-114
+     * @param string $language Language code to add (e.g., 'es', 'de')
+     * @param int $bookId Book ID in database
+     * @param string|null $edition Optional edition override (from database config)
+     */
+    public function addLanguageToSurah(PDO $pdo, int $surahNumber, string $language, int $bookId, ?string $edition = null): array
+    {
+        // Check if surah exists
+        $stmt = $pdo->prepare("SELECT id FROM surahs WHERE book_id = ? AND number = ?");
+        $stmt->execute([$bookId, $surahNumber]);
+        $surahId = $stmt->fetchColumn();
+
+        if (!$surahId) {
+            throw new Exception("Surah $surahNumber does not exist. Import it first.");
+        }
+
+        // Get edition for language (use provided edition or fallback to static list)
+        if (!$edition) {
+            $edition = self::getEditionForLanguage($language);
+        }
+        if (!$edition) {
+            throw new Exception("No edition available for language: $language");
+        }
+
+        // Fetch translation from API
+        $translationData = $this->getSurah($surahNumber, $edition);
+
+        // Update surah name with new language
+        $stmt = $pdo->prepare("SELECT name FROM surahs WHERE id = ?");
+        $stmt->execute([$surahId]);
+        $currentName = json_decode($stmt->fetchColumn(), true) ?: [];
+        $currentName[$language] = $translationData['englishName'];
+
+        $stmt = $pdo->prepare("UPDATE surahs SET name = ? WHERE id = ?");
+        $stmt->execute([json_encode($currentName), $surahId]);
+
+        // Get all existing ayahs for this surah
+        $stmt = $pdo->prepare("SELECT id, ayah_number, text FROM ayahs WHERE surah_id = ?");
+        $stmt->execute([$surahId]);
+        $existingAyahs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Build a map of ayah_number -> existing text JSON
+        $ayahMap = [];
+        foreach ($existingAyahs as $ayah) {
+            $ayahMap[$ayah['ayah_number']] = [
+                'id' => $ayah['id'],
+                'text' => json_decode($ayah['text'], true) ?: []
+            ];
+        }
+
+        // Merge new translation into existing text
+        $updatedCount = 0;
+        foreach ($translationData['ayahs'] as $ayah) {
+            $ayahNumber = $ayah['numberInSurah'];
+
+            if (isset($ayahMap[$ayahNumber])) {
+                // Merge: add new language to existing JSON
+                $mergedText = $ayahMap[$ayahNumber]['text'];
+                $mergedText[$language] = $ayah['text'];
+
+                $stmt = $pdo->prepare("UPDATE ayahs SET text = ? WHERE id = ?");
+                $stmt->execute([json_encode($mergedText), $ayahMap[$ayahNumber]['id']]);
+                $updatedCount++;
+            }
+        }
+
+        return [
+            'surah_id' => $surahId,
+            'surah_number' => $surahNumber,
+            'language_added' => $language,
+            'ayahs_updated' => $updatedCount
+        ];
+    }
+
+    /**
+     * Add a language to multiple surahs
+     *
+     * @param PDO $pdo Database connection
+     * @param array $surahRange [start, end] surah numbers
+     * @param string $language Language code to add
+     * @param int $bookId Book ID
+     * @param callable|null $progressCallback Progress callback
+     */
+    public function addLanguageToSurahs(PDO $pdo, array $surahRange, string $language, int $bookId, ?callable $progressCallback = null): array
+    {
+        $start = $surahRange[0];
+        $end = $surahRange[1];
+        $totalUpdated = 0;
+        $ayahsUpdated = 0;
+        $errors = [];
+
+        for ($i = $start; $i <= $end; $i++) {
+            try {
+                $result = $this->addLanguageToSurah($pdo, $i, $language, $bookId);
+                $totalUpdated++;
+                $ayahsUpdated += $result['ayahs_updated'];
+
+                if ($progressCallback) {
+                    $progressCallback($i, $end - $start + 1, $result);
+                }
+
+                // Small delay to be nice to the API
+                usleep(100000); // 100ms
+
+            } catch (Exception $e) {
+                $errors[] = [
+                    'surah' => $i,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+
+        return [
+            'surahs_updated' => $totalUpdated,
+            'total_surahs' => $end - $start + 1,
+            'ayahs_updated' => $ayahsUpdated,
+            'language' => $language,
             'errors' => $errors
         ];
     }
