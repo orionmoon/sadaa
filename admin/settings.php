@@ -100,8 +100,15 @@ if ($_POST) {
         if (strlen($newPassword) < 6) {
             $error = 'Le mot de passe doit contenir au moins 6 caractères';
         } else {
-            // In a real app, you would hash this and store in database
-            $message = 'Pour changer le mot de passe, modifiez la constante ADMIN_PASSWORD dans admin/layout.php';
+            try {
+                $hashed = password_hash($newPassword, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('admin_password', ?) 
+                                       ON DUPLICATE KEY UPDATE setting_value = ?");
+                $stmt->execute([$hashed, $hashed]);
+                $message = 'Le mot de passe a été mis à jour avec succès';
+            } catch (PDOException $e) {
+                $error = 'Erreur: ' . $e->getMessage();
+            }
         }
     }
 }
@@ -452,9 +459,10 @@ adminHeader('Paramètres');
                     <select id="lang_selector" class="form-input" onchange="onLanguageSelect()" required>
                         <option value="">-- Sélectionner une langue --</option>
                         <?php foreach ($availableEditions as $code => $langData): ?>
-                        <option value="<?= $code ?>" data-rtl="<?= $langData['rtl'] ? '1' : '0' ?>" data-native="<?= htmlspecialchars($langData['native']) ?>">
-                            <?= htmlspecialchars($langData['name']) ?>
-                        </option>
+                            <option value="<?= $code ?>" data-rtl="<?= $langData['rtl'] ? '1' : '0' ?>"
+                                data-native="<?= htmlspecialchars($langData['native']) ?>">
+                                <?= htmlspecialchars($langData['name']) ?>
+                            </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -478,11 +486,14 @@ adminHeader('Paramètres');
                     $langName = json_decode($lang['name'], true);
                     $isRtlLang = $lang['is_rtl'];
                     $isRequired = $lang['code'] === 'fr';
-                ?>
-                <div class="form-group">
-                    <label class="form-label">Nom (<?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>)<?= $isRequired ? ' *' : '' ?></label>
-                    <input type="text" name="lang_name_<?= $lang['code'] ?>" id="lang_name_<?= $lang['code'] ?>" class="form-input<?= $isRtlLang ? ' font-arabic' : '' ?>" <?= $isRtlLang ? 'dir="rtl"' : '' ?> <?= $isRequired ? 'required' : '' ?>>
-                </div>
+                    ?>
+                    <div class="form-group">
+                        <label class="form-label">Nom
+                            (<?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>)<?= $isRequired ? ' *' : '' ?></label>
+                        <input type="text" name="lang_name_<?= $lang['code'] ?>" id="lang_name_<?= $lang['code'] ?>"
+                            class="form-input<?= $isRtlLang ? ' font-arabic' : '' ?>" <?= $isRtlLang ? 'dir="rtl"' : '' ?>
+                            <?= $isRequired ? 'required' : '' ?>>
+                    </div>
                 <?php endforeach; ?>
             </div>
             <div style="display: flex; gap: 1rem; align-items: center;">
@@ -640,9 +651,6 @@ adminHeader('Paramètres');
             <iconify-icon icon="mdi:key"></iconify-icon>
             Changer le mot de passe
         </button>
-        <p class="text-muted mt-1" style="font-size: 0.8rem;">
-            Note: Dans cette version, le mot de passe est stocké dans le fichier <code>admin/layout.php</code>
-        </p>
     </form>
 </div>
 

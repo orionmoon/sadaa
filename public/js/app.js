@@ -63,6 +63,7 @@ const els = {
     typeTabs: document.querySelectorAll('.tab'),
     langSelect: document.getElementById('lang-select'),
     bookSelect: document.getElementById('book-select'),
+    groupTags: document.getElementById('group-tags'),
     themeToggle: document.getElementById('theme-toggle')
 };
 
@@ -198,6 +199,31 @@ function renderSurah() {
     const name = JSON.parse(surah.name);
     els.surahTitle.textContent = lang === 'ar' ? name['ar'] : (name[lang] || name['en']);
     els.verseRef.textContent = `AYAT ${surah.ayah_count} • ${surah.revelation_type}`;
+
+    // Display Tags
+    if (els.groupTags) {
+        els.groupTags.innerHTML = '';
+        if (state.surahGroups.length > 0) {
+            const currentGroup = state.surahGroups[state.currentGroupIndex];
+            if (currentGroup.tags && currentGroup.tags.length > 0) {
+                currentGroup.tags.forEach(tag => {
+                    const badge = document.createElement('span');
+                    badge.className = 'tag-badge';
+                    // Use CSS variables or inline styles for colors
+                    badge.style.background = `${tag.color}20`;
+                    badge.style.color = tag.color;
+                    badge.style.border = `1px solid ${tag.color}40`;
+                    badge.style.fontSize = '0.7rem';
+                    badge.style.padding = '0.1rem 0.5rem';
+                    badge.style.borderRadius = '999px';
+                    badge.style.fontWeight = '500';
+                    badge.textContent = tag.name;
+                    els.groupTags.appendChild(badge);
+                });
+            }
+        }
+    }
+
     const edition = window.languageEditions?.[lang] || 'quran-uthmani';
     const source = window.importSource || 'alquran.cloud';
     els.sourceAttribution.textContent = `${edition} • ${source}`;
@@ -1008,10 +1034,15 @@ function openReader() {
 
     // Try to get the first ayah currently displayed
     let startAyah = 1;
-    if (state.surahData && state.surahData.ayahs && state.surahData.ayahs.length > 0) {
-        // Get the first ayah number from the current view
+    if (state.surahGroups && state.surahGroups.length > 0) {
+        const currentGroup = state.surahGroups[state.currentGroupIndex];
+        if (currentGroup && currentGroup.ayahs && currentGroup.ayahs.length > 0) {
+            startAyah = currentGroup.ayahs[0].ayah_number || 1;
+        }
+    } else if (state.surahData && state.surahData.ayahs && state.surahData.ayahs.length > 0) {
         startAyah = state.surahData.ayahs[0].ayah_number || 1;
     }
+
     readerState.startAyah = startAyah;
     readerState.currentAyah = startAyah;
 

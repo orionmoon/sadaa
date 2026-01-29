@@ -12,9 +12,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../config/db.php';
 
-// Simple authentication
-define('ADMIN_PASSWORD', 'admin123'); // Change in production!
-
 // Handle logout
 if (isset($_GET['logout'])) {
     $_SESSION['authenticated'] = false;
@@ -22,11 +19,29 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
+
 // Check authentication
 if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
-    if (isset($_POST['password']) && $_POST['password'] === ADMIN_PASSWORD) {
-        $_SESSION['authenticated'] = true;
-    } else {
+    if (isset($_POST['password'])) {
+        $inputPassword = $_POST['password'];
+
+        // Get hashed password from settings (fallback to 'admin123' hashed if not set)
+        $hashedPassword = getSetting('admin_password');
+
+        // If not in settings yet, allow 'admin123' as fallback constant for first time
+        if (!$hashedPassword) {
+            // Default: admin123
+            $hashedPassword = password_hash('admin123', PASSWORD_DEFAULT);
+        }
+
+        if (password_verify($inputPassword, $hashedPassword)) {
+            $_SESSION['authenticated'] = true;
+        } else {
+            $error = __('auth.wrong_password');
+        }
+    }
+
+    if (!isset($_SESSION['authenticated']) || !$_SESSION['authenticated']) {
         // Show login form
         ?>
         <!DOCTYPE html>

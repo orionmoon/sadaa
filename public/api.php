@@ -123,7 +123,7 @@ try {
                 $stmt->execute([$categoryId, $surah['id']]);
                 $groups = $stmt->fetchAll();
 
-                // Hydrate groups with ayahs
+                // Hydrate groups with ayahs and tags
                 foreach ($groups as &$group) {
                     $stmt = $pdo->prepare("
                         SELECT a.* FROM ayahs a
@@ -133,6 +133,15 @@ try {
                     ");
                     $stmt->execute([$group['id']]);
                     $group['ayahs'] = $stmt->fetchAll();
+
+                    // Fetch tags
+                    $stmt = $pdo->prepare("
+                        SELECT t.* FROM tags t
+                        JOIN assignment_group_tags agt ON t.id = agt.tag_id
+                        WHERE agt.assignment_group_id = ?
+                    ");
+                    $stmt->execute([$group['id']]);
+                    $group['tags'] = $stmt->fetchAll();
                 }
 
                 // Also populate flat 'ayahs' mainly for fallback or raw access if needed, 

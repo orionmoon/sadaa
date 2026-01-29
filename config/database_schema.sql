@@ -7,8 +7,8 @@ SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 
 -- Create database
-CREATE DATABASE IF NOT EXISTS sadaa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE sadaa;
+-- CREATE DATABASE IF NOT EXISTS sadaa CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- USE sadaa;
 
 -- ============================================
 -- Languages Table
@@ -166,6 +166,27 @@ CREATE TABLE IF NOT EXISTS ayah_categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
+-- Tags Table
+-- ============================================
+CREATE TABLE IF NOT EXISTS tags (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL,
+    color VARCHAR(20) DEFAULT '#C99B35',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
+-- Assignment Group Tags (Many-to-Many)
+-- ============================================
+CREATE TABLE IF NOT EXISTS assignment_group_tags (
+    assignment_group_id INT NOT NULL,
+    tag_id INT NOT NULL,
+    PRIMARY KEY (assignment_group_id, tag_id),
+    FOREIGN KEY (assignment_group_id) REFERENCES assignment_groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
 -- Imports Table (Track API imports)
 -- ============================================
 CREATE TABLE IF NOT EXISTS imports (
@@ -205,7 +226,7 @@ INSERT INTO settings (setting_key, setting_value) VALUES
 ('app_tagline', '{"ar": "صدى الحكمة للروح", "fr": "Écho de sagesse pour l''âme", "en": "Echo of wisdom for the soul"}'),
 ('primary_color', '#C99B35'),
 ('default_language', 'fr'),
-('admin_password', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+('admin_password', '$2y$10$q1EkXztCr87mt3hMmO7v5O.U7djoTp/5wF/0zlRbQHH2ZICqshdqy'); -- Default: admin123
 
 -- ============================================
 -- Indexes for Performance

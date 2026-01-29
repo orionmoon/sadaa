@@ -10,7 +10,8 @@ try {
     global $pdo;
     $stmt = $pdo->query("SELECT * FROM types ORDER BY sort_order ASC");
     $types = $stmt->fetchAll();
-} catch (PDOException $e) {}
+} catch (PDOException $e) {
+}
 
 // Get import source
 $importSource = 'alquran.cloud';
@@ -20,7 +21,8 @@ try {
     if ($import) {
         $importSource = $import['source'];
     }
-} catch (PDOException $e) {}
+} catch (PDOException $e) {
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>" class="<?= $currentTheme ?>" dir="<?= isRtl() ? 'rtl' : 'ltr' ?>">
@@ -94,11 +96,11 @@ try {
                 <?php foreach ($types as $index => $type):
                     $typeName = getLocalizedValue($type['name'], $currentLang);
                     $active = $index === 0 ? 'active' : '';
-                ?>
-                <button class="tab <?= $active ?>" data-type="<?= htmlspecialchars($type['slug']) ?>">
-                    <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
-                    <span><?= htmlspecialchars($typeName) ?></span>
-                </button>
+                    ?>
+                    <button class="tab <?= $active ?>" data-type="<?= htmlspecialchars($type['slug']) ?>">
+                        <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
+                        <span><?= htmlspecialchars($typeName) ?></span>
+                    </button>
                 <?php endforeach; ?>
             </div>
 
@@ -146,10 +148,12 @@ try {
                     <span id="reader-verse-indicator" class="reader-verse-indicator"></span>
                 </div>
                 <div class="reader-settings">
-                    <button id="reader-font-decrease" class="reader-settings-btn" title="<?= __('public.decrease_font') ?>">
+                    <button id="reader-font-decrease" class="reader-settings-btn"
+                        title="<?= __('public.decrease_font') ?>">
                         <iconify-icon icon="mdi:format-font-size-decrease"></iconify-icon>
                     </button>
-                    <button id="reader-font-increase" class="reader-settings-btn" title="<?= __('public.increase_font') ?>">
+                    <button id="reader-font-increase" class="reader-settings-btn"
+                        title="<?= __('public.increase_font') ?>">
                         <iconify-icon icon="mdi:format-font-size-increase"></iconify-icon>
                     </button>
                 </div>
@@ -199,6 +203,7 @@ try {
         <div class="top-section">
             <h1 id="surah-title" class="surah-title fade-in"><?= __('messages.loading') ?></h1>
             <div id="verse-ref" class="verse-ref fade-in"></div>
+            <div id="group-tags" class="group-tags fade-in flex justify-center gap-1 mt-1"></div>
         </div>
 
         <!-- 2. Screen (16:9 Container) -->

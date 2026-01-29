@@ -69,6 +69,33 @@ if ($_POST) {
                 }
             }
 
+            // Handle Tags
+            $tagsInput = $_POST['tags'] ?? '';
+            // Clear existing tags for this group
+            $stmt = $pdo->prepare("DELETE FROM assignment_group_tags WHERE assignment_group_id = ?");
+            $stmt->execute([$groupId]);
+
+            if (!empty($tagsInput)) {
+                $tags = array_map('trim', explode(',', $tagsInput));
+                foreach ($tags as $tagName) {
+                    if (empty($tagName))
+                        continue;
+
+                    // Get or create tag
+                    $stmt = $pdo->prepare("INSERT INTO tags (name) VALUES (?) ON DUPLICATE KEY UPDATE name = name");
+                    $stmt->execute([$tagName]);
+
+                    // If insert happened or exists, get the ID
+                    $stmt = $pdo->prepare("SELECT id FROM tags WHERE name = ?");
+                    $stmt->execute([$tagName]);
+                    $tagId = $stmt->fetchColumn();
+
+                    // Link tag to group
+                    $stmt = $pdo->prepare("INSERT IGNORE INTO assignment_group_tags (assignment_group_id, tag_id) VALUES (?, ?)");
+                    $stmt->execute([$groupId, $tagId]);
+                }
+            }
+
             $pdo->commit();
             $selectedCategoryId = $categoryId;
             $selectedSurahId = $surahId;
@@ -126,6 +153,28 @@ if ($selectedSurahId && $selectedCategoryId) {
                 $stmt = $pdo->prepare("SELECT ayah_id FROM ayah_categories WHERE assignment_group_id = ?");
                 $stmt->execute([$editGroupId]);
                 $editGroup['ayahs'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+                // Fetch tags for editing
+                $stmt = $pdo->prepare("
+                    SELECT t.name FROM tags t
+                    JOIN assignment_group_tags agt ON t.id = agt.tag_id
+                    WHERE agt.assignment_group_id = ?
+                ");
+                $stmt->execute([$editGroupId]);
+                $editGroup['tags'] = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            }
+        }
+
+        // Fetch tags for all groups in the current view
+        if (count($groups) > 0) {
+            foreach ($groups as &$group) {
+                $stmt = $pdo->prepare("
+                    SELECT t.* FROM tags t
+                    JOIN assignment_group_tags agt ON t.id = agt.tag_id
+                    WHERE agt.assignment_group_id = ?
+                ");
+                $stmt->execute([$group['id']]);
+                $group['tags'] = $stmt->fetchAll();
             }
         }
 
@@ -224,6 +273,16 @@ adminHeader('Assignation des versets');
                                 <div class="text-muted" style="font-size: 0.8rem;">
                                     <?= $group['ayah_count'] ?> versets
                                 </div>
+                                <?php if (!empty($group['tags'])): ?>
+                                    <div class="flex gap-1 mt-1" style="flex-wrap: wrap;">
+                                        <?php foreach ($group['tags'] as $tag): ?>
+                                            <span class="badge"
+                                                style="background: <?= htmlspecialchars($tag['color']) ?>20; color: <?= htmlspecialchars($tag['color']) ?>; border: 1px solid <?= htmlspecialchars($tag['color']) ?>40; font-size: 0.7rem; padding: 0.1rem 0.4rem;">
+                                                <?= htmlspecialchars($tag['name']) ?>
+                                            </span>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                             <div class="flex gap-1">
                                 <a href="assignments.php?category_id=<?= $selectedCategoryId ?>&surah_id=<?= $selectedSurahId ?>&edit_group=<?= $group['id'] ?>"
@@ -268,6 +327,13 @@ adminHeader('Assignation des versets');
                         value="<?= htmlspecialchars($editGroup['title'] ?? '') ?>">
                 </div>
 
+                <div class="form-group">
+                    <label class="form-label">Tags (séparés par des virgules)</label>
+                    <input type="text" name="tags" class="form-input" placeholder="patience, espoir, foi"
+                        value="<?= htmlspecialchars(isset($editGroup['tags']) ? implode(', ', $editGroup['tags']) : '') ?>">
+                    <small class="text-muted">Ex: patience, réconfort, sagesse</small>
+                </div>
+
                 <div style="margin-bottom: 0.5rem; font-weight: 500;">Sélectionner les versets :</div>
 
                 <div
@@ -299,9 +365,6 @@ adminHeader('Assignation des versets');
                                     <div class="font-arabic"
                                         style="font-size: 1.25rem; color: var(--color-primary); margin: 0.25rem 0;" dir="rtl">
                                         <?= htmlspecialchars($text['ar'] ?? '') ?>
-                                    </div>
-                                    <div style="font-size: 0.9rem; color: var(--text-secondary);">
-                                        <?= htmlspecialchars($text['fr'] ?? $text['en'] ?? '') ?>
                                     </div>
                                 </div>
                             </label>

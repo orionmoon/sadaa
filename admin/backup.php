@@ -22,6 +22,7 @@ $tables = [
     'books',
     'surahs',
     'ayahs',
+    'assignment_groups',
     'ayah_categories',
     'imports'
 ];
@@ -47,7 +48,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'export') {
             foreach ($tables as $table) {
                 // Check if table exists
                 $check = $pdo->query("SHOW TABLES LIKE '{$table}'");
-                if ($check->rowCount() === 0) continue;
+                if ($check->rowCount() === 0)
+                    continue;
 
                 // Get create table statement
                 $create = $pdo->query("SHOW CREATE TABLE `{$table}`")->fetch();
@@ -62,8 +64,9 @@ if (isset($_POST['action']) && $_POST['action'] === 'export') {
                     $columnList = '`' . implode('`, `', $columns) . '`';
 
                     foreach ($rows as $row) {
-                        $values = array_map(function($val) use ($pdo) {
-                            if ($val === null) return 'NULL';
+                        $values = array_map(function ($val) use ($pdo) {
+                            if ($val === null)
+                                return 'NULL';
                             return $pdo->quote($val);
                         }, array_values($row));
                         $sql .= "INSERT INTO `{$table}` ({$columnList}) VALUES (" . implode(', ', $values) . ");\n";
@@ -99,7 +102,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'export') {
 
             foreach ($tables as $table) {
                 $check = $pdo->query("SHOW TABLES LIKE '{$table}'");
-                if ($check->rowCount() === 0) continue;
+                if ($check->rowCount() === 0)
+                    continue;
 
                 $rows = $pdo->query("SELECT * FROM `{$table}`")->fetchAll(PDO::FETCH_ASSOC);
                 $data['data'][$table] = $rows;
@@ -158,7 +162,8 @@ if (isset($_POST['action']) && $_POST['action'] === 'import') {
                 $pdo->exec('SET FOREIGN_KEY_CHECKS=0');
 
                 foreach ($tables as $table) {
-                    if (!isset($data['data'][$table])) continue;
+                    if (!isset($data['data'][$table]))
+                        continue;
 
                     // Clear existing data
                     $pdo->exec("DELETE FROM `{$table}`");
@@ -240,7 +245,8 @@ adminHeader(__('nav.backup'));
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">
-                <iconify-icon icon="mdi:database-export" style="vertical-align: middle; margin-right: 0.5rem;"></iconify-icon>
+                <iconify-icon icon="mdi:database-export"
+                    style="vertical-align: middle; margin-right: 0.5rem;"></iconify-icon>
                 <?= __('backup.export') ?>
             </h2>
         </div>
@@ -283,7 +289,8 @@ adminHeader(__('nav.backup'));
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">
-                <iconify-icon icon="mdi:database-import" style="vertical-align: middle; margin-right: 0.5rem;"></iconify-icon>
+                <iconify-icon icon="mdi:database-import"
+                    style="vertical-align: middle; margin-right: 0.5rem;"></iconify-icon>
                 <?= __('backup.import') ?>
             </h2>
         </div>
@@ -314,50 +321,49 @@ adminHeader(__('nav.backup'));
 
 <!-- Existing Backups -->
 <?php if (!empty($backups)): ?>
-<div class="card mt-2">
-    <div class="card-header">
-        <h2 class="card-title">
-            <iconify-icon icon="mdi:history" style="vertical-align: middle; margin-right: 0.5rem;"></iconify-icon>
-            <?= __('backup.recent_backups') ?>
-        </h2>
-    </div>
+    <div class="card mt-2">
+        <div class="card-header">
+            <h2 class="card-title">
+                <iconify-icon icon="mdi:history" style="vertical-align: middle; margin-right: 0.5rem;"></iconify-icon>
+                <?= __('backup.recent_backups') ?>
+            </h2>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th><?= __('backup.filename') ?></th>
-                <th><?= __('backup.format') ?></th>
-                <th><?= __('backup.size') ?></th>
-                <th><?= __('backup.date') ?></th>
-                <th><?= __('labels.actions') ?></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach (array_slice($backups, 0, 10) as $backup): ?>
+        <table class="table">
+            <thead>
                 <tr>
-                    <td><?= htmlspecialchars($backup['name']) ?></td>
-                    <td>
-                        <span class="badge <?= $backup['format'] === 'sql' ? 'badge-primary' : 'badge-success' ?>">
-                            <?= strtoupper($backup['format']) ?>
-                        </span>
-                    </td>
-                    <td><?= number_format($backup['size'] / 1024, 2) ?> KB</td>
-                    <td><?= date('Y-m-d H:i', $backup['date']) ?></td>
-                    <td>
-                        <a href="?download=<?= urlencode($backup['name']) ?>" class="btn btn-sm btn-secondary">
-                            <iconify-icon icon="mdi:download"></iconify-icon>
-                        </a>
-                        <a href="?delete=<?= urlencode($backup['name']) ?>"
-                           class="btn btn-sm btn-danger"
-                           onclick="return confirm('<?= __('backup.confirm_delete') ?>')">
-                            <iconify-icon icon="mdi:delete"></iconify-icon>
-                        </a>
-                    </td>
+                    <th><?= __('backup.filename') ?></th>
+                    <th><?= __('backup.format') ?></th>
+                    <th><?= __('backup.size') ?></th>
+                    <th><?= __('backup.date') ?></th>
+                    <th><?= __('labels.actions') ?></th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
+            </thead>
+            <tbody>
+                <?php foreach (array_slice($backups, 0, 10) as $backup): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($backup['name']) ?></td>
+                        <td>
+                            <span class="badge <?= $backup['format'] === 'sql' ? 'badge-primary' : 'badge-success' ?>">
+                                <?= strtoupper($backup['format']) ?>
+                            </span>
+                        </td>
+                        <td><?= number_format($backup['size'] / 1024, 2) ?> KB</td>
+                        <td><?= date('Y-m-d H:i', $backup['date']) ?></td>
+                        <td>
+                            <a href="?download=<?= urlencode($backup['name']) ?>" class="btn btn-sm btn-secondary">
+                                <iconify-icon icon="mdi:download"></iconify-icon>
+                            </a>
+                            <a href="?delete=<?= urlencode($backup['name']) ?>" class="btn btn-sm btn-danger"
+                                onclick="return confirm('<?= __('backup.confirm_delete') ?>')">
+                                <iconify-icon icon="mdi:delete"></iconify-icon>
+                            </a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 <?php endif; ?>
 
 <?php
