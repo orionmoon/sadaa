@@ -118,7 +118,7 @@ try {
                 $stmt = $pdo->prepare("
                     SELECT ag.* FROM assignment_groups ag
                     WHERE ag.category_id = ? AND ag.surah_id = ?
-                    ORDER BY ag.created_at ASC
+                    ORDER BY ag.sort_order ASC, ag.created_at ASC
                 ");
                 $stmt->execute([$categoryId, $surah['id']]);
                 $groups = $stmt->fetchAll();
