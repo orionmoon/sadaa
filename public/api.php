@@ -143,6 +143,7 @@ try {
                     $stmt->execute([$group['id']]);
                     $group['tags'] = $stmt->fetchAll();
                 }
+                unset($group);
 
                 // Also populate flat 'ayahs' mainly for fallback or raw access if needed, 
                 // but frontend should now prefer 'groups'.

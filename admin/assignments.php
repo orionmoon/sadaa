@@ -176,6 +176,7 @@ if ($selectedSurahId && $selectedCategoryId) {
                 $stmt->execute([$group['id']]);
                 $group['tags'] = $stmt->fetchAll();
             }
+            unset($group);
         }
 
     } catch (PDOException $e) {
@@ -388,13 +389,7 @@ adminHeader('Assignation des versets');
         </div>
     </div>
 
-    <script>
-        document.getElementById('select-all')?.addEventListener('click', () => {
-            document.querySelectorAll('input[name="ayahs[]"]').forEach(cb => cb.checked = true);
-        });
-        document.getElementById('deselect-all')?.addEventListener('click', () => {
-            document.querySelectorAll('input[name="ayahs[]"]').forEach(cb => cb.checked = false);
-        });
+    <script>     document.getElementById('select-all')?.addEventListener('click', () => {         document.querySelectorAll('input[name="ayahs[]"]').forEach(cb => cb.checked = true);     });     document.getElementById('deselect-all')?.addEventListener('click', () => {         document.querySelectorAll('input[name="ayahs[]"]').forEach(cb => cb.checked = false);     });
     </script>
 <?php endif; ?>
 
