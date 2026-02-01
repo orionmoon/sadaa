@@ -30,6 +30,17 @@ try {
 
 // Fetch active languages
 $languages = getActiveLanguages();
+
+// Fetch dynamic tagline from settings
+$taglineSetting = getSetting('tagline');
+$taglineArray = json_decode($taglineSetting, true);
+$dynamicTagline = '';
+
+if ($taglineArray && isset($taglineArray[$currentLang])) {
+    $dynamicTagline = $taglineArray[$currentLang];
+} elseif ($taglineArray && isset($taglineArray['ar'])) {
+    $dynamicTagline = $taglineArray['ar'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>" class="<?= $currentTheme ?>" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
@@ -73,7 +84,7 @@ $languages = getActiveLanguages();
         <!-- Logo Section -->
         <header class="logo-section">
             <h1 class="logo-arabic">صَــدَى</h1>
-            <p class="tagline"><?= __('public.tagline') ?></p>
+            <p class="tagline"><?= htmlspecialchars($dynamicTagline ?: __('public.tagline')) ?></p>
         </header>
 
         <!-- Type Tabs -->

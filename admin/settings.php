@@ -19,6 +19,24 @@ try {
 
 // Handle form submissions
 if ($_POST) {
+    if (isset($_POST['save_tagline'])) {
+        try {
+            $taglineArray = [];
+            foreach ($languages as $lang) {
+                $taglineArray[$lang['code']] = trim($_POST['tagline_' . $lang['code']] ?? '');
+            }
+            $taglineJson = json_encode($taglineArray);
+
+            $stmt = $pdo->prepare("INSERT INTO settings (setting_key, setting_value) VALUES ('tagline', ?) 
+                                   ON DUPLICATE KEY UPDATE setting_value = ?");
+            $stmt->execute([$taglineJson, $taglineJson]);
+
+            $message = 'Slogan enregistré';
+        } catch (PDOException $e) {
+            $error = 'Erreur: ' . $e->getMessage();
+        }
+    }
+
     if (isset($_POST['save_settings'])) {
         try {
             // Update settings
@@ -176,6 +194,46 @@ adminHeader('Paramètres');
                     style="height: 42px; padding: 0.25rem;">
             </div>
         </div>
+
+        <!-- Tagline translations -->
+        <div class="mb-2" style="margin-top: 1rem;">
+            <label class="form-label" style="margin-bottom: 0.5rem;">
+                <iconify-icon icon="mdi:text"></iconify-icon>
+                Slogan (multilingue)
+            </label>
+            <div class="grid grid-2">
+                <?php
+                $taglineSetting = json_decode($settings['tagline'] ?? '{}', true);
+                foreach ($languages as $lang):
+                    $langName = json_decode($lang['name'], true);
+                    $isRtlLang = $lang['is_rtl'];
+                    $currentTagline = $taglineSetting[$lang['code']] ?? '';
+                    if (empty($currentTagline)) {
+                        $currentTagline = match($lang['code']) {
+                            'ar' => 'صدى الحكمة للروح',
+                            'fr' => 'Écho de sagesse pour l\'âme',
+                            'en' => 'Echo of wisdom for the soul',
+                            'es' => 'Eco de sabiduría para el alma',
+                            'de' => 'Echo der Weisheit für die Seele',
+                            default => '',
+                        };
+                    }
+                    ?>
+                    <div class="form-group">
+                        <label class="form-label"><?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>
+                            (<?= strtoupper($lang['code']) ?>)</label>
+                        <input type="text" name="tagline_<?= $lang['code'] ?>" class="form-input<?= $isRtlLang ? ' font-arabic' : '' ?>"
+                            value="<?= htmlspecialchars($currentTagline) ?>" <?= $isRtlLang ? 'dir="rtl"' : '' ?>>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <button type="submit" name="save_tagline" class="btn btn-primary mb-2">
+            <iconify-icon icon="mdi:content-save"></iconify-icon>
+            Enregistrer le slogan
+        </button>
+
         <button type="submit" name="save_settings" class="btn btn-primary">
             <iconify-icon icon="mdi:content-save"></iconify-icon>
             Enregistrer
