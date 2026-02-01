@@ -88,6 +88,7 @@ try {
     <meta property="og:url" content="https://sadaa.me/category/<?= htmlspecialchars($categorySlug ?? '') ?>">
     <meta property="og:type" content="article">
     <meta property="og:image" content="https://sadaa.me/assets/og-image.jpg">
+    <meta property="og:site_name" content="Sadaa">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= $pageTitle ?>">
     <meta name="twitter:description" content="<?= $pageDesc ?>">
@@ -142,6 +143,13 @@ try {
     </script>
     <?php endif; ?>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="manifest" href="/assets/site.webmanifest">
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
