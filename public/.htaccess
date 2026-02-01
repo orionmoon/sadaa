@@ -1,3 +1,16 @@
 RewriteEngine On
+
+# Force HTTPS (uncomment if needed on production)
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Serve sitemap.xml from sitemap.xml.php
+RewriteRule ^sitemap\.xml$ sitemap.xml.php [L]
+
+# Remove .php extension
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Default fallback
+ErrorDocument 404 /public/404.html

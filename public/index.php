@@ -40,7 +40,15 @@ if ($taglineArray && isset($taglineArray[$currentLang])) {
     $dynamicTagline = $taglineArray[$currentLang];
 } elseif ($taglineArray && isset($taglineArray['ar'])) {
     $dynamicTagline = $taglineArray['ar'];
+} else {
+    $dynamicTagline = __('public.tagline');
 }
+
+// SEO: Get site name from settings
+$siteName = getSetting('app_name', 'Sadaa');
+$siteTagline = $dynamicTagline;
+$seoDesc = htmlspecialchars($siteTagline . ' - ' . $siteName);
+$seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>" class="<?= $currentTheme ?>" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
@@ -48,22 +56,30 @@ if ($taglineArray && isset($taglineArray[$currentLang])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sadaa | Écho Spirituel</title>
+    <title><?= $seoTitle ?></title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="<?= $seoDesc ?>">
+    <meta name="keywords" content="Coran, Quran, Islam, Spiritualité, Sagesse, Thématiques, Versets">
+    <link rel="canonical" href="https://sadaa.me/">
 
     <!-- Social Meta Tags -->
-    <meta name="description"
-        content="Découvrez les trésors du Coran à travers des thématiques inspirantes. Trouvez paix et guidance avec Sadaa.">
-    <meta property="og:title" content="Sadaa | Écho Spirituel">
-    <meta property="og:description"
-        content="Explorez le Coran par thématique. Une expérience immersive et spirituelle.">
+    <meta property="og:title" content="<?= $seoTitle ?>">
+    <meta property="og:description" content="<?= $seoDesc ?>">
     <meta property="og:url" content="https://sadaa.me">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://sadaa.me/assets/og-image.jpg">
+    <meta property="og:site_name" content="<?= htmlspecialchars($siteName) ?>">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Sadaa | Écho Spirituel">
-    <meta name="twitter:description"
-        content="Explorez le Coran par thématique. Une expérience immersive et spirituelle.">
+    <meta name="twitter:title" content="<?= $seoTitle ?>">
+    <meta name="twitter:description" content="<?= $seoDesc ?>">
     <meta name="twitter:image" content="https://sadaa.me/assets/og-image.jpg">
+
+    <!-- Hreflang for multilingual -->
+    <?php foreach ($languages as $lang): ?>
+        <link rel="alternate" hreflang="<?= $lang['code'] ?>" href="https://sadaa.me/?lang=<?= $lang['code'] ?>">
+    <?php endforeach; ?>
+    <link rel="alternate" hreflang="x-default" href="https://sadaa.me/">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
