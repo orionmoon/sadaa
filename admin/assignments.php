@@ -150,15 +150,21 @@ if ($view === 'edit' && $selectedSurahId) {
     }
 }
 
-// Fetch Groups (Global or Filtered)
+// Get pagination
+$page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+$perPage = 25;
+$offset = ($page - 1) * $perPage;
+
+// Fetch Groups (Global or Filtered) - with pagination
 $groups = [];
+$totalCount = 0;
 try {
-    $sql = "SELECT ag.*, s.number as surah_number, s.name as surah_name, c.name as category_name, t.name as type_name,
-            (SELECT COUNT(*) FROM ayah_categories ac WHERE ac.assignment_group_id = ag.id) as ayah_count
-            FROM assignment_groups ag
-            JOIN surahs s ON ag.surah_id = s.id
-            JOIN categories c ON ag.category_id = c.id
-            JOIN types t ON c.type_id = t.id";
+    // Count query
+    $countSql = "SELECT COUNT(DISTINCT ag.id) as total
+                 FROM assignment_groups ag
+                 JOIN surahs s ON ag.surah_id = s.id
+                 JOIN categories c ON ag.category_id = c.id
+                 JOIN types t ON c.type_id = t.id";
 
     $where = [];
     $params = [];
@@ -172,17 +178,33 @@ try {
         $params[] = $filterSurahId;
     }
     if ($filterTag) {
-        $sql .= " JOIN assignment_group_tags agt ON ag.id = agt.assignment_group_id
-                  JOIN tags tg ON agt.tag_id = tg.id";
+        $countSql .= " JOIN assignment_group_tags agt ON ag.id = agt.assignment_group_id
+                       JOIN tags tg ON agt.tag_id = tg.id";
         $where[] = "tg.name = ?";
         $params[] = $filterTag;
     }
 
     if (!empty($where)) {
+        $countSql .= " WHERE " . implode(" AND ", $where);
+    }
+
+    $stmt = $pdo->prepare($countSql);
+    $stmt->execute($params);
+    $totalCount = (int) $stmt->fetch()['total'];
+
+    // Main query with pagination
+    $sql = "SELECT ag.*, s.number as surah_number, s.name as surah_name, c.name as category_name, t.name as type_name,
+            (SELECT COUNT(*) FROM ayah_categories ac WHERE ac.assignment_group_id = ag.id) as ayah_count
+            FROM assignment_groups ag
+            JOIN surahs s ON ag.surah_id = s.id
+            JOIN categories c ON ag.category_id = c.id
+            JOIN types t ON c.type_id = t.id";
+
+    if (!empty($where)) {
         $sql .= " WHERE " . implode(" AND ", $where);
     }
 
-    $sql .= " ORDER BY ag.sort_order ASC, ag.created_at DESC LIMIT 100";
+    $sql .= " ORDER BY ag.sort_order ASC, ag.created_at DESC LIMIT $perPage OFFSET $offset";
 
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -320,79 +342,109 @@ adminHeader('Assignation des versets');
                     </form>
                 </div>
 
-                <div class="card p-0 overflow-hidden">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th width="50">Ordre</th>
-                                <th>Groupe / Titre</th>
-                                <th>Sourate</th>
-                                <th>Catégorie</th>
-                                <th>Contenu</th>
-                                <th width="100">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (count($groups) > 0): ?>
-                                    <?php foreach ($groups as $group):
-                                        $gSurahName = json_decode($group['surah_name'], true);
-                                        $gCatName = json_decode($group['category_name'], true);
-                                        $gTypeName = json_decode($group['type_name'], true);
-                                        ?>
-                                            <tr>
-                                                <td class="text-center">
-                                                    <span class="badge badge-secondary"><?= $group['sort_order'] ?></span>
-                                                </td>
-                                                <td>
-                                                    <div style="font-weight: 600;"><?= htmlspecialchars($group['title'] ?: 'Groupe #' . $group['id']) ?></div>
-                                                    <?php if (!empty($group['tags'])): ?>
-                                                            <div class="flex gap-1 mt-1">
-                                                                <?php foreach ($group['tags'] as $tg): ?>
-                                                                        <span class="badge" style="background: <?= $tg['color'] ?>20; color: <?= $tg['color'] ?>; font-size: 0.65rem; border: 1px solid <?= $tg['color'] ?>40;">
-                                                                            <?= htmlspecialchars($tg['name']) ?>
-                                                                        </span>
-                                                                <?php endforeach; ?>
-                                                            </div>
-                                                    <?php endif; ?>
-                                                </td>
-                                                <td>
-                                                    <div style="font-size: 0.85rem;">
-                                                        <?= $group['surah_number'] ?>. <?= htmlspecialchars($gSurahName['ar'] ?? '') ?>
-                                                    </div>
-                                                    <div class="text-muted" style="font-size: 0.75rem;">(<?= htmlspecialchars($gSurahName['en'] ?? '') ?>)</div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge" style="background: var(--bg-dark); border: 1px solid var(--border-color);">
-                                                        <?= htmlspecialchars($gTypeName['fr'] ?? '') ?> → <?= htmlspecialchars($gCatName['fr'] ?? $gCatName['en'] ?? '') ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="text-primary" style="font-weight: 600;"><?= $group['ayah_count'] ?></span> versets
-                                                </td>
-                                                <td>
-                                                    <div class="flex gap-1">
-                                                        <a href="?view=edit&edit_group=<?= $group['id'] ?>" class="btn btn-sm btn-secondary" title="Éditer">
-                                                            <iconify-icon icon="mdi:pencil"></iconify-icon>
-                                                        </a>
-                                                        <form method="post" onsubmit="return confirm('Supprimer ce groupe ?');" style="display:inline;">
-                                                            <input type="hidden" name="group_id" value="<?= $group['id'] ?>">
-                                                            <button type="submit" name="delete_group" class="btn btn-sm btn-danger" title="Supprimer">
-                                                                <iconify-icon icon="mdi:delete"></iconify-icon>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                    <?php endforeach; ?>
-                            <?php else: ?>
-                                    <tr>
-                                        <td colspan="6" class="text-center" style="padding: 3rem;">
-                                            <div class="text-muted">Aucun groupe trouvé avec ces critères.</div>
-                                        </td>
-                                    </tr>
+                <div class="card p-0">
+                    <div class="table-container" style="max-height: 500px; overflow-y: auto; overflow-x: hidden;">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th width="50">Ordre</th>
+                                    <th>Groupe / Titre</th>
+                                    <th>Sourate</th>
+                                    <th>Catégorie</th>
+                                    <th>Contenu</th>
+                                    <th width="100">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (count($groups) > 0): ?>
+                                        <?php foreach ($groups as $group):
+                                            $gSurahName = json_decode($group['surah_name'], true);
+                                            $gCatName = json_decode($group['category_name'], true);
+                                            $gTypeName = json_decode($group['type_name'], true);
+                                            ?>
+                                                <tr>
+                                                    <td class="text-center">
+                                                        <span class="badge badge-secondary"><?= $group['sort_order'] ?></span>
+                                                    </td>
+                                                    <td>
+                                                        <div style="font-weight: 600;"><?= htmlspecialchars($group['title'] ?: 'Groupe #' . $group['id']) ?></div>
+                                                        <?php if (!empty($group['tags'])): ?>
+                                                                <div class="flex gap-1 mt-1">
+                                                                    <?php foreach ($group['tags'] as $tg): ?>
+                                                                            <span class="badge" style="background: <?= $tg['color'] ?>20; color: <?= $tg['color'] ?>; font-size: 0.65rem; border: 1px solid <?= $tg['color'] ?>40;">
+                                                                                <?= htmlspecialchars($tg['name']) ?>
+                                                                            </span>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td>
+                                                        <div style="font-size: 0.85rem;">
+                                                            <?= $group['surah_number'] ?>. <?= htmlspecialchars($gSurahName['ar'] ?? '') ?>
+                                                        </div>
+                                                        <div class="text-muted" style="font-size: 0.75rem;">(<?= htmlspecialchars($gSurahName['en'] ?? '') ?>)</div>
+                                                    </td>
+                                                    <td>
+                                                        <span class="badge" style="background: var(--bg-dark); border: 1px solid var(--border-color);">
+                                                            <?= htmlspecialchars($gTypeName['fr'] ?? '') ?> → <?= htmlspecialchars($gCatName['fr'] ?? $gCatName['en'] ?? '') ?>
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="text-primary" style="font-weight: 600;"><?= $group['ayah_count'] ?></span> versets
+                                                    </td>
+                                                    <td>
+                                                        <div class="flex gap-1">
+                                                            <a href="?view=edit&edit_group=<?= $group['id'] ?>" class="btn btn-sm btn-secondary" title="Éditer">
+                                                                <iconify-icon icon="mdi:pencil"></iconify-icon>
+                                                            </a>
+                                                            <form method="post" onsubmit="return confirm('Supprimer ce groupe ?');" style="display:inline;">
+                                                                <input type="hidden" name="group_id" value="<?= $group['id'] ?>">
+                                                                <button type="submit" name="delete_group" class="btn btn-sm btn-danger" title="Supprimer">
+                                                                    <iconify-icon icon="mdi:delete"></iconify-icon>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                        <?php endforeach; ?>
+                                <?php else: ?>
+                                        <tr>
+                                            <td colspan="6" class="text-center" style="padding: 3rem;">
+                                                <div class="text-muted">Aucun groupe trouvé avec ces critères.</div>
+                                            </td>
+                                        </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <?php if ($totalCount > $perPage): ?>
+                        <?php
+                        $totalPages = ceil($totalCount / $perPage);
+                        $queryParams = $_GET;
+                        unset($queryParams['page']);
+                        $queryString = http_build_query($queryParams);
+                        $baseUrl = '?view=list' . ($queryString ? '&' . $queryString : '');
+                        ?>
+                        <div class="pagination" style="display: flex; justify-content: center; align-items: center; gap: 0.5rem; padding: 1rem; border-top: 1px solid var(--border-color); background: var(--bg-card);">
+                            <?php if ($page > 1): ?>
+                                <a href="<?= $baseUrl ?>&page=<?= $page - 1 ?>" class="btn btn-sm btn-secondary">
+                                    <iconify-icon icon="mdi:chevron-left"></iconify-icon>
+                                </a>
                             <?php endif; ?>
-                        </tbody>
-                    </table>
+
+                            <span style="padding: 0 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                                Page <?= $page ?> sur <?= $totalPages ?> (<?= $totalCount ?> total)
+                            </span>
+
+                            <?php if ($page < $totalPages): ?>
+                                <a href="<?= $baseUrl ?>&page=<?= $page + 1 ?>" class="btn btn-sm btn-secondary">
+                                    <iconify-icon icon="mdi:chevron-right"></iconify-icon>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
         <?php elseif ($view === 'edit'): ?>
@@ -553,8 +605,8 @@ adminHeader('Assignation des versets');
 <style>
     .data-table { width: 100%; border-collapse: collapse; }
     .data-table th, .data-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); text-align: left; }
-    .data-table thead { background: var(--bg-dark); }
-    .data-table tr:hover { background: var(--bg-hover); }
+    .data-table thead { position: sticky; top: 0; background: var(--bg-dark); z-index: 1; }
+    .data-table tbody tr:hover { background: var(--bg-hover); }
     .ayah-select-item:hover { background: var(--bg-hover) !important; }
     .bg-dark-soft { background: rgba(0,0,0,0.1); }
 </style>
