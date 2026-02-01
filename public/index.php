@@ -33,7 +33,7 @@ $languages = getActiveLanguages();
 
 // Fetch dynamic tagline from settings
 $taglineSetting = getSetting('tagline');
-$taglineArray = json_decode($taglineSetting, true);
+$taglineArray = $taglineSetting ? json_decode($taglineSetting, true) : null;
 $dynamicTagline = '';
 
 if ($taglineArray && isset($taglineArray[$currentLang])) {
