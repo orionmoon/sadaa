@@ -252,5 +252,6 @@ return [
         'theme_light' => 'Hell',
         'story' => 'Story',
         'square' => 'Quadrat',
+        'show_arabic' => 'Arabischen Text anzeigen',
     ],
 ];

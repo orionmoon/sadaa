@@ -252,5 +252,6 @@ return [
         'theme_light' => 'Light',
         'story' => 'Story',
         'square' => 'Square',
+        'show_arabic' => 'Show Arabic text',
     ],
 ];

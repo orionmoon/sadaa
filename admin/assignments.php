@@ -290,9 +290,9 @@ adminHeader('Assignation des versets');
         <div class="alert alert-info">
             <iconify-icon icon="mdi:information"></iconify-icon>
             <?php if (count($surahs) === 0): ?>
-                    Vous devez d'abord <a href="import.php" style="color: inherit; font-weight: bold;">importer le Coran</a>.
+                    Vous devez d'abord <a href="/admin/import" style="color: inherit; font-weight: bold;">importer le Coran</a>.
             <?php else: ?>
-                    Vous devez d'abord <a href="categories.php" style="color: inherit; font-weight: bold;">créer des catégories</a>.
+                    Vous devez d'abord <a href="/admin/categories" style="color: inherit; font-weight: bold;">créer des catégories</a>.
             <?php endif; ?>
         </div>
 <?php else: ?>

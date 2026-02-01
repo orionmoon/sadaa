@@ -384,7 +384,7 @@ adminHeader('Import du Coran');
                         L'édition affichée entre parenthèses sera utilisée.
                         <br>
                         <strong>Pour choisir une autre édition</strong>, ajoutez d'abord la langue dans
-                        <a href="settings.php" style="color: var(--color-primary); text-decoration: underline;">Paramètres → Langues</a>.
+                        <a href="/admin/settings" style="color: var(--color-primary); text-decoration: underline;">Paramètres → Langues</a>.
                     </div>
                 </div>
             </div>

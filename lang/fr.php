@@ -252,5 +252,6 @@ return [
         'theme_light' => 'Clair',
         'story' => 'Story',
         'square' => 'Carré',
+        'show_arabic' => 'Afficher le texte arabe',
     ],
 ];

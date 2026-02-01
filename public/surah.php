@@ -34,18 +34,46 @@ try {
     <?php
     $pageTitle = "Sadaa | Écho Spirituel";
     $pageDesc = "Découvrez les trésors du Coran à travers des thématiques inspirantes.";
-    if (isset($_GET['category'])) {
+    $categoryId = null;
+    $categorySlug = null;
+    $translatedName = '';
+
+    // Priority: slug parameter, then fallback to ID for backward compatibility
+    if (isset($_GET['slug'])) {
+        $categorySlug = $_GET['slug'];
         try {
-            $stmt = $pdo->prepare("SELECT name FROM categories WHERE id = ?");
-            $stmt->execute([$_GET['category']]);
-            $catData = $stmt->fetch();
-            if ($catData) {
-                $catName = json_decode($catData['name'], true);
+            $stmt = $pdo->prepare("SELECT * FROM categories WHERE slug = ?");
+            $stmt->execute([$categorySlug]);
+            $categoryData = $stmt->fetch();
+            if ($categoryData) {
+                $categoryId = $categoryData['id'];
+                $catName = json_decode($categoryData['name'], true);
                 $translatedName = $catName[$currentLang] ?? $catName['en'] ?? $catName['fr'] ?? '';
                 if ($translatedName) {
                     $pageTitle = htmlspecialchars($translatedName) . " - Sadaa";
                     $pageDesc = "Explorez les versets du Coran sur le thème : " . htmlspecialchars($translatedName);
                 }
+            } else {
+                http_response_code(404);
+                header("Location: /404.html");
+                exit;
+            }
+        } catch (PDOException $e) {
+        }
+    } elseif (isset($_GET['category'])) {
+        // Backward compatibility: redirect to slug-based URL
+        $categoryId = (int)$_GET['category'];
+        try {
+            $stmt = $pdo->prepare("SELECT slug FROM categories WHERE id = ?");
+            $stmt->execute([$categoryId]);
+            $cat = $stmt->fetch();
+            if ($cat && !empty($cat['slug'])) {
+                $redirectUrl = "/category/{$cat['slug']}";
+                if (isset($_GET['lang'])) {
+                    $redirectUrl .= "?lang=" . urlencode($_GET['lang']);
+                }
+                header("Location: $redirectUrl", true, 301);
+                exit;
             }
         } catch (PDOException $e) {
         }
@@ -57,13 +85,62 @@ try {
     <meta name="description" content="<?= $pageDesc ?>">
     <meta property="og:title" content="<?= $pageTitle ?>">
     <meta property="og:description" content="<?= $pageDesc ?>">
-    <meta property="og:url" content="https://sadaa.me/surah.php?<?= http_build_query($_GET) ?>">
+    <meta property="og:url" content="https://sadaa.me/category/<?= htmlspecialchars($categorySlug ?? '') ?>">
     <meta property="og:type" content="article">
     <meta property="og:image" content="https://sadaa.me/assets/og-image.jpg">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= $pageTitle ?>">
     <meta name="twitter:description" content="<?= $pageDesc ?>">
     <meta name="twitter:image" content="https://sadaa.me/assets/og-image.jpg">
+
+    <!-- Canonical URL -->
+    <?php if ($categorySlug): ?>
+    <link rel="canonical" href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>">
+    <?php endif; ?>
+
+    <!-- Hreflang for multilingual -->
+    <?php if ($categorySlug): ?>
+        <?php foreach ($languages as $lang): ?>
+        <link rel="alternate" hreflang="<?= $lang['code'] ?>" href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?><?= $lang['code'] !== $currentLang ? '?lang=' . $lang['code'] : '' ?>">
+        <?php endforeach; ?>
+        <link rel="alternate" hreflang="x-default" href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>">
+    <?php endif; ?>
+
+    <!-- JSON-LD Structured Data -->
+    <?php if ($categorySlug && !empty($translatedName)): ?>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "<?= htmlspecialchars($translatedName) ?>",
+  "description": "<?= htmlspecialchars($pageDesc) ?>",
+  "url": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>",
+  "inLanguage": "<?= $currentLang ?>",
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "Sadaa",
+    "url": "https://sadaa.me"
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Accueil",
+        "item": "https://sadaa.me"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "<?= htmlspecialchars($translatedName) ?>",
+        "item": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>"
+      }
+    ]
+  }
+}
+    </script>
+    <?php endif; ?>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,7 +149,7 @@ try {
         href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&amp;family=Inter:wght@200;300;400;500;600&amp;family=Noto+Naskh+Arabic:wght@400;500;700&amp;family=Reem+Kufi:wght@400;500;600;700&amp;family=Crimson+Text:wght@400;600;700&amp;display=swap"
         rel="stylesheet">
 
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <!-- Library for generating images from HTML -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -302,13 +379,17 @@ try {
     </main>
 
     <footer>
-        <a href="index.php" class="footer-signature fade-in" title="Retour à l'accueil">
+        <a href="/" class="footer-signature fade-in" title="Retour à l'accueil">
             <span class="logo-arabic">صَــدَى</span>
         </a>
     </footer>
 
     <!-- Hidden select for backward compatibility -->
-    <select id="category-select" style="display:none;"></select>
+    <select id="category-select" style="display:none;">
+        <?php if ($categoryId): ?>
+        <option value="<?= $categoryId ?>" selected><?= $categoryId ?></option>
+        <?php endif; ?>
+    </select>
 
     <!-- JS Translations -->
     <script>
@@ -316,6 +397,10 @@ try {
         window.currentLang = '<?= $currentLang ?>';
         window.languageEditions = <?= json_encode(array_column($languages, 'quran_edition', 'code')) ?>;
         window.importSource = '<?= $importSource ?>';
+        <?php if ($categoryId): ?>
+        // Set current category ID for JavaScript
+        window.initialCategoryId = <?= $categoryId ?>;
+        <?php endif; ?>
     </script>
     <!-- JS -->
     <!-- Share Modal -->
@@ -324,8 +409,8 @@ try {
         <div class="picker-modal-content share-modal-content">
             <h2 class="modal-title"><?= __('public.share_verse') ?></h2>
 
-            <!-- Format & Theme Switchers -->
-            <div class="share-controls">
+            <!-- Format & Theme Switchers - Same Line -->
+            <div class="share-controls-row">
                 <div class="share-control-group">
                     <label><?= __('js.share_format') ?></label>
                     <div class="share-format-tabs">
@@ -357,21 +442,37 @@ try {
                     <div class="card-bg-pattern"></div>
                     <div class="card-gradient"></div>
                     <div class="card-custom-bg"></div>
-                    <div class="card-content">
+                    <!-- Header avec infos en haut -->
+                    <div class="card-header">
                         <div class="card-category" id="card-category">La Patience</div>
                         <div class="card-surah-title" id="card-surah-title">Al-Baqarah</div>
                         <div class="card-ayah-number" id="card-ayah-ref">2:153</div>
-                        <div class="card-arabic" id="card-ayah-arabic">يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا
-                            بِالصَّبْرِ وَالصَّلَاةِ</div>
+                    </div>
+                    <!-- Contenu centré -->
+                    <div class="card-content">
+                        <div class="card-arabic" id="card-ayah-arabic">يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا
+                            بِالصَّبْرِ وَالصَّلَاةِ</div>
                         <div class="card-translation" id="card-ayah-translation">O vous qui croyez ! Cherchez secours
                             dans la patience et la prière.</div>
                     </div>
+                    <!-- Footer en bas -->
                     <div class="card-footer">
                         <div class="card-logo">صَــدَى</div>
                         <div class="card-url">sadaa.me</div>
                     </div>
                 </div>
             </div>
+
+            <!-- Arabic Text Toggle (only for non-Arabic languages) -->
+            <?php if ($currentLang !== 'ar'): ?>
+            <div class="share-arabic-toggle" id="share-arabic-toggle-container">
+                <label class="toggle-label">
+                    <input type="checkbox" id="toggle-arabic-text" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-text"><?= __('js.show_arabic') ?></span>
+                </label>
+            </div>
+            <?php endif; ?>
 
             <!-- Background Gallery (Optional) -->
             <div class="share-bg-gallery" id="share-bg-gallery">
@@ -381,18 +482,19 @@ try {
                 <!-- JS will populate these if backgrounds exist -->
             </div>
 
-            <div class="flex flex-col gap-1 mt-1 w-full">
-                <button id="btn-download-image" class="btn btn-primary w-full">
-                    <iconify-icon icon="mdi:download"></iconify-icon> <?= __('actions.download') ?>
+            <!-- Action Buttons -->
+            <div class="share-action-buttons">
+                <button id="btn-download-image" class="btn-share-action btn-share-download" title="<?= __('actions.download') ?>">
+                    <iconify-icon icon="mdi:download"></iconify-icon>
                 </button>
-                <button id="btn-close-share" class="btn btn-secondary w-full">
-                    <?= __('actions.close') ?>
+                <button id="btn-close-share" class="btn-share-action btn-share-close" title="<?= __('actions.close') ?>">
+                    <iconify-icon icon="mdi:close"></iconify-icon>
                 </button>
             </div>
         </div>
     </div>
 
-    <script src="js/app.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 
 </html>

@@ -64,7 +64,7 @@ if (is_dir($backgroundsDir)) {
         if (preg_match('/\.(jpg|jpeg|png|webp)$/i', $file)) {
             $backgrounds[] = [
                 'name' => $file,
-                'path' => '../public/assets/backgrounds/' . $file,
+                'path' => '/assets/backgrounds/' . $file,
                 'size' => round(filesize($backgroundsDir . $file) / 1024, 2) . ' KB'
             ];
         }

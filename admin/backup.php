@@ -387,7 +387,7 @@ if (isset($_GET['delete'])) {
     $filepath = "{$backupDir}/{$filename}";
     if (file_exists($filepath) && strpos($filename, 'sadaa_backup_') === 0) {
         unlink($filepath);
-        header('Location: backup.php?deleted=1');
+        header('Location: backup?deleted=1');
         exit;
     }
 }

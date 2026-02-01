@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api.php
+Disallow: /config/
+
+Sitemap: https://sadaa.me/sitemap.xml

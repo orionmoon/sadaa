@@ -37,7 +37,7 @@ adminHeader('Historique des imports');
 
 <div class="page-header">
     <h1 class="page-title">Historique des imports</h1>
-    <a href="import.php" class="btn btn-primary">
+    <a href="/admin/import" class="btn btn-primary">
         <iconify-icon icon="mdi:plus"></iconify-icon>
         Nouvel import
     </a>
@@ -110,7 +110,7 @@ adminHeader('Historique des imports');
         <p class="text-muted text-center" style="padding: 2rem;">
             <iconify-icon icon="mdi:history" style="font-size: 3rem;"></iconify-icon><br>
             Aucun import effectué.<br>
-            <a href="import.php" style="color: var(--color-primary);">Commencer un import</a>
+            <a href="/admin/import" style="color: var(--color-primary);">Commencer un import</a>
         </p>
     <?php else: ?>
         <table class="table">

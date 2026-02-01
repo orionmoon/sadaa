@@ -252,5 +252,6 @@ return [
         'theme_light' => 'فاتح',
         'story' => 'ستوري',
         'square' => 'مربع',
+        'show_arabic' => '',
     ],
 ];

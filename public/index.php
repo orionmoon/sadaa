@@ -81,6 +81,26 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
     <?php endforeach; ?>
     <link rel="alternate" hreflang="x-default" href="https://sadaa.me/">
 
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "<?= htmlspecialchars($siteName) ?>",
+  "url": "https://sadaa.me",
+  "description": "<?= htmlspecialchars($siteTagline) ?>",
+  "inLanguage": ["ar", "fr", "en"],
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://sadaa.me/category/{search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+    </script>
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -333,7 +353,7 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
         // Start
         document.getElementById('btn-start').addEventListener('click', () => {
             if (currentCategories[currentIndex]) {
-                window.location.href = `surah.php?category=${currentCategories[currentIndex].id}`;
+                window.location.href = `/category/${currentCategories[currentIndex].slug}`;
             }
         });
 
@@ -362,7 +382,7 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 case 'Enter':
                     // Start
                     if (currentCategories[currentIndex]) {
-                        window.location.href = `surah.php?category=${currentCategories[currentIndex].id}`;
+                        window.location.href = `/category/${currentCategories[currentIndex].slug}`;
                     }
                     break;
             }

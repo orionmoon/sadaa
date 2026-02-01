@@ -1,0 +1,39 @@
+RewriteEngine On
+
+# CRITICAL: Prevent second-pass rewrites
+RewriteCond %{ENV:REDIRECT_STATUS} !^$
+RewriteRule ^ - [L]
+
+# Force HTTPS (uncomment on production)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Admin requests - add .php extension if not present
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^admin/([a-z0-9_-]+)$ admin/$1.php [L]
+
+# Admin requests - serve existing files directly
+RewriteRule ^admin/(.*)$ admin/$1 [L]
+
+# If the file/directory exists in public, serve it
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# API, CSS, JS, assets from public
+RewriteRule ^(api\.php|css/|js/|assets/)(.*)$ public/$1$2 [L]
+
+# Pretty URLs: /category/slug → public/surah.php?slug=slug
+RewriteRule ^category/([a-z0-9\-]+)/?$ public/surah.php?slug=$1 [L,QSA]
+
+# Sitemap
+RewriteRule ^sitemap\.xml$ public/sitemap.xml.php [L]
+
+# All other requests go to /public
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ public/$1 [L]
+
+# Default fallback
+ErrorDocument 404 /public/404.html

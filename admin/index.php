@@ -98,7 +98,7 @@ adminHeader('Tableau de bord');
 
 <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
-    <a href="../public/index.php" target="_blank" class="btn btn-secondary">
+    <a href="/" target="_blank" class="btn btn-secondary">
         <iconify-icon icon="mdi:open-in-new"></iconify-icon>
         Voir le site
     </a>
@@ -169,19 +169,19 @@ adminHeader('Tableau de bord');
         <h2 class="card-title">Actions rapides</h2>
     </div>
     <div class="flex gap-2">
-        <a href="import.php" class="btn btn-primary">
+        <a href="/admin/import" class="btn btn-primary">
             <iconify-icon icon="mdi:cloud-download"></iconify-icon>
             Importer le Coran
         </a>
-        <a href="types.php" class="btn btn-secondary">
+        <a href="/admin/types" class="btn btn-secondary">
             <iconify-icon icon="mdi:plus"></iconify-icon>
             Nouveau Type
         </a>
-        <a href="categories.php" class="btn btn-secondary">
+        <a href="/admin/categories" class="btn btn-secondary">
             <iconify-icon icon="mdi:plus"></iconify-icon>
             Nouvelle Catégorie
         </a>
-        <a href="assignments.php" class="btn btn-secondary">
+        <a href="/admin/assignments" class="btn btn-secondary">
             <iconify-icon icon="mdi:link-variant"></iconify-icon>
             Assigner des versets
         </a>
@@ -289,11 +289,11 @@ adminHeader('Tableau de bord');
         </div>
         <ol style="padding-left: 1.5rem; line-height: 2;">
             <li>Configurez la base de données MySQL avec le fichier <code>config/database_schema.sql</code></li>
-            <li>Allez sur <a href="import.php" style="color: var(--color-primary);">Import Coran</a> pour télécharger les
+            <li>Allez sur <a href="/admin/import" style="color: var(--color-primary);">Import Coran</a> pour télécharger les
                 sourates</li>
-            <li>Créez des <a href="types.php" style="color: var(--color-primary);">Types</a> et <a href="categories.php"
+            <li>Créez des <a href="/admin/types" style="color: var(--color-primary);">Types</a> et <a href="/admin/categories"
                     style="color: var(--color-primary);">Catégories</a></li>
-            <li>Utilisez <a href="assignments.php" style="color: var(--color-primary);">Assignations</a> pour classer les
+            <li>Utilisez <a href="/admin/assignments" style="color: var(--color-primary);">Assignations</a> pour classer les
                 versets par catégorie</li>
         </ol>
     </div>
@@ -304,7 +304,7 @@ adminHeader('Tableau de bord');
     <div class="card">
         <div class="card-header">
             <h2 class="card-title">Imports récents</h2>
-            <a href="imports.php" class="btn btn-sm btn-secondary">Voir tout</a>
+            <a href="/admin/imports" class="btn btn-sm btn-secondary">Voir tout</a>
         </div>
         <table class="table">
             <thead>

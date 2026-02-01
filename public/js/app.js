@@ -79,7 +79,8 @@ const els = {
     btnFormats: document.querySelectorAll('.btn-format'),
     btnThemes: document.querySelectorAll('.btn-theme'),
     shareBgGallery: document.getElementById('share-bg-gallery'),
-    cardCustomBg: document.querySelector('.card-custom-bg')
+    cardCustomBg: document.querySelector('.card-custom-bg'),
+    toggleArabicText: document.getElementById('toggle-arabic-text')
 };
 
 // Init
@@ -89,6 +90,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const hasSurahParam = params.has('surah');
     if (hasSurahParam) state.currentSurah = parseInt(params.get('surah'));
     if (params.has('category')) state.currentCategory = parseInt(params.get('category'));
+
+    // If no category in URL but page has initialCategoryId (from slug), use it
+    if (!state.currentCategory && window.initialCategoryId) {
+        state.currentCategory = window.initialCategoryId;
+    }
 
     // Set initial selects
     if (els.langSelect) els.langSelect.value = state.currentLanguage;
@@ -113,8 +119,8 @@ async function loadInitialData() {
     try {
         // Fetch Categories & Types
         const [catsRes, typesRes] = await Promise.all([
-            fetch('api.php?endpoint=categories').then(r => r.json()),
-            fetch('api.php?endpoint=types').then(r => r.json())
+            fetch('/api.php?endpoint=categories').then(r => r.json()),
+            fetch('/api.php?endpoint=types').then(r => r.json())
         ]);
 
         if (catsRes.status === 'success') state.categories = catsRes.data;
@@ -136,7 +142,7 @@ async function loadSurah(number, startAtEnd = false) {
     els.translationText.innerHTML = '';
 
     try {
-        const url = `api.php?endpoint=surah&surah=${number}&category=${state.currentCategory || ''}`;
+        const url = `/api.php?endpoint=surah&surah=${number}&category=${state.currentCategory || ''}`;
         const res = await fetch(url).then(r => r.json());
 
         if (res.status === 'success') {
@@ -166,7 +172,7 @@ async function loadSurah(number, startAtEnd = false) {
 // Load the first available surah for a category
 async function loadFirstSurahForCategory(categoryId) {
     try {
-        const res = await fetch(`api.php?endpoint=surahs&category_id=${categoryId}`).then(r => r.json());
+        const res = await fetch(`/api.php?endpoint=surahs&category_id=${categoryId}`).then(r => r.json());
         if (res.status === 'success' && res.data && res.data.length > 0) {
             state.currentSurah = res.data[0].number;
             updateUrl();
@@ -213,7 +219,8 @@ function renderSurah() {
     // Title & Info
     const name = JSON.parse(surah.name);
     els.surahTitle.textContent = lang === 'ar' ? name['ar'] : (name[lang] || name['en']);
-    els.verseRef.textContent = `AYAT ${surah.ayah_count} • ${surah.revelation_type}`;
+    const revType = surah.revelation_type === 'meccan' ? __('meccan') : __('medinan');
+    els.verseRef.textContent = `${surah.ayah_count} ${__('verses')} • ${revType}`;
 
     // Display Tags
     if (els.groupTags) {
@@ -516,6 +523,18 @@ function setupEventListeners() {
     }
     if (els.btnDownloadImage) {
         els.btnDownloadImage.addEventListener('click', downloadShareImage);
+    }
+    if (els.toggleArabicText) {
+        els.toggleArabicText.addEventListener('change', () => {
+            // Only toggle if current language is not Arabic
+            if (state.currentLanguage !== 'ar') {
+                if (els.cardAyahArabic) {
+                    els.cardAyahArabic.style.display = els.toggleArabicText.checked ? '' : 'none';
+                }
+                // Re-scale text when visibility changes
+                autoScaleVerseText();
+            }
+        });
     }
 
     // Share Format Switcher
@@ -912,7 +931,7 @@ async function initQuranReader() {
 
 async function loadAllSurahs() {
     try {
-        const res = await fetch('api.php?endpoint=surahs').then(r => r.json());
+        const res = await fetch('/api.php?endpoint=surahs').then(r => r.json());
         if (res.status === 'success') {
             readerState.allSurahs = res.data;
             populateSurahSelect();
@@ -1127,7 +1146,7 @@ async function loadReaderSurah() {
     readerEls.textContainer.innerHTML = `<div class="reader-loading">${__('loading')}</div>`;
 
     try {
-        const res = await fetch(`api.php?endpoint=surah&surah=${readerState.currentSurah}`).then(r => r.json());
+        const res = await fetch(`/api.php?endpoint=surah&surah=${readerState.currentSurah}`).then(r => r.json());
 
         if (res.status === 'success') {
             readerState.surahData = res.data;
@@ -1358,9 +1377,37 @@ function openShareModal() {
     setShareTheme('dark');
     setShareBackground(''); // Clear custom background
 
+    // Initialize Arabic text toggle (only for non-Arabic languages)
+    if (els.toggleArabicText) {
+        const isArabic = state.currentLanguage === 'ar';
+        // Show toggle only when language is not Arabic
+        const toggleContainer = els.toggleArabicText.closest('.share-arabic-toggle');
+        if (toggleContainer) {
+            toggleContainer.style.display = isArabic ? 'none' : '';
+        }
+        if (!isArabic) {
+            // Set default to checked and ensure Arabic text is visible
+            els.toggleArabicText.checked = true;
+            if (els.cardAyahArabic) {
+                els.cardAyahArabic.style.display = '';
+            }
+        }
+    }
+
     // Populate the card with current state data
     if (els.cardAyahRef) {
         els.cardAyahRef.innerText = els.verseRef.innerText;
+        // Apply RTL and remove letter-spacing for Arabic text
+        const currentLang = state.currentLanguage || 'ar';
+        if (currentLang === 'ar') {
+            els.cardAyahRef.style.direction = 'rtl';
+            els.cardAyahRef.style.letterSpacing = '0';
+            els.cardAyahRef.style.fontFamily = "'Noto Naskh Arabic', serif";
+        } else {
+            els.cardAyahRef.style.direction = 'ltr';
+            els.cardAyahRef.style.letterSpacing = '';
+            els.cardAyahRef.style.fontFamily = '';
+        }
     }
     if (els.cardAyahArabic) {
         els.cardAyahArabic.innerHTML = els.verseText.innerHTML;
@@ -1376,7 +1423,20 @@ function openShareModal() {
         if (cat) {
             const currentLang = state.currentLanguage || 'ar';
             const descJson = typeof cat.description === 'string' ? JSON.parse(cat.description) : cat.description;
-            els.cardCategory.innerText = descJson[currentLang] || descJson.ar || cat.description_en || '';
+            const categoryText = descJson[currentLang] || descJson.ar || cat.description_en || '';
+            els.cardCategory.innerText = categoryText;
+            // Apply RTL for Arabic text and fix letter-spacing issue
+            if (currentLang === 'ar') {
+                els.cardCategory.style.direction = 'rtl';
+                els.cardCategory.style.fontFamily = "'Noto Naskh Arabic', serif";
+                els.cardCategory.style.letterSpacing = '0';
+                els.cardCategory.style.textTransform = 'none';
+            } else {
+                els.cardCategory.style.direction = 'ltr';
+                els.cardCategory.style.fontFamily = "";
+                els.cardCategory.style.letterSpacing = '';
+                els.cardCategory.style.textTransform = '';
+            }
         }
     }
 
@@ -1423,7 +1483,7 @@ async function loadShareBackgrounds() {
     }
 
     try {
-        const res = await fetch('api.php?endpoint=backgrounds').then(r => r.json());
+        const res = await fetch('/api.php?endpoint=backgrounds').then(r => r.json());
         if (res.status === 'success' && res.data) {
             // Remove existing background buttons (except "none")
             const existingBgs = els.shareBgGallery.querySelectorAll('button:not(.btn-bg-none)');
@@ -1431,7 +1491,7 @@ async function loadShareBackgrounds() {
 
             res.data.forEach(bgFile => {
                 const btn = document.createElement('button');
-                btn.style.backgroundImage = `url('assets/backgrounds/${bgFile}')`;
+                btn.style.backgroundImage = `url('/assets/backgrounds/${bgFile}')`;
                 btn.dataset.bg = bgFile;
                 btn.onclick = () => setShareBackground(bgFile, btn);
                 els.shareBgGallery.appendChild(btn);
@@ -1450,7 +1510,7 @@ function setShareBackground(bgFile, btn) {
     if (btn) btn.classList.add('active');
 
     if (bgFile) {
-        els.cardCustomBg.style.backgroundImage = `url('assets/backgrounds/${bgFile}')`;
+        els.cardCustomBg.style.backgroundImage = `url('/assets/backgrounds/${bgFile}')`;
         els.cardCustomBg.style.opacity = '1';
     } else {
         els.cardCustomBg.style.backgroundImage = 'none';

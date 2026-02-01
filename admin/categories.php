@@ -178,7 +178,7 @@ adminHeader('Gestion des Catégories');
 <?php if (count($types) === 0): ?>
     <div class="alert alert-info">
         <iconify-icon icon="mdi:information"></iconify-icon>
-        Vous devez d'abord <a href="types.php" style="color: inherit; font-weight: bold;">créer des Types</a> avant de
+        Vous devez d'abord <a href="/admin/types" style="color: inherit; font-weight: bold;">créer des Types</a> avant de
         pouvoir ajouter des catégories.
     </div>
 <?php else: ?>
@@ -430,7 +430,7 @@ adminHeader('Gestion des Catégories');
                             <button type="button" class="btn btn-sm btn-secondary" onclick='editCategory(<?= $catJson ?>)'>
                                 <iconify-icon icon="mdi:pencil"></iconify-icon>
                             </button>
-                            <a href="assignments.php?category_id=<?= $cat['id'] ?>" class="btn btn-sm btn-secondary">
+                            <a href="/admin/assignments?category_id=<?= $cat['id'] ?>" class="btn btn-sm btn-secondary">
                                 <iconify-icon icon="mdi:link-variant"></iconify-icon>
                             </a>
                             <form method="post" style="display: inline;"

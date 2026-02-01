@@ -15,7 +15,7 @@ require_once __DIR__ . '/../config/db.php';
 // Handle logout
 if (isset($_GET['logout'])) {
     $_SESSION['authenticated'] = false;
-    header('Location: index.php');
+    header('Location: /admin/index');
     exit;
 }
 
@@ -733,7 +733,7 @@ function adminHeader($title = 'Administration')
                 <div class="sidebar-logo">صدى</div>
                 <nav class="sidebar-nav">
                     <?php foreach ($navItems as $item): ?>
-                        <a href="<?= $item['page'] ?>.php"
+                        <a href="/admin/<?= $item['page'] ?>"
                             class="nav-item <?= $currentPage === $item['page'] ? 'active' : '' ?>">
                             <iconify-icon icon="<?= $item['icon'] ?>"></iconify-icon>
                             <span>
