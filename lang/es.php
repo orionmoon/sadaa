@@ -45,6 +45,7 @@ return [
         'next' => 'Siguiente',
         'previous' => 'Anterior',
         'start' => 'Iniciar',
+        'download' => 'Descargar',
     ],
 
     // Etiquetas comunes
@@ -214,6 +215,7 @@ return [
         'next_verse' => 'Siguiente versículo',
         'previous_verse' => 'Versículo anterior',
         'share' => 'Compartir',
+        'share_verse' => 'Compartir versículo',
         'copy' => 'Copiar',
         'copied' => '¡Copiado!',
         'quran' => 'El Sagrado Corán',
@@ -241,8 +243,14 @@ return [
         'play' => 'Reproducir',
         'pause' => 'Pausar',
         'confirm_delete' => '¿Está seguro de que desea eliminar?',
-        'meccan' => 'Mecana',
-        'medinan' => 'Medinense',
+        'meccan' => 'Mecki',
+        'medinan' => 'Medini',
         'verses' => 'versículos',
+        'share_format' => 'Formato',
+        'share_theme' => 'Tema',
+        'theme_dark' => 'Oscuro',
+        'theme_light' => 'Claro',
+        'story' => 'Story',
+        'square' => 'Cuadrado',
     ],
 ];

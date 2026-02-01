@@ -64,7 +64,22 @@ const els = {
     langSelect: document.getElementById('lang-select'),
     bookSelect: document.getElementById('book-select'),
     groupTags: document.getElementById('group-tags'),
-    themeToggle: document.getElementById('theme-toggle')
+    themeToggle: document.getElementById('theme-toggle'),
+    // Share elements
+    btnShare: document.getElementById('btn-share'),
+    shareModal: document.getElementById('share-modal'),
+    btnCloseShare: document.getElementById('btn-close-share'),
+    btnDownloadImage: document.getElementById('btn-download-image'),
+    cardAyahRef: document.getElementById('card-ayah-ref'),
+    cardAyahArabic: document.getElementById('card-ayah-arabic'),
+    cardAyahTranslation: document.getElementById('card-ayah-translation'),
+    cardSurahTitle: document.getElementById('card-surah-title'),
+    cardCategory: document.getElementById('card-category'),
+    shareCard: document.getElementById('share-card-story'),
+    btnFormats: document.querySelectorAll('.btn-format'),
+    btnThemes: document.querySelectorAll('.btn-theme'),
+    shareBgGallery: document.getElementById('share-bg-gallery'),
+    cardCustomBg: document.querySelector('.card-custom-bg')
 };
 
 // Init
@@ -417,16 +432,13 @@ function updateNavigation() {
 }
 
 function updatePickerUI() {
-    // Determine active type/category and render picker track
-    // For now, simpler implementation: just populate track with current category's type
-    // This part requires mirroring the index.php logic or reusing it.
-    // Given the complexity, we'll implement basic picker rendering here.
-
     // Find category object
     const cat = state.categories.find(c => c.id == state.currentCategory);
     if (cat) {
-        document.getElementById('current-category-name').textContent = getLocalized(cat.name);
-        document.getElementById('current-category-icon').innerHTML = `<iconify-icon icon="${cat.icon}"></iconify-icon>`;
+        const nameEl = document.getElementById('current-category-name');
+        const iconEl = document.getElementById('current-category-icon');
+        if (nameEl) nameEl.textContent = getLocalized(cat.name);
+        if (iconEl) iconEl.innerHTML = `<iconify-icon icon="${cat.icon}"></iconify-icon>`;
     }
 }
 
@@ -480,17 +492,53 @@ function setupEventListeners() {
         els.arabicScrollDown.addEventListener('click', () => scrollArabicContent('down'));
     }
 
+    // Intervations
     // Copy
-    els.btnCopy.addEventListener('click', async () => {
-        const text = `${els.verseText.innerText}\n\n${els.translationText.innerText}`;
-        try {
-            await navigator.clipboard.writeText(text);
-            const icon = els.btnCopy.querySelector('iconify-icon');
-            const originalIcon = icon.getAttribute('icon');
-            icon.setAttribute('icon', 'mdi:check');
-            setTimeout(() => icon.setAttribute('icon', originalIcon), 2000);
-        } catch (e) { console.error(e); }
+    if (els.btnCopy) {
+        els.btnCopy.addEventListener('click', async () => {
+            const text = `${els.verseText.innerText}\n\n${els.translationText.innerText}`;
+            try {
+                await navigator.clipboard.writeText(text);
+                const icon = els.btnCopy.querySelector('iconify-icon');
+                const originalIcon = icon.getAttribute('icon');
+                icon.setAttribute('icon', 'mdi:check');
+                setTimeout(() => icon.setAttribute('icon', originalIcon), 2000);
+            } catch (e) { console.error(e); }
+        });
+    }
+
+    // Share
+    if (els.btnShare) {
+        els.btnShare.addEventListener('click', openShareModal);
+    }
+    if (els.btnCloseShare) {
+        els.btnCloseShare.addEventListener('click', closeShareModal);
+    }
+    if (els.btnDownloadImage) {
+        els.btnDownloadImage.addEventListener('click', downloadShareImage);
+    }
+
+    // Share Format Switcher
+    els.btnFormats.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const format = btn.dataset.format;
+            setShareFormat(format);
+        });
     });
+
+    // Share Theme Switcher
+    els.btnThemes.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const theme = btn.dataset.theme;
+            setShareTheme(theme);
+        });
+    });
+
+    // Share Modal Backdrop
+    const shareBackdrop = els.shareModal ? els.shareModal.querySelector('.picker-modal-backdrop') : null;
+    if (shareBackdrop) {
+        shareBackdrop.addEventListener('click', closeShareModal);
+    }
 
     // Picker Modal
     if (els.pickerTrigger) {
@@ -1301,3 +1349,249 @@ document.addEventListener('DOMContentLoaded', () => {
     initQuranReader();
     updateFontSize();
 });
+
+function openShareModal() {
+    if (!els.shareModal) return;
+
+    // Reset format and theme
+    setShareFormat('story');
+    setShareTheme('dark');
+    setShareBackground(''); // Clear custom background
+
+    // Populate the card with current state data
+    if (els.cardAyahRef) {
+        els.cardAyahRef.innerText = els.verseRef.innerText;
+    }
+    if (els.cardAyahArabic) {
+        els.cardAyahArabic.innerHTML = els.verseText.innerHTML;
+    }
+    if (els.cardAyahTranslation) {
+        const inner = document.getElementById('translation-inner');
+        els.cardAyahTranslation.innerHTML = inner ? inner.innerHTML : els.translationText.innerHTML;
+    }
+
+    // Populate Category Description
+    if (els.cardCategory && state.currentCategory && state.categories) {
+        const cat = state.categories.find(c => c.id == state.currentCategory);
+        if (cat) {
+            const currentLang = state.currentLanguage || 'ar';
+            const descJson = typeof cat.description === 'string' ? JSON.parse(cat.description) : cat.description;
+            els.cardCategory.innerText = descJson[currentLang] || descJson.ar || cat.description_en || '';
+        }
+    }
+
+    // Populate Surah Title
+    if (els.cardSurahTitle && state.surahData && state.surahData.surah) {
+        const surah = state.surahData.surah;
+        const currentLang = state.currentLanguage || 'ar';
+        const nameJson = typeof surah.name === 'string' ? JSON.parse(surah.name) : surah.name;
+        els.cardSurahTitle.innerText = nameJson[currentLang] || nameJson.ar || surah.name_en;
+    }
+
+    // Load available backgrounds
+    loadShareBackgrounds();
+
+    // Auto-scale text to fit
+    autoScaleVerseText();
+
+    els.shareModal.classList.remove('hidden');
+    void els.shareModal.offsetWidth; // Force reflow
+    els.shareModal.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+}
+
+function setShareTheme(theme) {
+    if (!els.shareCard) return;
+
+    // Update buttons
+    els.btnThemes.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+    });
+
+    // Update card class
+    els.shareCard.classList.remove('theme-dark', 'theme-light');
+    els.shareCard.classList.add(`theme-${theme}`);
+}
+
+async function loadShareBackgrounds() {
+    if (!els.shareBgGallery) return;
+
+    // Reset gallery
+    const noneBtn = els.shareBgGallery.querySelector('.btn-bg-none');
+    if (noneBtn) {
+        noneBtn.onclick = () => setShareBackground('', noneBtn);
+    }
+
+    try {
+        const res = await fetch('api.php?endpoint=backgrounds').then(r => r.json());
+        if (res.status === 'success' && res.data) {
+            // Remove existing background buttons (except "none")
+            const existingBgs = els.shareBgGallery.querySelectorAll('button:not(.btn-bg-none)');
+            existingBgs.forEach(b => b.remove());
+
+            res.data.forEach(bgFile => {
+                const btn = document.createElement('button');
+                btn.style.backgroundImage = `url('assets/backgrounds/${bgFile}')`;
+                btn.dataset.bg = bgFile;
+                btn.onclick = () => setShareBackground(bgFile, btn);
+                els.shareBgGallery.appendChild(btn);
+            });
+        }
+    } catch (e) {
+        console.error('Error loading backgrounds', e);
+    }
+}
+
+function setShareBackground(bgFile, btn) {
+    if (!els.cardCustomBg) return;
+
+    // Update gallery active state
+    els.shareBgGallery.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+
+    if (bgFile) {
+        els.cardCustomBg.style.backgroundImage = `url('assets/backgrounds/${bgFile}')`;
+        els.cardCustomBg.style.opacity = '1';
+    } else {
+        els.cardCustomBg.style.backgroundImage = 'none';
+        els.cardCustomBg.style.opacity = '0';
+    }
+}
+
+function setShareFormat(format) {
+    if (!els.shareCard) return;
+
+    // Update buttons
+    els.btnFormats.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.format === format);
+    });
+
+    // Update card class
+    els.shareCard.classList.remove('format-story', 'format-square');
+    els.shareCard.classList.add(`format-${format}`);
+
+    // Re-scale text because container size changed
+    autoScaleVerseText();
+}
+
+function autoScaleVerseText() {
+    if (!els.shareCard) return;
+
+    const arabic = els.cardAyahArabic;
+    const translation = els.cardAyahTranslation;
+    const content = els.shareCard.querySelector('.card-content');
+    const isSquare = els.shareCard.classList.contains('format-square');
+
+    // Base sizes
+    let arabicSize = 72;
+    let translationSize = 56;
+    let gap = 60;
+
+    // Adjust based on length
+    const arabicLen = arabic.innerText.length;
+    const transLen = translation.innerText.length;
+
+    // Standard scaling
+    if (arabicLen > 200) arabicSize = 48;
+    else if (arabicLen > 100) arabicSize = 60;
+
+    if (transLen > 400) translationSize = 36;
+    else if (transLen > 200) translationSize = 44;
+
+    // Square format needs very aggressive scaling
+    if (isSquare) {
+        gap = 30; // Tighter gap
+
+        // Even smaller base sizes for square
+        arabicSize *= 0.85;
+        translationSize *= 0.85;
+
+        const totalLen = arabicLen + transLen;
+
+        // Extreme cases handling for 1:1 format
+        if (totalLen > 500) {
+            arabicSize = Math.min(arabicSize, 34);
+            translationSize = Math.min(translationSize, 28);
+        } else if (totalLen > 300) {
+            arabicSize = Math.min(arabicSize, 42);
+            translationSize = Math.min(translationSize, 34);
+        }
+    }
+
+    arabic.style.fontSize = `${arabicSize}px`;
+    translation.style.fontSize = `${translationSize}px`;
+    if (content) content.style.gap = `${gap}px`;
+}
+
+function closeShareModal() {
+    if (!els.shareModal) return;
+    els.shareModal.classList.remove('visible');
+    setTimeout(() => {
+        els.shareModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }, 300);
+}
+
+async function downloadShareImage() {
+    if (!els.shareCard) return;
+
+    const btn = els.btnDownloadImage;
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = '<iconify-icon icon="mdi:loading" class="spin"></iconify-icon> Génération...';
+    btn.disabled = true;
+
+    try {
+        // Use html2canvas to render the card
+        const isSquare = els.shareCard.classList.contains('format-square');
+        const width = 1080;
+        const height = isSquare ? 1080 : 1920;
+
+        const canvas = await html2canvas(els.shareCard, {
+            scale: 2, // 2x for high resolution
+            useCORS: true,
+            backgroundColor: null,
+            logging: false,
+            width: width,
+            height: height,
+            scrollX: 0,
+            scrollY: -window.scrollY, // Corrects offset if page is scrolled
+            onclone: (clonedDoc) => {
+                const clonedCard = clonedDoc.getElementById('share-card-story');
+                if (clonedCard) {
+                    clonedCard.style.transform = 'none';
+                    clonedCard.style.position = 'relative';
+                    clonedCard.style.top = '0';
+                    clonedCard.style.left = '0';
+                    clonedCard.style.margin = '0';
+
+                    // Reset container styles in clone to ensure absolute capture
+                    const container = clonedCard.parentElement;
+                    if (container) {
+                        container.style.padding = '0';
+                        container.style.margin = '0';
+                        container.style.transform = 'none';
+                        container.style.display = 'block';
+                    }
+                }
+            }
+        });
+
+        // Convert canvas to image and trigger download
+        const link = document.createElement('a');
+        link.download = `sadaa-${isSquare ? 'post' : 'story'}-${Date.now()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        btn.innerHTML = '<iconify-icon icon="mdi:check"></iconify-icon> Terminé !';
+        setTimeout(() => {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
+        }, 2000);
+
+    } catch (error) {
+        console.error('Erreur lors de la génération de l\'image:', error);
+        alert('Désolé, une erreur est survenue lors de la génération de l\'image.');
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }
+}

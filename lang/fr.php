@@ -45,6 +45,7 @@ return [
         'next' => 'Suivant',
         'previous' => 'Précédent',
         'start' => 'Commencer',
+        'download' => 'Télécharger',
     ],
 
     // Common labels
@@ -214,6 +215,7 @@ return [
         'next_verse' => 'Verset suivant',
         'previous_verse' => 'Verset précédent',
         'share' => 'Partager',
+        'share_verse' => 'Partager le verset',
         'copy' => 'Copier',
         'copied' => 'Copié !',
         'quran' => 'Le Saint Coran',
@@ -244,5 +246,11 @@ return [
         'meccan' => 'Mecquoise',
         'medinan' => 'Médinoise',
         'verses' => 'versets',
+        'share_format' => 'Format',
+        'share_theme' => 'Thème',
+        'theme_dark' => 'Sombre',
+        'theme_light' => 'Clair',
+        'story' => 'Story',
+        'square' => 'Carré',
     ],
 ];

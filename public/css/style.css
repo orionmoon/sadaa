@@ -61,6 +61,20 @@ iconify-icon {
     --border-color: #2D2D2D;
 }
 
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 /* Base Styles */
 body {
     background-color: var(--bg-primary);
@@ -1927,4 +1941,367 @@ footer {
 .reader-surah-name.is-translation {
     font-family: var(--font-display);
     direction: ltr;
+}
+
+/* --- Share Modal & Card Generator --- */
+.share-modal-content {
+    max-width: 500px !important;
+    padding: 2rem !important;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.share-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.share-control-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.share-control-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.share-format-tabs,
+.share-theme-tabs {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+    background: var(--bg-secondary);
+    padding: 0.25rem;
+    border-radius: 12px;
+}
+
+.btn-format,
+.btn-theme {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.6rem;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-format.active,
+.btn-theme.active {
+    background: var(--bg-primary);
+    color: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.share-preview-container {
+    width: 100%;
+    height: 380px;
+    overflow: hidden;
+    border-radius: 1.5rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    background: #111;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Card Template */
+.share-card {
+    position: absolute;
+    width: 1080px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 120px 100px;
+    overflow: hidden;
+    font-family: var(--font-inter);
+    text-align: center;
+    transform-origin: center center;
+    z-index: 10;
+    box-shadow: 0 0 100px rgba(0, 0, 0, 1);
+}
+
+.share-card.format-story {
+    height: 1920px;
+}
+
+.share-card.format-square {
+    height: 1080px;
+    padding: 80px 80px;
+    /* Reduced padding for square format */
+}
+
+/* Themes */
+.share-card.theme-dark {
+    background: #000;
+    color: white;
+}
+
+.share-card.theme-light {
+    background: #ffffff;
+    color: #333;
+}
+
+/* Scaled for preview in modal */
+.share-preview-container .share-card.format-story {
+    transform: scale(0.18);
+}
+
+.share-preview-container .share-card.format-square {
+    transform: scale(0.32);
+}
+
+/* Background Design - Premium Layers */
+.card-bg-pattern {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    opacity: 0.1;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M50 0l50 50-50 50L0 50z' fill='%23C99B35' fill-opacity='0.2'/%3E%3C/svg%3E");
+    z-index: 1;
+}
+
+.card-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+}
+
+.theme-dark .card-gradient {
+    background:
+        radial-gradient(circle at 50% 50%, rgba(201, 155, 53, 0.2) 0%, transparent 70%),
+        linear-gradient(135deg, #1e1e1e 0%, #0a0a0a 50%, #000000 100%);
+}
+
+.theme-light .card-gradient {
+    background:
+        radial-gradient(circle at 50% 50%, rgba(201, 155, 53, 0.1) 0%, transparent 70%),
+        linear-gradient(135deg, #f8f8f8 0%, #ffffff 100%);
+}
+
+.card-custom-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: 3;
+    opacity: 0;
+    /* Visible only when set */
+}
+
+.share-card::after {
+    content: '';
+    position: absolute;
+    top: 60px;
+    left: 60px;
+    right: 60px;
+    bottom: 60px;
+    border: 3px solid rgba(201, 155, 53, 0.15);
+    z-index: 4;
+}
+
+.share-card .card-content {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 60px;
+}
+
+.card-category {
+    font-family: var(--font-display);
+    font-size: 32px;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-weight: 500;
+    margin-bottom: -30px;
+    opacity: 0.8;
+}
+
+.card-surah-title {
+    font-family: var(--font-display);
+    font-size: 56px;
+    color: var(--color-primary);
+    font-weight: 700;
+    margin-bottom: -20px;
+    opacity: 0.95;
+}
+
+.share-card .card-ayah-number {
+    font-family: var(--font-display);
+    font-size: 38px;
+    color: var(--color-primary);
+    opacity: 0.8;
+    letter-spacing: 4px;
+}
+
+.share-card .card-arabic {
+    font-family: var(--font-noto);
+    font-size: 84px;
+    line-height: 1.7;
+    color: var(--color-primary);
+    direction: rtl;
+    padding: 0 40px;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.share-card .card-translation {
+    font-family: var(--font-display);
+    font-size: 64px;
+    line-height: 1.5;
+    font-style: italic;
+    padding: 0 60px;
+}
+
+.theme-dark .card-translation {
+    color: #ffffff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.theme-light .card-translation {
+    color: #333;
+}
+
+/* Ayah Numbers in Card */
+.share-card .ayah-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border: 2px solid var(--color-primary);
+    border-radius: 50%;
+    font-size: 20px;
+    font-family: var(--font-inter);
+    font-style: normal;
+    color: var(--color-primary);
+    margin: 0 15px;
+    vertical-align: middle;
+}
+
+.share-card .ayah-ornament {
+    color: var(--color-primary);
+    font-family: var(--font-amiri);
+    font-size: 1.2em;
+    margin: 0 10px;
+}
+
+
+.share-card .card-footer {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.share-card .card-logo {
+    font-family: var(--font-noto-logo);
+    font-size: 110px;
+    color: var(--color-primary);
+    font-weight: 700;
+}
+
+.share-card .card-url {
+    font-size: 32px;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    font-weight: 300;
+}
+
+.theme-dark .card-url {
+    color: white;
+}
+
+.theme-light .card-url {
+    color: #555;
+}
+
+/* Background Gallery */
+.share-bg-gallery {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    margin-bottom: 0.5rem;
+    scrollbar-width: none;
+}
+
+.share-bg-gallery::-webkit-scrollbar {
+    display: none;
+}
+
+.share-bg-gallery button {
+    flex: 0 0 60px;
+    height: 60px;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.share-bg-gallery button.active {
+    border-color: var(--color-primary);
+    transform: scale(1.05);
+}
+
+.btn-bg-none {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .share-modal-content {
+        padding: 1rem !important;
+        width: 92%;
+    }
+
+    .share-preview-container {
+        height: 280px;
+    }
+
+    .share-preview-container .share-card.format-story {
+        transform: scale(0.14);
+    }
+
+    .share-preview-container .share-card.format-square {
+        transform: scale(0.25);
+    }
 }

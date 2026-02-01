@@ -45,6 +45,7 @@ return [
         'next' => 'التالي',
         'previous' => 'السابق',
         'start' => 'ابدأ',
+        'download' => 'تحميل',
     ],
 
     // Common labels
@@ -214,6 +215,7 @@ return [
         'next_verse' => 'الآية التالية',
         'previous_verse' => 'الآية السابقة',
         'share' => 'مشاركة',
+        'share_verse' => 'مشاركة الآية',
         'copy' => 'نسخ',
         'copied' => 'تم النسخ!',
         'quran' => 'القرآن الكريم',
@@ -244,5 +246,11 @@ return [
         'meccan' => 'مكية',
         'medinan' => 'مدنية',
         'verses' => 'آيات',
+        'share_format' => 'التنسيق',
+        'share_theme' => 'المظهر',
+        'theme_dark' => 'داكن',
+        'theme_light' => 'فاتح',
+        'story' => 'ستوري',
+        'square' => 'مربع',
     ],
 ];

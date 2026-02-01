@@ -45,6 +45,7 @@ return [
         'next' => 'Next',
         'previous' => 'Previous',
         'start' => 'Start',
+        'download' => 'Download',
     ],
 
     // Common labels
@@ -214,6 +215,7 @@ return [
         'next_verse' => 'Next verse',
         'previous_verse' => 'Previous verse',
         'share' => 'Share',
+        'share_verse' => 'Share verse',
         'copy' => 'Copy',
         'copied' => 'Copied!',
         'quran' => 'The Holy Quran',
@@ -244,5 +246,11 @@ return [
         'meccan' => 'Meccan',
         'medinan' => 'Medinan',
         'verses' => 'verses',
+        'share_format' => 'Format',
+        'share_theme' => 'Theme',
+        'theme_dark' => 'Dark',
+        'theme_light' => 'Light',
+        'story' => 'Story',
+        'square' => 'Square',
     ],
 ];

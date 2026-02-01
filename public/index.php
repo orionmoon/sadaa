@@ -39,6 +39,21 @@ $languages = getActiveLanguages();
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Sadaa | Écho Spirituel</title>
 
+    <!-- Social Meta Tags -->
+    <meta name="description"
+        content="Découvrez les trésors du Coran à travers des thématiques inspirantes. Trouvez paix et guidance avec Sadaa.">
+    <meta property="og:title" content="Sadaa | Écho Spirituel">
+    <meta property="og:description"
+        content="Explorez le Coran par thématique. Une expérience immersive et spirituelle.">
+    <meta property="og:url" content="https://sadaa.me">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://sadaa.me/assets/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Sadaa | Écho Spirituel">
+    <meta name="twitter:description"
+        content="Explorez le Coran par thématique. Une expérience immersive et spirituelle.">
+    <meta name="twitter:image" content="https://sadaa.me/assets/og-image.jpg">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -30,7 +30,40 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sada | Écho Spirituel</title>
+
+    <?php
+    $pageTitle = "Sadaa | Écho Spirituel";
+    $pageDesc = "Découvrez les trésors du Coran à travers des thématiques inspirantes.";
+    if (isset($_GET['category'])) {
+        try {
+            $stmt = $pdo->prepare("SELECT name FROM categories WHERE id = ?");
+            $stmt->execute([$_GET['category']]);
+            $catData = $stmt->fetch();
+            if ($catData) {
+                $catName = json_decode($catData['name'], true);
+                $translatedName = $catName[$currentLang] ?? $catName['en'] ?? $catName['fr'] ?? '';
+                if ($translatedName) {
+                    $pageTitle = htmlspecialchars($translatedName) . " - Sadaa";
+                    $pageDesc = "Explorez les versets du Coran sur le thème : " . htmlspecialchars($translatedName);
+                }
+            }
+        } catch (PDOException $e) {
+        }
+    }
+    ?>
+    <title><?= $pageTitle ?></title>
+
+    <!-- Social Meta Tags -->
+    <meta name="description" content="<?= $pageDesc ?>">
+    <meta property="og:title" content="<?= $pageTitle ?>">
+    <meta property="og:description" content="<?= $pageDesc ?>">
+    <meta property="og:url" content="https://sadaa.me/surah.php?<?= http_build_query($_GET) ?>">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://sadaa.me/assets/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= $pageTitle ?>">
+    <meta name="twitter:description" content="<?= $pageDesc ?>">
+    <meta name="twitter:image" content="https://sadaa.me/assets/og-image.jpg">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,6 +74,8 @@ try {
 
     <link rel="stylesheet" href="css/style.css">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <!-- Library for generating images from HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 
 <body dir="<?= isRtl() ? 'rtl' : 'ltr' ?>">
@@ -253,6 +288,9 @@ try {
                 <button class="btn-icon" id="btn-copy" title="<?= __('public.copy') ?>">
                     <iconify-icon icon="mdi:content-copy"></iconify-icon>
                 </button>
+                <button class="btn-icon" id="btn-share" title="Partager">
+                    <iconify-icon icon="mdi:share-variant"></iconify-icon>
+                </button>
                 <button id="btn-read-quran" class="btn-icon" title="<?= __('public.read_quran') ?>">
                     <iconify-icon icon="mdi:book-open-page-variant"></iconify-icon>
                 </button>
@@ -280,6 +318,80 @@ try {
         window.importSource = '<?= $importSource ?>';
     </script>
     <!-- JS -->
+    <!-- Share Modal -->
+    <div id="share-modal" class="picker-modal hidden">
+        <div class="picker-modal-backdrop"></div>
+        <div class="picker-modal-content share-modal-content">
+            <h2 class="modal-title"><?= __('public.share_verse') ?></h2>
+
+            <!-- Format & Theme Switchers -->
+            <div class="share-controls">
+                <div class="share-control-group">
+                    <label><?= __('js.share_format') ?></label>
+                    <div class="share-format-tabs">
+                        <button class="btn-format active" data-format="story">
+                            <iconify-icon icon="mdi:smartphone"></iconify-icon> <?= __('js.story') ?>
+                        </button>
+                        <button class="btn-format" data-format="square">
+                            <iconify-icon icon="mdi:crop-square"></iconify-icon> <?= __('js.square') ?>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="share-control-group">
+                    <label><?= __('js.share_theme') ?></label>
+                    <div class="share-theme-tabs">
+                        <button class="btn-theme active" data-theme="dark">
+                            <iconify-icon icon="mdi:moon-waning-crescent"></iconify-icon> <?= __('js.theme_dark') ?>
+                        </button>
+                        <button class="btn-theme" data-theme="light">
+                            <iconify-icon icon="mdi:white-balance-sunny"></iconify-icon> <?= __('js.theme_light') ?>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="share-preview-container" class="share-preview-container">
+                <!-- Secret area for image generation -->
+                <div id="share-card-story" class="share-card theme-dark format-story">
+                    <div class="card-bg-pattern"></div>
+                    <div class="card-gradient"></div>
+                    <div class="card-custom-bg"></div>
+                    <div class="card-content">
+                        <div class="card-category" id="card-category">La Patience</div>
+                        <div class="card-surah-title" id="card-surah-title">Al-Baqarah</div>
+                        <div class="card-ayah-number" id="card-ayah-ref">2:153</div>
+                        <div class="card-arabic" id="card-ayah-arabic">يَا أَيُّهَا الَّذِينَ آمَنُوا اسْتَعِينُوا
+                            بِالصَّبْرِ وَالصَّلَاةِ</div>
+                        <div class="card-translation" id="card-ayah-translation">O vous qui croyez ! Cherchez secours
+                            dans la patience et la prière.</div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="card-logo">صَــدَى</div>
+                        <div class="card-url">sadaa.me</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Background Gallery (Optional) -->
+            <div class="share-bg-gallery" id="share-bg-gallery">
+                <button class="btn-bg-none active" data-bg="">
+                    <iconify-icon icon="mdi:close"></iconify-icon>
+                </button>
+                <!-- JS will populate these if backgrounds exist -->
+            </div>
+
+            <div class="flex flex-col gap-1 mt-1 w-full">
+                <button id="btn-download-image" class="btn btn-primary w-full">
+                    <iconify-icon icon="mdi:download"></iconify-icon> <?= __('actions.download') ?>
+                </button>
+                <button id="btn-close-share" class="btn btn-secondary w-full">
+                    <?= __('actions.close') ?>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/app.js"></script>
 </body>
 

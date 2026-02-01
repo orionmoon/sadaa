@@ -48,6 +48,20 @@ try {
             $response['data'] = $stmt->fetchAll();
             break;
 
+        case 'backgrounds':
+            $bgDir = __DIR__ . '/assets/backgrounds';
+            $files = [];
+            if (is_dir($bgDir)) {
+                $rawFiles = scandir($bgDir);
+                foreach ($rawFiles as $file) {
+                    if (preg_match('/\.(jpg|jpeg|png|webp)$/i', $file)) {
+                        $files[] = $file;
+                    }
+                }
+            }
+            $response['data'] = $files;
+            break;
+
         case 'surahs':
         case 'get_surahs':
             $bookId = isset($_GET['book_id']) ? (int) $_GET['book_id'] : null;

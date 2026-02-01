@@ -191,6 +191,7 @@ $navItems = [
     ['page' => 'import', 'icon' => 'mdi:cloud-download', 'label' => __('nav.import')],
     ['page' => 'imports', 'icon' => 'mdi:history', 'label' => __('nav.history')],
     ['page' => 'backup', 'icon' => 'mdi:database-sync', 'label' => __('nav.backup')],
+    ['page' => 'backgrounds', 'icon' => 'mdi:image-multiple', 'label' => 'Fonds d\'écran'],
     ['page' => 'settings', 'icon' => 'mdi:cog', 'label' => __('nav.settings')],
 ];
 
