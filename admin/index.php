@@ -24,6 +24,58 @@ try {
     // Tables may not exist yet
 }
 
+// Get distribution by type
+$typeStats = [];
+try {
+    $stmt = $pdo->query("
+        SELECT 
+            t.id,
+            t.name,
+            COUNT(DISTINCT c.id) as category_count,
+            COUNT(DISTINCT ag.id) as group_count,
+            COALESCE(SUM(sub.ayah_count), 0) as ayah_assigned
+        FROM types t
+        LEFT JOIN categories c ON c.type_id = t.id
+        LEFT JOIN assignment_groups ag ON ag.category_id = c.id
+        LEFT JOIN (
+            SELECT ac.category_id, COUNT(*) as ayah_count
+            FROM ayah_categories ac
+            GROUP BY ac.category_id
+        ) sub ON sub.category_id = c.id
+        GROUP BY t.id, t.name
+        ORDER BY t.sort_order ASC
+    ");
+    $typeStats = $stmt->fetchAll();
+} catch (PDOException $e) {
+}
+
+// Get distribution by category
+$categoryStats = [];
+try {
+    $stmt = $pdo->query("
+        SELECT 
+            c.id,
+            c.name,
+            t.name as type_name,
+            COALESCE(SUB.ayah_count, 0) as ayah_assigned,
+            COALESCE(SUB.surah_count, 0) as surah_count
+        FROM categories c
+        LEFT JOIN types t ON c.type_id = t.id
+        LEFT JOIN (
+            SELECT 
+                ac.category_id,
+                COUNT(DISTINCT ac.ayah_id) as ayah_count,
+                COUNT(DISTINCT ag.surah_id) as surah_count
+            FROM ayah_categories ac
+            LEFT JOIN assignment_groups ag ON ag.id = ac.assignment_group_id
+            GROUP BY ac.category_id
+        ) SUB ON SUB.category_id = c.id
+        ORDER BY t.sort_order ASC, c.sort_order ASC
+    ");
+    $categoryStats = $stmt->fetchAll();
+} catch (PDOException $e) {
+}
+
 // Get recent imports
 $recentImports = [];
 try {
@@ -127,6 +179,98 @@ adminHeader('Tableau de bord');
         </a>
     </div>
 </div>
+
+<!-- Distribution by Type -->
+<?php if (count($typeStats) > 0): ?>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <iconify-icon icon="mdi:chart-pie"></iconify-icon>
+                Distribution par Type
+            </h2>
+        </div>
+        <div class="grid grid-3">
+            <?php foreach ($typeStats as $type):
+                $typeName = json_decode($type['name'], true);
+                $frName = $typeName['fr'] ?? $typeName['en'] ?? 'Type';
+                $assigned = (int) $type['ayah_assigned'];
+                $totalAyahs = $stats['ayahs'] > 0 ? $stats['ayahs'] : 1;
+                $percent = round(($assigned / $totalAyahs) * 100, 1);
+                ?>
+                <div style="background: var(--bg-dark); border-radius: 0.5rem; padding: 1rem;">
+                    <div class="flex justify-between items-center mb-1">
+                        <span style="font-weight: 600;"><?= htmlspecialchars($frName) ?></span>
+                        <span class="badge badge-primary"><?= $type['category_count'] ?> cat.</span>
+                    </div>
+                    <div class="flex justify-between text-muted" style="font-size: 0.8rem; margin-bottom: 0.5rem;">
+                        <span><?= number_format($assigned) ?> versets</span>
+                        <span><?= $percent ?>%</span>
+                    </div>
+                    <div style="background: var(--bg-card); border-radius: 999px; height: 8px; overflow: hidden;">
+                        <div style="background: var(--color-primary); height: 100%; width: <?= $percent ?>%;"></div>
+                    </div>
+                    <div class="flex justify-between mt-1" style="font-size: 0.75rem; color: var(--text-secondary);">
+                        <span><?= $type['group_count'] ?> groupes</span>
+                        <span><?= $type['category_count'] ?> catégories</span>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+<?php endif; ?>
+
+<!-- Distribution by Category -->
+<?php if (count($categoryStats) > 0): ?>
+    <div class="card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <iconify-icon icon="mdi:chart-bar"></iconify-icon>
+                Distribution par Catégorie
+            </h2>
+        </div>
+        <div style="max-height: 400px; overflow-y: auto;">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Catégorie</th>
+                        <th>Type</th>
+                        <th>Versets assignés</th>
+                        <th>Sourates</th>
+                        <th>Progression</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($categoryStats as $cat):
+                        $catName = json_decode($cat['name'], true);
+                        $frName = $catName['fr'] ?? $catName['en'] ?? 'Catégorie';
+                        $typeName = json_decode($cat['type_name'], true);
+                        $typeFr = $typeName['fr'] ?? $typeName['en'] ?? 'Type';
+                        $assigned = (int) $cat['ayah_assigned'];
+                        $surahs = (int) $cat['surah_count'];
+                        $totalAyahs = $stats['ayahs'] > 0 ? $stats['ayahs'] : 1;
+                        $percent = round(($assigned / $totalAyahs) * 100, 1);
+                        $progressColor = $percent < 10 ? '#ff6b6b' : ($percent < 50 ? '#ff9800' : '#4caf50');
+                        ?>
+                        <tr>
+                            <td style="font-weight: 500;"><?= htmlspecialchars($frName) ?></td>
+                            <td><span class="badge" style="background: var(--bg-dark);"><?= htmlspecialchars($typeFr) ?></span></td>
+                            <td><?= number_format($assigned) ?></td>
+                            <td><?= $surahs ?></td>
+                            <td style="width: 200px;">
+                                <div class="flex items-center gap-1">
+                                    <div style="flex: 1; background: var(--bg-dark); border-radius: 999px; height: 6px; overflow: hidden;">
+                                        <div style="background: <?= $progressColor ?>; height: 100%; width: <?= $percent ?>%;"></div>
+                                    </div>
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary); min-width: 35px;"><?= $percent ?>%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+<?php endif; ?>
 
 <?php if ($stats['surahs'] === 0): ?>
     <!-- Getting Started -->
