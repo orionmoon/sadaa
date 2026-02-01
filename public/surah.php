@@ -57,7 +57,8 @@ try {
     <meta name="description" content="<?= $pageDesc ?>">
     <meta property="og:title" content="<?= $pageTitle ?>">
     <meta property="og:description" content="<?= $pageDesc ?>">
-    <meta property="og:url" content="https://sadaa.me/surah.php?<?= http_build_query($_GET) ?>">
+    <?php $catId = $_GET['category'] ?? 0; ?>
+    <meta property="og:url" content="https://sadaa.me/category/<?= $catId ?>">
     <meta property="og:type" content="article">
     <meta property="og:image" content="https://sadaa.me/assets/og-image.jpg">
     <meta name="twitter:card" content="summary_large_image">

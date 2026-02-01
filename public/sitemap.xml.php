@@ -31,19 +31,13 @@ echo "  </url>\n";
 
 foreach ($categories as $catId) {
     echo "  <url>\n";
-    echo "    <loc>https://sadaa.me/surah.php?category=" . $catId . "</loc>\n";
+    echo "    <loc>https://sadaa.me/category/" . $catId . "</loc>\n";
     echo "    <changefreq>weekly</changefreq>\n";
     echo "    <priority>0.8</priority>\n";
     foreach ($languages as $lang) {
-        echo '    <xhtml:link rel="alternate" hreflang="' . $lang['code'] . '" href="https://sadaa.me/surah.php?category=' . $catId . '&amp;lang=' . $lang['code'] . '" />' . "\n";
+        echo '    <xhtml:link rel="alternate" hreflang="' . $lang['code'] . '" href="https://sadaa.me/category/' . $catId . '?lang=' . $lang['code'] . '" />' . "\n";
     }
     echo "  </url>\n";
 }
-
-echo "  <url>\n";
-echo "    <loc>https://sadaa.me/admin/</loc>\n";
-echo "    <changefreq>monthly</changefreq>\n";
-echo "    <priority>0.3</priority>\n";
-echo "  </url>\n";
 
 echo '</urlset>';

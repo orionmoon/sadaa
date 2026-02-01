@@ -333,7 +333,7 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
         // Start
         document.getElementById('btn-start').addEventListener('click', () => {
             if (currentCategories[currentIndex]) {
-                window.location.href = `surah.php?category=${currentCategories[currentIndex].id}`;
+                window.location.href = `category/${currentCategories[currentIndex].id}`;
             }
         });
 
@@ -362,7 +362,7 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 case 'Enter':
                     // Start
                     if (currentCategories[currentIndex]) {
-                        window.location.href = `surah.php?category=${currentCategories[currentIndex].id}`;
+                        window.location.href = `category/${currentCategories[currentIndex].id}`;
                     }
                     break;
             }

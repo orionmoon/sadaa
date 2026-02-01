@@ -4,6 +4,9 @@ RewriteEngine On
 # RewriteCond %{HTTPS} off
 # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
+# Pretty URLs for categories: /category/{id}
+RewriteRule ^category/(\d+)$ surah.php?category=$1 [L,QSA]
+
 # Serve sitemap.xml from sitemap.xml.php
 RewriteRule ^sitemap\.xml$ sitemap.xml.php [L]
 
