@@ -636,10 +636,13 @@ function setupEventListeners() {
     let touchStartY = 0;
     let touchEndX = 0;
     let touchEndY = 0;
+    let currentTouchTarget = null;
 
+    // Touch events for translation wrapper
     els.translationWrapper.addEventListener('touchstart', (e) => {
         touchStartX = e.changedTouches[0].screenX;
         touchStartY = e.changedTouches[0].screenY;
+        currentTouchTarget = 'translation';
     }, { passive: true });
 
     els.translationWrapper.addEventListener('touchend', (e) => {
@@ -647,6 +650,21 @@ function setupEventListeners() {
         touchEndY = e.changedTouches[0].screenY;
         handleSwipe();
     }, { passive: true });
+
+    // Touch events for arabic wrapper
+    if (els.arabicWrapper) {
+        els.arabicWrapper.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+            currentTouchTarget = 'arabic';
+        }, { passive: true });
+
+        els.arabicWrapper.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }, { passive: true });
+    }
 
     function handleSwipe() {
         const swipeThreshold = 50;
@@ -664,15 +682,17 @@ function setupEventListeners() {
                 }
             }
         } else {
-            // Vertical swipe - text scrolling
+            // Vertical swipe - text scrolling based on target
             if (Math.abs(diffY) > swipeThreshold) {
-                if (diffY > 0) {
-                    scrollTextContent('down');
+                const direction = diffY > 0 ? 'down' : 'up';
+                if (currentTouchTarget === 'arabic') {
+                    scrollArabicContent(direction);
                 } else {
-                    scrollTextContent('up');
+                    scrollTextContent(direction);
                 }
             }
         }
+        currentTouchTarget = null;
     }
 
     // Picker Arrows
