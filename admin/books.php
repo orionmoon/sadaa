@@ -12,12 +12,13 @@ try {
     $languages = $stmt->fetchAll();
 } catch (PDOException $e) {
     // Fallback to default languages if table doesn't exist
+    // Using JSON format to match database structure
     $languages = [
-        ['code' => 'ar', 'name' => 'Arabe'],
-        ['code' => 'fr', 'name' => 'Français'],
-        ['code' => 'en', 'name' => 'Anglais'],
-        ['code' => 'es', 'name' => 'Espagnol'],
-        ['code' => 'de', 'name' => 'Allemand'],
+        ['code' => 'ar', 'name' => json_encode(['fr' => 'Arabe', 'en' => 'Arabic', 'ar' => 'العربية', 'es' => 'Árabe', 'de' => 'Arabisch'])],
+        ['code' => 'fr', 'name' => json_encode(['fr' => 'Français', 'en' => 'French', 'ar' => 'الفرنسية', 'es' => 'Francés', 'de' => 'Französisch'])],
+        ['code' => 'en', 'name' => json_encode(['fr' => 'Anglais', 'en' => 'English', 'ar' => 'الإنجليزية', 'es' => 'Inglés', 'de' => 'Englisch'])],
+        ['code' => 'es', 'name' => json_encode(['fr' => 'Espagnol', 'en' => 'Spanish', 'ar' => 'الإسبانية', 'es' => 'Español', 'de' => 'Spanisch'])],
+        ['code' => 'de', 'name' => json_encode(['fr' => 'Allemand', 'en' => 'German', 'ar' => 'الألمانية', 'es' => 'Alemán', 'de' => 'Deutsch'])],
     ];
 }
 
@@ -160,9 +161,11 @@ adminHeader('Gestion des Livres');
                 $code = $lang['code'];
                 $isArabic = $code === 'ar';
                 $required = $code === 'fr' ? 'required' : '';
+                $langName = json_decode($lang['name'], true);
+                $displayName = $langName['fr'] ?? $langName['en'] ?? $code;
             ?>
             <div class="form-group">
-                <label class="form-label">Titre (<?= htmlspecialchars($lang['name']) ?>)<?= $required ? ' *' : '' ?></label>
+                <label class="form-label">Titre (<?= htmlspecialchars($displayName) ?>)<?= $required ? ' *' : '' ?></label>
                 <input type="text" name="title_<?= $code ?>" class="form-input<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?> <?= $required ?>>
             </div>
             <?php endforeach; ?>
@@ -177,9 +180,11 @@ adminHeader('Gestion des Livres');
             <?php foreach ($languages as $lang):
                 $code = $lang['code'];
                 $isArabic = $code === 'ar';
+                $langName = json_decode($lang['name'], true);
+                $displayName = $langName['fr'] ?? $langName['en'] ?? $code;
             ?>
             <div class="form-group">
-                <label class="form-label">Description (<?= htmlspecialchars($lang['name']) ?>)</label>
+                <label class="form-label">Description (<?= htmlspecialchars($displayName) ?>)</label>
                 <textarea name="desc_<?= $code ?>" class="form-textarea<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?>></textarea>
             </div>
             <?php endforeach; ?>
@@ -209,9 +214,11 @@ adminHeader('Gestion des Livres');
                 $code = $lang['code'];
                 $isArabic = $code === 'ar';
                 $required = $code === 'fr' ? 'required' : '';
+                $langName = json_decode($lang['name'], true);
+                $displayName = $langName['fr'] ?? $langName['en'] ?? $code;
             ?>
             <div class="form-group">
-                <label class="form-label">Titre (<?= htmlspecialchars($lang['name']) ?>)<?= $required ? ' *' : '' ?></label>
+                <label class="form-label">Titre (<?= htmlspecialchars($displayName) ?>)<?= $required ? ' *' : '' ?></label>
                 <input type="text" name="title_<?= $code ?>" id="edit-title-<?= $code ?>" class="form-input<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?> <?= $required ?>>
             </div>
             <?php endforeach; ?>
@@ -226,9 +233,11 @@ adminHeader('Gestion des Livres');
             <?php foreach ($languages as $lang):
                 $code = $lang['code'];
                 $isArabic = $code === 'ar';
+                $langName = json_decode($lang['name'], true);
+                $displayName = $langName['fr'] ?? $langName['en'] ?? $code;
             ?>
             <div class="form-group">
-                <label class="form-label">Description (<?= htmlspecialchars($lang['name']) ?>)</label>
+                <label class="form-label">Description (<?= htmlspecialchars($displayName) ?>)</label>
                 <textarea name="desc_<?= $code ?>" id="edit-desc-<?= $code ?>" class="form-textarea<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?>></textarea>
             </div>
             <?php endforeach; ?>
