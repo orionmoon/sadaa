@@ -269,13 +269,11 @@ adminHeader('Gestion des Livres');
                                 <?= number_format($book['ayah_count']) ?>
                             </span></td>
                         <td>
-                            <button type="button" class="btn btn-sm btn-secondary"
-                                onclick='editBook(<?= json_encode([
-                                    "id" => $book["id"],
-                                    "title" => json_decode($book["title"], true),
-                                    "slug" => $book["slug"],
-                                    "description" => json_decode($book["description"], true)
-                                ]) ?>)'>
+                            <button type="button" class="btn btn-sm btn-secondary edit-book-btn"
+                                data-book-id="<?= $book['id'] ?>"
+                                data-book-slug="<?= htmlspecialchars($book['slug']) ?>"
+                                data-book-title="<?= htmlspecialchars($book['title']) ?>"
+                                data-book-description="<?= htmlspecialchars($book['description'] ?? '{}') ?>">
                                 <iconify-icon icon="mdi:pencil"></iconify-icon>
                             </button>
                             <?php if ($book['slug'] !== 'quran'): ?>
@@ -300,6 +298,19 @@ adminHeader('Gestion des Livres');
 </div>
 
 <script>
+// Add click handlers to all edit buttons
+document.querySelectorAll('.edit-book-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const bookData = {
+            id: this.dataset.bookId,
+            slug: this.dataset.bookSlug,
+            title: JSON.parse(this.dataset.bookTitle || '{}'),
+            description: JSON.parse(this.dataset.bookDescription || '{}')
+        };
+        editBook(bookData);
+    });
+});
+
 function editBook(book) {
     // Show edit form
     document.getElementById('edit-book-form').style.display = 'block';
