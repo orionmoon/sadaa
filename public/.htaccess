@@ -27,5 +27,10 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^(.*)$ $1.php [L]
 
-# Default fallback
-ErrorDocument 404 /404.html
+# Handle 404 errors - redirect to 404.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ /404.php [L]
+
+# Default fallback (Apache native 404 handler)
+ErrorDocument 404 /404.php

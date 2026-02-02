@@ -46,6 +46,7 @@ return [
         'previous' => 'Anterior',
         'start' => 'Iniciar',
         'download' => 'Descargar',
+        'back_home' => 'Volver al inicio',
     ],
 
     // Etiquetas comunes

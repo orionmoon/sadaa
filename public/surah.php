@@ -148,7 +148,7 @@ try {
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-    <link rel="manifest" href="/assets/site.webmanifest">
+    <link rel="manifest" href="/assets/manifest.php">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -213,11 +213,14 @@ try {
         <div class="picker-modal-content">
             <!-- Type Tabs -->
             <div class="type-tabs">
-                <?php foreach ($types as $index => $type):
+                <?php 
+                $totalTypes = count($types);
+                foreach ($types as $index => $type):
                     $typeName = getLocalizedValue($type['name'], $currentLang);
                     $active = $index === 0 ? 'active' : '';
+                    $position = $index === 0 ? 'first' : ($index === $totalTypes - 1 ? 'last' : 'middle');
                     ?>
-                    <button class="tab <?= $active ?>" data-type="<?= htmlspecialchars($type['slug']) ?>">
+                    <button class="tab <?= $active ?> <?= $position ?>" data-type="<?= htmlspecialchars($type['slug']) ?>">
                         <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
                         <span><?= htmlspecialchars($typeName) ?></span>
                     </button>
@@ -387,7 +390,7 @@ try {
     </main>
 
     <footer>
-        <a href="/" class="footer-signature fade-in" title="Retour à l'accueil">
+        <a href="/" class="footer-signature fade-in" title="<?= __('actions.back_home') ?>">
             <span class="logo-arabic">صَــدَى</span>
         </a>
     </footer>

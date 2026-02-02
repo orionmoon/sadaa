@@ -56,11 +56,8 @@ if ($uri === '/' || $uri === '/index') {
     exit;
 }
 
-// 404 - File not found
+// If we reach here, it's a 404 - page doesn't exist
+// This handles /hghg and any other non-existent URLs
 http_response_code(404);
-if (file_exists(__DIR__ . '/404.html')) {
-    require __DIR__ . '/404.html';
-} else {
-    echo "404 - Page not found";
-}
+require __DIR__ . '/404.php';
 exit;

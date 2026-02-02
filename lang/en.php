@@ -46,6 +46,7 @@ return [
         'previous' => 'Previous',
         'start' => 'Start',
         'download' => 'Download',
+        'back_home' => 'Back to home',
     ],
 
     // Common labels

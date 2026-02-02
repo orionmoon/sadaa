@@ -90,21 +90,72 @@ body {
     overflow: hidden;
 }
 
-/* Welcome Container */
-.welcome-container {
+/* Welcome Page Layout - Single Screen (No Scroll) */
+.welcome-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 1rem 0.5rem;
+    text-align: center;
+}
+
+.welcome-header-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.welcome-main {
     flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 2rem 2rem 1rem;
+    padding: 0.5rem 1rem;
     max-width: 650px;
     margin: 0 auto;
     width: 100%;
-    gap: 2rem;
+    min-height: 0;
+}
+
+.welcome-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
 }
 
 /* Logo Section */
+.logo-section {
+    text-align: center;
+}
+
+.welcome-header .logo-arabic {
+    font-family: var(--font-noto-logo);
+    font-size: 7rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+    line-height: 1.2;
+    letter-spacing: 2px;
+}
+
+.welcome-header .tagline {
+    font-family: var(--font-inter);
+    font-size: 0.85rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    margin: 0;
+    letter-spacing: 0.5px;
+    max-width: 300px;
+    line-height: 1.4;
+}
+
+/* Logo Section (legacy for other pages) */
 .logo-section {
     text-align: center;
 }
@@ -148,7 +199,7 @@ body {
     padding: 0.75rem 1.5rem;
     border: none;
     background: transparent;
-    border-radius: 9999px;
+    border-radius: 0;
     font-family: var(--font-inter);
     font-weight: 400;
     font-size: 0.9rem;
@@ -157,6 +208,29 @@ body {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 120px;
     position: relative;
+}
+
+/* Tab positioning for rounded corners - LTR (default) */
+.tab.first {
+    border-radius: 9999px 0 0 9999px;
+}
+
+.tab.last {
+    border-radius: 0 9999px 9999px 0;
+}
+
+/* Single tab case */
+.tab.first.last {
+    border-radius: 9999px;
+}
+
+/* RTL specific - reverse the corners for Arabic */
+[dir="rtl"] .tab.first {
+    border-radius: 0 9999px 9999px 0;
+}
+
+[dir="rtl"] .tab.last {
+    border-radius: 9999px 0 0 9999px;
 }
 
 .tab iconify-icon {
@@ -177,7 +251,39 @@ body {
     box-shadow: 0 2px 8px rgba(201, 155, 53, 0.3);
 }
 
+/* Maintain rounded corners for active tabs - LTR */
+.tab.active.first {
+    border-radius: 9999px 0 0 9999px;
+}
+
+.tab.active.last {
+    border-radius: 0 9999px 9999px 0;
+}
+
+.tab.active.first.last {
+    border-radius: 9999px;
+}
+
+/* RTL specific for active tabs */
+[dir="rtl"] .tab.active.first {
+    border-radius: 0 9999px 9999px 0;
+}
+
+[dir="rtl"] .tab.active.last {
+    border-radius: 9999px 0 0 9999px;
+}
+
 /* Picker Section (Carousel style) */
+.welcome-content-wrapper .picker-section {
+    width: 100%;
+    position: relative;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Legacy Picker Section */
 .picker-section {
     width: 100%;
     position: relative;
@@ -186,6 +292,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Welcome page picker viewport */
+.welcome-content-wrapper .picker-viewport {
+    height: 140px;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    /* Mask effect for top/bottom fading */
+    mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
 }
 
 .picker-wrapper {
@@ -229,6 +346,8 @@ body {
     width: 100%;
     font-weight: 500;
     transform: scale(0.85);
+    text-align: center;
+    padding: 0 1rem;
 }
 
 .picker-item.active {
@@ -275,7 +394,17 @@ body {
     cursor: default;
 }
 
-/* Description */
+/* Description - Welcome Page Compact */
+.welcome-content-wrapper .description-section {
+    text-align: center;
+    min-height: 2.5rem;
+    max-height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Legacy Description */
 .description-section {
     text-align: center;
     min-height: 3rem;
@@ -291,7 +420,23 @@ body {
     font-weight: 300;
 }
 
-/* CTA Button */
+/* CTA Button - Welcome Page Compact */
+.welcome-content-wrapper .cta-button {
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 2.5rem;
+    border-radius: 9999px;
+    font-family: var(--font-inter);
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: 0 4px 16px rgba(201, 155, 53, 0.35);
+    min-width: 160px;
+}
+
+/* Legacy CTA Button */
 .cta-button {
     background: var(--color-primary);
     color: white;
@@ -318,14 +463,15 @@ body {
     box-shadow: 0 2px 8px rgba(201, 155, 53, 0.3);
 }
 
-/* Footer */
+/* Footer - Welcome Page */
 .welcome-footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 1.5rem 2rem 2.5rem;
-    gap: 1.5rem;
+    padding: 0.75rem 1rem 1rem;
+    gap: 1rem;
     flex-shrink: 0;
+    background: var(--bg-primary);
 }
 
 .theme-toggle {
@@ -409,28 +555,98 @@ select:hover {
     }
 
     .type-tabs {
-        width: calc(100% - 2rem);
-        margin: 0 auto;
-        display: flex;
+        display: inline-flex;
         justify-content: center;
     }
 
     .tab {
-        padding: 0.6rem 0.25rem;
+        padding: 0.6rem 0.75rem;
         font-size: 0.8rem;
-        flex: 1;
+        flex: 0 0 auto;
         justify-content: center;
-        min-width: 0;
-        max-width: 25%;
+        min-width: auto;
     }
 
     .tab span {
         display: none;
     }
 
+    .active-type-label {
+        display: block;
+        text-align: center;
+        font-size: 0.95rem;
+        color: var(--color-primary);
+        margin: 0.25rem auto 0;
+        padding: 0.25rem 0.5rem;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+
     .welcome-container {
         gap: 1.5rem;
         padding: 1rem 1.5rem;
+    }
+
+    /* Welcome Page Responsive - Small screens */
+    .welcome-header {
+        padding: 1rem 0.75rem 0.25rem;
+    }
+
+    .welcome-header .logo-arabic {
+        font-size: 4.5rem;
+        line-height: 1.1;
+    }
+
+    .welcome-header .tagline {
+        font-size: 0.75rem;
+        max-width: 250px;
+    }
+
+    .welcome-main {
+        padding: 0.25rem 0.75rem;
+    }
+
+    .welcome-content-wrapper {
+        gap: 0.75rem;
+    }
+
+    .welcome-content-wrapper .picker-section {
+        height: 130px;
+    }
+
+    .welcome-content-wrapper .picker-viewport {
+        height: 110px;
+    }
+
+    .welcome-content-wrapper .picker-item {
+        height: 30px;
+        font-size: 0.85rem;
+    }
+
+    .welcome-content-wrapper .picker-item.active {
+        font-size: 1.1rem;
+        height: 45px;
+    }
+
+    .welcome-content-wrapper .description-section {
+        min-height: 2rem;
+        max-height: 2.5rem;
+    }
+
+    .welcome-content-wrapper .profile-description {
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .welcome-content-wrapper .cta-button {
+        padding: 0.6rem 2rem;
+        font-size: 0.85rem;
+        min-width: 140px;
+    }
+
+    .welcome-footer {
+        padding: 0.5rem 0.75rem 0.75rem;
+        gap: 0.75rem;
     }
 
     /* Hide text on very small screens if needed, or keep */
@@ -439,6 +655,10 @@ select:hover {
 @media (min-width: 641px) {
     .tab span {
         display: inline;
+    }
+
+    .active-type-label {
+        display: none;
     }
 }
 
@@ -1258,6 +1478,7 @@ header {
 
 footer {
     flex-shrink: 0;
+    text-align: center;
 }
 
 .footer-signature {
@@ -1267,11 +1488,13 @@ footer {
     color: var(--color-primary);
     opacity: 0.85;
     text-decoration: none;
-    margin: 0;
-    padding: 0.5rem 0;
-    display: block;
+    margin: 0 auto;
+    padding: 0.5rem 1rem;
+    display: inline-block;
     text-align: center;
     transition: var(--transition);
+    cursor: pointer;
+    position: relative;
 }
 
 .footer-signature:hover {
@@ -1281,6 +1504,8 @@ footer {
 
 .footer-signature .logo-arabic {
     font-size: 1.5rem;
+    pointer-events: none;
+    display: inline-block;
 }
 
 /* Animations */
@@ -2071,6 +2296,9 @@ footer {
     display: flex;
     justify-content: center;
     margin-bottom: 0.5rem;
+    width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
 }
 
 .toggle-label {

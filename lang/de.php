@@ -46,6 +46,7 @@ return [
         'previous' => 'Zurück',
         'start' => 'Start',
         'download' => 'Herunterladen',
+        'back_home' => 'Zurück zur Startseite',
     ],
 
     // Common labels

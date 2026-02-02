@@ -1,7 +1,7 @@
 <?php
 /**
  * Sadaa (صدى) - Home Page
- * Main landing page with correct design implementation
+ * Main landing page with header/content/footer layout
  */
 
 require_once __DIR__ . '/../config/db.php';
@@ -106,7 +106,7 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
     <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
-    <link rel="manifest" href="/assets/site.webmanifest">
+    <link rel="manifest" href="/assets/manifest.php">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,71 +120,82 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="<?= $currentTheme ?>" style="overflow: hidden;">
+<body class="<?= $currentTheme ?>">
 
-    <main class="welcome-container">
-
-        <!-- Logo Section -->
-        <header class="logo-section">
+    <!-- Header -->
+    <header class="welcome-header">
+        <div class="welcome-header-content">
             <h1 class="logo-arabic">صَــدَى</h1>
             <p class="tagline"><?= htmlspecialchars($dynamicTagline ?: __('public.tagline')) ?></p>
-        </header>
+        </div>
+    </header>
 
-        <!-- Type Tabs -->
-        <section class="type-tabs">
-            <?php foreach ($types as $index => $type):
-                $active = $index === 0 ? 'active' : '';
-                $name = getLocalizedValue($type['name'], $currentLang);
-                ?>
-                <button class="tab <?= $active ?>" data-type-id="<?= $type['id'] ?>">
-                    <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
-                    <span><?= htmlspecialchars($name) ?></span>
-                </button>
-            <?php endforeach; ?>
-        </section>
+    <!-- Main Content -->
+    <main class="welcome-main">
+        <div class="welcome-content-wrapper">
+            <!-- Type Tabs -->
+            <section class="type-tabs">
+                <?php 
+                $totalTypes = count($types);
+                foreach ($types as $index => $type):
+                    $active = $index === 0 ? 'active' : '';
+                    $position = $index === 0 ? 'first' : ($index === $totalTypes - 1 ? 'last' : 'middle');
+                    $name = getLocalizedValue($type['name'], $currentLang);
+                    ?>
+                    <button class="tab <?= $active ?> <?= $position ?>" data-type-id="<?= $type['id'] ?>">
+                        <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
+                        <span><?= htmlspecialchars($name) ?></span>
+                    </button>
+                <?php endforeach; ?>
+            </section>
 
-        <!-- Picker Section -->
-        <section class="picker-section">
-            <div class="picker-wrapper">
-                <button class="picker-arrow up" id="arrow-up" aria-label="Précédent" disabled>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 15l-6-6-6 6"></path>
-                    </svg>
-                </button>
-
-                <div class="picker-viewport">
-                    <div class="picker-track" id="picker-track">
-                        <!-- Items injected by JS -->
-                    </div>
-                </div>
-
-                <button class="picker-arrow down" id="arrow-down" aria-label="Suivant">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M6 9l6 6 6-6"></path>
-                    </svg>
-                </button>
+            <!-- Active Type Label (Mobile) -->
+            <div class="active-type-label" id="active-type-label">
+                <?= htmlspecialchars(getLocalizedValue($types[0]['name'], $currentLang)) ?>
             </div>
-        </section>
 
-        <!-- Description Section -->
-        <section class="description-section">
-            <p class="profile-description" id="profile-description">
-                <?= __('public.select_intention') ?>
-            </p>
-        </section>
+            <!-- Picker Section -->
+            <section class="picker-section">
+                <div class="picker-wrapper">
+                    <button class="picker-arrow up" id="arrow-up" aria-label="Précédent" disabled>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 15l-6-6-6 6"></path>
+                        </svg>
+                    </button>
 
-        <!-- CTA Button -->
-        <section class="cta-section">
-            <button class="cta-button" id="btn-start">
-                <?= __('actions.start') ?>
-            </button>
-        </section>
+                    <div class="picker-viewport">
+                        <div class="picker-track" id="picker-track">
+                            <!-- Items injected by JS -->
+                        </div>
+                    </div>
 
+                    <button class="picker-arrow down" id="arrow-down" aria-label="Suivant">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M6 9l6 6 6-6"></path>
+                        </svg>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Description Section -->
+            <section class="description-section">
+                <p class="profile-description" id="profile-description">
+                    <?= __('public.select_intention') ?>
+                </p>
+            </section>
+
+            <!-- CTA Button -->
+            <section class="cta-section">
+                <button class="cta-button" id="btn-start">
+                    <?= __('actions.start') ?>
+                </button>
+            </section>
+        </div>
     </main>
 
     <!-- Footer -->
     <footer class="welcome-footer">
-        <button id="theme-toggle" class="theme-toggle" aria-label="Changer thème">
+        <button id="theme-toggle" class="theme-toggle" aria-label="<?= __('actions.toggle_theme') ?>">
             <svg class="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                 stroke-width="2">
                 <circle cx="12" cy="12" r="5"></circle>
@@ -280,32 +291,31 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 item.classList.toggle('active', i === currentIndex);
             });
 
-            // 2. Scroll track
-            // Height of item is 40px, active is 60px. Base is centered.
-            // Simplified logic: translate so active item is centered in 120px viewport
-            // Ideally: center of active item should be at 60px
-            // Let's assume standard item height 40px + gap. 
-            // Better: use relative index shift. 
-            // Center is 60px.
-            // If index 0 is active: translateY(0) -> assuming first item starts centered? 
-            // Let's use simple logic: shift up by currentIndex * 50px roughly. 
-            // We need to calculate exact height.
-            // Let's rely on fixed heights defined in CSS.
-            // Active item: 60px, others 40px. 
-            // We want active item centered. Viewport is 120px. Center is 60px.
-            // Active item center is at (previous items height) + 30px.
-            // We need translateY = 60 - (previous items height + 30).
-
-            let offset = 0;
-            // Simply shift by index * 50px (approx) for now to simulate. 
-            // Or better: (120/2) - (current item center position)
-            // But item positions are dynamic because of scaling. 
-            // Let's use a simpler fixed step for now: -50px per item.
-            // Correct approach: 
-            // center line - (index * 50px) - 30px (half active height) 
-            // Actually, let's keep it simple: 
-            // Translate = - (currentIndex * 50) + 35 (adjustment)
-            const translateY = -(currentIndex * 50) + 30;
+            // 2. Scroll track - Fixed positioning based on index
+            // Force browser to recalculate layout after class changes
+            void track.offsetHeight;
+            
+            // Get actual heights from computed styles to support responsive design
+            const tempItem = items[0] || track.firstElementChild;
+            const tempActive = items[currentIndex] || tempItem;
+            
+            // Force layout recalculation to ensure we get updated styles
+            track.getBoundingClientRect();
+            tempActive.getBoundingClientRect();
+            
+            // Get computed styles
+            const itemStyles = window.getComputedStyle(tempItem);
+            const activeStyles = window.getComputedStyle(tempActive);
+            
+            const ITEM_HEIGHT = parseFloat(itemStyles.height) || 40;
+            const ACTIVE_HEIGHT = parseFloat(activeStyles.height) || 60;
+            const VIEWPORT_HEIGHT = parseFloat(window.getComputedStyle(track.parentElement).height) || 120;
+            const VIEWPORT_CENTER = VIEWPORT_HEIGHT / 2;
+            
+            // Calculate position: sum of normal items + half of active item height
+            const position = (currentIndex * ITEM_HEIGHT) + (ACTIVE_HEIGHT / 2);
+            const translateY = VIEWPORT_CENTER - position;
+            
             track.style.transform = `translateY(${translateY}px)`;
 
             // 3. Update description
@@ -326,6 +336,13 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 initType(tab.dataset.typeId);
+                
+                // Update active type label for mobile
+                const typeLabel = document.getElementById('active-type-label');
+                const tabText = tab.querySelector('span');
+                if (typeLabel && tabText) {
+                    typeLabel.textContent = tabText.textContent;
+                }
             });
         });
 
@@ -366,7 +383,16 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
 
         // Initialize
         const activeTab = document.querySelector('.tab.active');
-        if (activeTab) initType(activeTab.dataset.typeId);
+        if (activeTab) {
+            initType(activeTab.dataset.typeId);
+            
+            // Set initial active type label for mobile
+            const typeLabel = document.getElementById('active-type-label');
+            const tabText = activeTab.querySelector('span');
+            if (typeLabel && tabText) {
+                typeLabel.textContent = tabText.textContent;
+            }
+        }
 
         // Keyboard Navigation
         document.addEventListener('keydown', (e) => {
