@@ -49,15 +49,27 @@ if ($_POST) {
                 'fr' => trim($_POST['desc_fr'] ?? ''),
                 'en' => trim($_POST['desc_en'] ?? ''),
             ]);
-            $slug = trim($_POST['slug'] ?? '');
 
-            if (!$slug) {
-                $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $_POST['title_en'] ?? $_POST['title_fr'] ?? 'book'));
+            // Check if this is the Quran (protected)
+            $stmt = $pdo->prepare("SELECT slug FROM books WHERE id = ?");
+            $stmt->execute([$bookId]);
+            $currentSlug = $stmt->fetchColumn();
+
+            if ($currentSlug === 'quran') {
+                // Quran is protected - keep original slug
+                $stmt = $pdo->prepare("UPDATE books SET title = ?, description = ? WHERE id = ?");
+                $stmt->execute([$title, $description, $bookId]);
+                $message = 'Le Coran a été modifié';
+            } else {
+                // Other books can change slug
+                $slug = trim($_POST['slug'] ?? '');
+                if (!$slug) {
+                    $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', $_POST['title_en'] ?? $_POST['title_fr'] ?? 'book'));
+                }
+                $stmt = $pdo->prepare("UPDATE books SET title = ?, slug = ?, description = ? WHERE id = ?");
+                $stmt->execute([$title, $slug, $description, $bookId]);
+                $message = 'Livre modifié avec succès';
             }
-
-            $stmt = $pdo->prepare("UPDATE books SET title = ?, slug = ?, description = ? WHERE id = ?");
-            $stmt->execute([$title, $slug, $description, $bookId]);
-            $message = 'Livre modifié avec succès';
         } catch (PDOException $e) {
             $error = 'Erreur: ' . $e->getMessage();
         }
@@ -257,16 +269,16 @@ adminHeader('Gestion des Livres');
                                 <?= number_format($book['ayah_count']) ?>
                             </span></td>
                         <td>
+                            <button type="button" class="btn btn-sm btn-secondary"
+                                onclick='editBook(<?= json_encode([
+                                    "id" => $book["id"],
+                                    "title" => json_decode($book["title"], true),
+                                    "slug" => $book["slug"],
+                                    "description" => json_decode($book["description"], true)
+                                ]) ?>)'>
+                                <iconify-icon icon="mdi:pencil"></iconify-icon>
+                            </button>
                             <?php if ($book['slug'] !== 'quran'): ?>
-                                <button type="button" class="btn btn-sm btn-secondary"
-                                    onclick='editBook(<?= json_encode([
-                                        "id" => $book["id"],
-                                        "title" => json_decode($book["title"], true),
-                                        "slug" => $book["slug"],
-                                        "description" => json_decode($book["description"], true)
-                                    ]) ?>)'>
-                                    <iconify-icon icon="mdi:pencil"></iconify-icon>
-                                </button>
                                 <form method="post" style="display: inline;"
                                     onsubmit="return confirm('Supprimer ce livre et tout son contenu?');">
                                     <input type="hidden" name="book_id" value="<?= $book['id'] ?>">
@@ -275,9 +287,8 @@ adminHeader('Gestion des Livres');
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <span class="badge badge-success">
+                                <span class="badge badge-success" title="Le Coran ne peut pas être supprimé">
                                     <iconify-icon icon="mdi:shield-check"></iconify-icon>
-                                    Protégé
                                 </span>
                             <?php endif; ?>
                         </td>
@@ -302,6 +313,16 @@ function editBook(book) {
     document.getElementById('edit-desc-ar').value = book.description.ar || '';
     document.getElementById('edit-desc-fr').value = book.description.fr || '';
     document.getElementById('edit-desc-en').value = book.description.en || '';
+
+    // Quran is protected - make slug readonly
+    const slugField = document.getElementById('edit-slug');
+    if (book.slug === 'quran') {
+        slugField.readOnly = true;
+        slugField.parentElement.querySelector('label').innerHTML = 'Slug <span class="text-muted">(protégé)</span>';
+    } else {
+        slugField.readOnly = false;
+        slugField.parentElement.querySelector('label').innerHTML = 'Slug';
+    }
 
     // Scroll to edit form
     document.getElementById('edit-book-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
