@@ -44,6 +44,22 @@ if ($taglineArray && isset($taglineArray[$currentLang])) {
     $dynamicTagline = __('public.tagline');
 }
 
+// Fetch about content for modal
+$aboutContent = null;
+try {
+    $stmt = $pdo->prepare("SELECT * FROM about_content WHERE language_code = ? AND is_active = 1");
+    $stmt->execute([$currentLang]);
+    $aboutContent = $stmt->fetch();
+    
+    // Fallback to Arabic
+    if (!$aboutContent) {
+        $stmt = $pdo->prepare("SELECT * FROM about_content WHERE language_code = 'ar' AND is_active = 1");
+        $stmt->execute();
+        $aboutContent = $stmt->fetch();
+    }
+} catch (PDOException $e) {
+}
+
 // SEO: Get site name from settings
 $siteName = getSetting('app_name', 'Sadaa');
 $siteTagline = $dynamicTagline;
@@ -126,7 +142,12 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
     <header class="welcome-header">
         <div class="welcome-header-content">
             <h1 class="logo-arabic">صَــدَى</h1>
-            <p class="tagline"><?= htmlspecialchars($dynamicTagline ?: __('public.tagline')) ?></p>
+            <div class="tagline-with-info">
+                <p class="tagline"><?= htmlspecialchars($dynamicTagline ?: __('public.tagline')) ?></p>
+                <button type="button" id="about-info-btn" class="info-btn" title="<?= __('public.about') ?>">
+                    <iconify-icon icon="mdi:information-circle"></iconify-icon>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -440,6 +461,68 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 updateSelection();
             }
         }
+    </script>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content about-modal-content">
+            <button type="button" id="close-about-modal" class="modal-close-btn">
+                <iconify-icon icon="mdi:close"></iconify-icon>
+            </button>
+            <div class="modal-body">
+                <?php if ($aboutContent): ?>
+                    <h2 class="about-modal-title" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
+                        <?= htmlspecialchars($aboutContent['title']) ?>
+                    </h2>
+                    <div class="about-modal-text" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
+                        <?php
+                        $allowedTags = '<h1><h2><h3><h4><h5><h6><p><br><strong><b><em><i><ul><ol><li>';
+                        echo strip_tags($aboutContent['content'], $allowedTags);
+                        ?>
+                    </div>
+                <?php else: ?>
+                    <p class="about-modal-text">À propos de Sadaa</p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // About modal
+        const aboutBtn = document.getElementById('about-info-btn');
+        const aboutModal = document.getElementById('about-modal');
+        const closeAboutBtn = document.getElementById('close-about-modal');
+        const aboutBackdrop = aboutModal.querySelector('.modal-backdrop');
+
+        function openAboutModal() {
+            aboutModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAboutModal() {
+            aboutModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        if (aboutBtn) {
+            aboutBtn.addEventListener('click', openAboutModal);
+        }
+
+        if (closeAboutBtn) {
+            closeAboutBtn.addEventListener('click', closeAboutModal);
+        }
+
+        if (aboutBackdrop) {
+            aboutBackdrop.addEventListener('click', closeAboutModal);
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !aboutModal.classList.contains('hidden')) {
+                closeAboutModal();
+            }
+        });
     </script>
 </body>
 

@@ -113,7 +113,7 @@ $logoUrl = getSetting('site_logo', '/assets/favicon.svg');
             max-width: 800px;
             margin: 0 auto;
             padding: 2rem 1.5rem;
-            line-height: 1.8;
+            line-height: 1.6;
             font-size: 1.1rem;
             color: var(--text-primary);
         }
@@ -124,7 +124,36 @@ $logoUrl = getSetting('site_logo', '/assets/favicon.svg');
         }
         
         .about-content p {
-            margin-bottom: 1.5rem;
+            margin: 0 0 0.75rem 0;
+        }
+        
+        .about-content p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .about-content h1,
+        .about-content h2,
+        .about-content h3,
+        .about-content h4,
+        .about-content h5,
+        .about-content h6 {
+            margin: 1.5rem 0 0.75rem 0;
+        }
+        
+        .about-content h1:first-child,
+        .about-content h2:first-child,
+        .about-content h3:first-child {
+            margin-top: 0;
+        }
+        
+        .about-content ul,
+        .about-content ol {
+            margin: 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .about-content li {
+            margin: 0.25rem 0;
         }
         
         .about-footer {
@@ -173,9 +202,12 @@ $logoUrl = getSetting('site_logo', '/assets/favicon.svg');
         <!-- Main Content -->
         <main class="about-content" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
             <?php if ($aboutContent && $aboutContent['content']): ?>
-                <?= nl2br(htmlspecialchars($aboutContent['content'])) ?>
+                <?php
+                $allowedTags = '<h1><h2><h3><h4><h5><h6><p><br><strong><b><em><i><ul><ol><li>';
+                echo strip_tags($aboutContent['content'], $allowedTags);
+                ?>
             <?php else: ?>
-                <p><?= __('about.coming_soon', 'Contenu à venir...') ?></p>
+                <p>Contenu à venir...</p>
             <?php endif; ?>
         </main>
         

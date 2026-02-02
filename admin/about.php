@@ -118,7 +118,10 @@ adminHeader('Gestion de la Page À Propos');
                           <?= $isRtl ? 'dir="rtl"' : '' ?> 
                           required 
                           rows="12"
-                          placeholder="Contenu de la page À Propos..."><?= htmlspecialchars($content) ?></textarea>
+                          placeholder="Contenu de la page À Propos..."><?= $content ?></textarea>
+                <small class="form-help">
+                    HTML autorisé : &lt;h1&gt; à &lt;h6&gt;, &lt;p&gt;, &lt;br&gt;, &lt;strong&gt;, &lt;em&gt;, &lt;ul&gt;, &lt;ol&gt;, &lt;li&gt;
+                </small>
             </div>
         </div>
     <?php endforeach; ?>

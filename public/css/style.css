@@ -2913,4 +2913,196 @@ footer {
         font-size: 0.85rem;
         min-width: 140px;
     }
+}/* ============================================
+   About Modal & Info Button Styles
+   ============================================ */
+
+/* Info button next to tagline */
+.tagline-with-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
+
+.info-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+
+.info-btn:hover {
+    color: var(--color-primary);
+    background: var(--bg-secondary);
+}
+
+.info-btn iconify-icon {
+    font-size: 1.2rem;
+}
+
+/* About Modal */
+.about-modal-content {
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.about-modal-title {
+    font-family: var(--font-noto);
+    font-size: 1.8rem;
+    color: var(--color-primary);
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.about-modal-text {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+.about-modal-text p {
+    margin: 0 0 0.75rem 0;
+}
+
+.about-modal-text p:last-child {
+    margin-bottom: 0;
+}
+
+.about-modal-text h1,
+.about-modal-text h2,
+.about-modal-text h3,
+.about-modal-text h4,
+.about-modal-text h5,
+.about-modal-text h6 {
+    margin: 1.5rem 0 0.75rem 0;
+}
+
+.about-modal-text h1:first-child,
+.about-modal-text h2:first-child,
+.about-modal-text h3:first-child {
+    margin-top: 0;
+}
+
+.about-modal-text ul,
+.about-modal-text ol {
+    margin: 0.75rem 0;
+    padding-left: 1.5rem;
+}
+
+.about-modal-text li {
+    margin: 0.25rem 0;
+}
+
+.about-modal-text[dir="rtl"] {
+    font-family: var(--font-noto);
+    text-align: right;
+}
+
+.about-modal-text[dir="rtl"] ul,
+.about-modal-text[dir="rtl"] ol {
+    padding-left: 0;
+    padding-right: 1.5rem;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .about-modal-content {
+        max-width: 90%;
+        max-height: 85vh;
+        padding: 1.5rem;
+    }
+    
+    .about-modal-title {
+        font-size: 1.5rem;
+    }
+    
+    .about-modal-text {
+        font-size: 1rem;
+    }
+    
+    .info-btn iconify-icon {
+        font-size: 1rem;
+    }
+}
+/* ============================================
+   Modal Base Styles
+   ============================================ */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.modal-content {
+    position: relative;
+    background: var(--bg-primary);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    max-width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    z-index: 1001;
+    border: 1px solid var(--border-color);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    z-index: 1002;
+}
+
+.modal-close-btn:hover {
+    background: var(--bg-secondary);
+    color: var(--color-primary);
+}
+
+.modal-close-btn iconify-icon {
+    font-size: 1.5rem;
+}
+
+.modal-body {
+    padding: 1rem;
+}
+
