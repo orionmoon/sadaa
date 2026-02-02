@@ -841,33 +841,38 @@ function navigatePicker(dir) {
 }
 
 function scrollToActiveCategory() {
-    // Calculate transformY to center the active item
-    // Item height = 40px base. Active = 60px.
-    // Container usually shows 3 items? 
-    // Logic: Center the active index.
-    // Let's assume uniform height logic for simplicity or center based on index
-    // The CSS logic `picker-track` usually transforms.
-    // For simplicity here, let's just re-render and ensure style updates.
-    // Detailed scroll logic:
     const activeIdx = currentPickerCategories.findIndex(c => c.id == state.currentCategory);
     if (activeIdx === -1) return;
 
-    // Move track so active item is in middle. 
-    // Viewport height ~ 120px. Middle is 60px.
-    // Item heights: 40px each. Active one is 60px.
-    // If we have items 0..N.
-    // Position of active item center = (Sum of prev items height) + (ActiveHeight/2).
-    // Just use simple index * 40px offset approximation + generic offset?
-    // Let's use specific logic if available from landing page
-
-    const itemHeight = 40;
-    // We want the center of the active item to be at vertical center (60px)
-    // Roughly: Center = 60.
-    // Y Position of item I = I * 40.
-    // But active item is taller? css handles scaling. layout flow is still flex col.
-    // We translate track up by (Index * 40) - (ViewportHeight/2) + (ItemHeight/2)
-    const offset = -(activeIdx * itemHeight) + (120 / 2) - (itemHeight / 2);
-    els.modalPickerTrack.style.transform = `translateY(${offset}px)`;
+    // Same dynamic calculation as index page
+    // Force browser to recalculate layout
+    void els.modalPickerTrack.offsetHeight;
+    
+    // Get all picker items
+    const items = els.modalPickerTrack.querySelectorAll('.picker-item');
+    if (!items.length) return;
+    
+    const tempItem = items[0];
+    const tempActive = items[activeIdx];
+    
+    // Force layout recalculation
+    els.modalPickerTrack.getBoundingClientRect();
+    tempActive.getBoundingClientRect();
+    
+    // Get computed styles (same technique as index page)
+    const itemStyles = window.getComputedStyle(tempItem);
+    const activeStyles = window.getComputedStyle(tempActive);
+    
+    const ITEM_HEIGHT = parseFloat(itemStyles.height) || 40;
+    const ACTIVE_HEIGHT = parseFloat(activeStyles.height) || 60;
+    const VIEWPORT_HEIGHT = parseFloat(window.getComputedStyle(els.modalPickerTrack.parentElement).height) || 140;
+    const VIEWPORT_CENTER = VIEWPORT_HEIGHT / 2;
+    
+    // Calculate position: sum of normal items + half of active item height
+    const position = (activeIdx * ITEM_HEIGHT) + (ACTIVE_HEIGHT / 2);
+    const translateY = VIEWPORT_CENTER - position;
+    
+    els.modalPickerTrack.style.transform = `translateY(${translateY}px)`;
 
     // Update arrows state
     if (els.modalArrowUp) els.modalArrowUp.disabled = activeIdx === 0;
@@ -899,9 +904,14 @@ function renderPickerItems() {
             state.currentCategory = cat.id;
             updatePickerUI();
             renderPickerItems();
-            scrollToActiveCategory();
+            // scrollToActiveCategory is called after render via requestAnimationFrame
         };
         container.appendChild(item);
+    });
+    
+    // Ensure scroll position is updated after DOM render
+    requestAnimationFrame(() => {
+        scrollToActiveCategory();
     });
 }
 
