@@ -306,13 +306,15 @@ function editBook(book) {
 
     // Populate form fields
     document.getElementById('edit-book-id').value = book.id;
-    document.getElementById('edit-title-ar').value = book.title.ar || '';
-    document.getElementById('edit-title-fr').value = book.title.fr || '';
-    document.getElementById('edit-title-en').value = book.title.en || '';
+    document.getElementById('edit-title-ar').value = book.title?.ar || '';
+    document.getElementById('edit-title-fr').value = book.title?.fr || '';
+    document.getElementById('edit-title-en').value = book.title?.en || '';
     document.getElementById('edit-slug').value = book.slug || '';
-    document.getElementById('edit-desc-ar').value = book.description.ar || '';
-    document.getElementById('edit-desc-fr').value = book.description.fr || '';
-    document.getElementById('edit-desc-en').value = book.description.en || '';
+    
+    const desc = book.description || {};
+    document.getElementById('edit-desc-ar').value = desc.ar || '';
+    document.getElementById('edit-desc-fr').value = desc.fr || '';
+    document.getElementById('edit-desc-en').value = desc.en || '';
 
     // Quran is protected - make slug readonly
     const slugField = document.getElementById('edit-slug');
