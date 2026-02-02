@@ -29,7 +29,8 @@ const state = {
     currentGroupIndex: 0,
     currentPage: 0,
     totalPages: 0,
-    pages: []
+    pages: [],
+    categorySurahs: []
 };
 
 // DOM Elements
@@ -182,6 +183,7 @@ async function loadFirstSurahForCategory(categoryId) {
     try {
         const res = await fetch(`/api.php?endpoint=surahs&category_id=${categoryId}`).then(r => r.json());
         if (res.status === 'success' && res.data && res.data.length > 0) {
+            state.categorySurahs = res.data;
             state.currentSurah = res.data[0].number;
             updateUrl();
             await loadSurah(state.currentSurah);
@@ -330,8 +332,21 @@ function renderSurah() {
     }
 
     // Update Navigation Links
-    state.nextSurahId = next_surah ? next_surah.number : null;
-    state.prevSurahId = prev_surah ? prev_surah.number : null;
+    // When in category mode, use category boundaries instead of chronological next/prev
+    if (state.currentCategory && state.categorySurahs.length > 0) {
+        const currentIndex = state.categorySurahs.findIndex(s => s.number === surah.number);
+        if (currentIndex !== -1) {
+            state.prevSurahId = currentIndex > 0 ? state.categorySurahs[currentIndex - 1].number : null;
+            state.nextSurahId = currentIndex < state.categorySurahs.length - 1 ? state.categorySurahs[currentIndex + 1].number : null;
+        } else {
+            state.nextSurahId = null;
+            state.prevSurahId = null;
+        }
+    } else {
+        // Not in category mode - use chronological next/prev from API
+        state.nextSurahId = next_surah ? next_surah.number : null;
+        state.prevSurahId = prev_surah ? prev_surah.number : null;
+    }
     updateNavigation();
 }
 
