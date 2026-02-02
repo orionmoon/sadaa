@@ -5,6 +5,22 @@
 
 require_once __DIR__ . '/layout.php';
 
+// Get all active languages
+$languages = [];
+try {
+    $stmt = $pdo->query("SELECT code, name FROM languages WHERE is_active = 1 ORDER BY sort_order ASC, code ASC");
+    $languages = $stmt->fetchAll();
+} catch (PDOException $e) {
+    // Fallback to default languages if table doesn't exist
+    $languages = [
+        ['code' => 'ar', 'name' => 'Arabe'],
+        ['code' => 'fr', 'name' => 'Français'],
+        ['code' => 'en', 'name' => 'Anglais'],
+        ['code' => 'es', 'name' => 'Espagnol'],
+        ['code' => 'de', 'name' => 'Allemand'],
+    ];
+}
+
 $message = '';
 $error = '';
 
@@ -12,16 +28,19 @@ $error = '';
 if ($_POST) {
     if (isset($_POST['add_book'])) {
         try {
-            $title = json_encode([
-                'ar' => trim($_POST['title_ar'] ?? ''),
-                'fr' => trim($_POST['title_fr'] ?? ''),
-                'en' => trim($_POST['title_en'] ?? ''),
-            ]);
-            $description = json_encode([
-                'ar' => trim($_POST['desc_ar'] ?? ''),
-                'fr' => trim($_POST['desc_fr'] ?? ''),
-                'en' => trim($_POST['desc_en'] ?? ''),
-            ]);
+            $titleData = [];
+            foreach ($languages as $lang) {
+                $code = $lang['code'];
+                $titleData[$code] = trim($_POST["title_$code"] ?? '');
+            }
+            $title = json_encode($titleData);
+
+            $descData = [];
+            foreach ($languages as $lang) {
+                $code = $lang['code'];
+                $descData[$code] = trim($_POST["desc_$code"] ?? '');
+            }
+            $description = json_encode($descData);
             $slug = trim($_POST['slug'] ?? '');
 
             if (!$slug) {
@@ -39,16 +58,19 @@ if ($_POST) {
     if (isset($_POST['edit_book'])) {
         try {
             $bookId = (int) $_POST['book_id'];
-            $title = json_encode([
-                'ar' => trim($_POST['title_ar'] ?? ''),
-                'fr' => trim($_POST['title_fr'] ?? ''),
-                'en' => trim($_POST['title_en'] ?? ''),
-            ]);
-            $description = json_encode([
-                'ar' => trim($_POST['desc_ar'] ?? ''),
-                'fr' => trim($_POST['desc_fr'] ?? ''),
-                'en' => trim($_POST['desc_en'] ?? ''),
-            ]);
+            $titleData = [];
+            foreach ($languages as $lang) {
+                $code = $lang['code'];
+                $titleData[$code] = trim($_POST["title_$code"] ?? '');
+            }
+            $title = json_encode($titleData);
+
+            $descData = [];
+            foreach ($languages as $lang) {
+                $code = $lang['code'];
+                $descData[$code] = trim($_POST["desc_$code"] ?? '');
+            }
+            $description = json_encode($descData);
 
             // Check if this is the Quran (protected)
             $stmt = $pdo->prepare("SELECT slug FROM books WHERE id = ?");
@@ -134,18 +156,16 @@ adminHeader('Gestion des Livres');
     </div>
     <form method="post">
         <div class="grid grid-3">
+            <?php foreach ($languages as $lang):
+                $code = $lang['code'];
+                $isArabic = $code === 'ar';
+                $required = $code === 'fr' ? 'required' : '';
+            ?>
             <div class="form-group">
-                <label class="form-label">Titre (Arabe)</label>
-                <input type="text" name="title_ar" class="form-input font-arabic" dir="rtl">
+                <label class="form-label">Titre (<?= htmlspecialchars($lang['name']) ?>)<?= $required ? ' *' : '' ?></label>
+                <input type="text" name="title_<?= $code ?>" class="form-input<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?> <?= $required ?>>
             </div>
-            <div class="form-group">
-                <label class="form-label">Titre (Français) *</label>
-                <input type="text" name="title_fr" class="form-input" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Titre (Anglais)</label>
-                <input type="text" name="title_en" class="form-input">
-            </div>
+            <?php endforeach; ?>
         </div>
 
         <div class="form-group">
@@ -154,18 +174,15 @@ adminHeader('Gestion des Livres');
         </div>
 
         <div class="grid grid-3">
+            <?php foreach ($languages as $lang):
+                $code = $lang['code'];
+                $isArabic = $code === 'ar';
+            ?>
             <div class="form-group">
-                <label class="form-label">Description (Arabe)</label>
-                <textarea name="desc_ar" class="form-textarea font-arabic" dir="rtl"></textarea>
+                <label class="form-label">Description (<?= htmlspecialchars($lang['name']) ?>)</label>
+                <textarea name="desc_<?= $code ?>" class="form-textarea<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?>></textarea>
             </div>
-            <div class="form-group">
-                <label class="form-label">Description (Français)</label>
-                <textarea name="desc_fr" class="form-textarea"></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Description (Anglais)</label>
-                <textarea name="desc_en" class="form-textarea"></textarea>
-            </div>
+            <?php endforeach; ?>
         </div>
 
         <button type="submit" name="add_book" class="btn btn-primary">
@@ -188,18 +205,16 @@ adminHeader('Gestion des Livres');
         <input type="hidden" name="book_id" id="edit-book-id">
 
         <div class="grid grid-3">
+            <?php foreach ($languages as $lang):
+                $code = $lang['code'];
+                $isArabic = $code === 'ar';
+                $required = $code === 'fr' ? 'required' : '';
+            ?>
             <div class="form-group">
-                <label class="form-label">Titre (Arabe)</label>
-                <input type="text" name="title_ar" id="edit-title-ar" class="form-input font-arabic" dir="rtl">
+                <label class="form-label">Titre (<?= htmlspecialchars($lang['name']) ?>)<?= $required ? ' *' : '' ?></label>
+                <input type="text" name="title_<?= $code ?>" id="edit-title-<?= $code ?>" class="form-input<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?> <?= $required ?>>
             </div>
-            <div class="form-group">
-                <label class="form-label">Titre (Français) *</label>
-                <input type="text" name="title_fr" id="edit-title-fr" class="form-input" required>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Titre (Anglais)</label>
-                <input type="text" name="title_en" id="edit-title-en" class="form-input">
-            </div>
+            <?php endforeach; ?>
         </div>
 
         <div class="form-group">
@@ -208,18 +223,15 @@ adminHeader('Gestion des Livres');
         </div>
 
         <div class="grid grid-3">
+            <?php foreach ($languages as $lang):
+                $code = $lang['code'];
+                $isArabic = $code === 'ar';
+            ?>
             <div class="form-group">
-                <label class="form-label">Description (Arabe)</label>
-                <textarea name="desc_ar" id="edit-desc-ar" class="form-textarea font-arabic" dir="rtl"></textarea>
+                <label class="form-label">Description (<?= htmlspecialchars($lang['name']) ?>)</label>
+                <textarea name="desc_<?= $code ?>" id="edit-desc-<?= $code ?>" class="form-textarea<?= $isArabic ? ' font-arabic' : '' ?>"<?= $isArabic ? ' dir="rtl"' : '' ?>></textarea>
             </div>
-            <div class="form-group">
-                <label class="form-label">Description (Français)</label>
-                <textarea name="desc_fr" id="edit-desc-fr" class="form-textarea"></textarea>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Description (Anglais)</label>
-                <textarea name="desc_en" id="edit-desc-en" class="form-textarea"></textarea>
-            </div>
+            <?php endforeach; ?>
         </div>
 
         <button type="submit" name="edit_book" class="btn btn-primary">
@@ -317,15 +329,19 @@ function editBook(book) {
 
     // Populate form fields
     document.getElementById('edit-book-id').value = book.id;
-    document.getElementById('edit-title-ar').value = book.title?.ar || '';
-    document.getElementById('edit-title-fr').value = book.title?.fr || '';
-    document.getElementById('edit-title-en').value = book.title?.en || '';
     document.getElementById('edit-slug').value = book.slug || '';
-    
+
+    // Populate title fields dynamically
+    const title = book.title || {};
+    <?php foreach ($languages as $lang): ?>
+    document.getElementById('edit-title-<?= $lang['code'] ?>').value = title['<?= $lang['code'] ?>'] || '';
+    <?php endforeach; ?>
+
+    // Populate description fields dynamically
     const desc = book.description || {};
-    document.getElementById('edit-desc-ar').value = desc.ar || '';
-    document.getElementById('edit-desc-fr').value = desc.fr || '';
-    document.getElementById('edit-desc-en').value = desc.en || '';
+    <?php foreach ($languages as $lang): ?>
+    document.getElementById('edit-desc-<?= $lang['code'] ?>').value = desc['<?= $lang['code'] ?>'] || '';
+    <?php endforeach; ?>
 
     // Quran is protected - make slug readonly
     const slugField = document.getElementById('edit-slug');
