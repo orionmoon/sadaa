@@ -284,6 +284,7 @@ function renderSurah() {
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
                 checkArabicOverflow();
+                updateArabicScrollButtons();
             });
         });
     } else {
@@ -322,6 +323,8 @@ function renderSurah() {
             requestAnimationFrame(() => {
                 checkTextOverflow();
                 checkArabicOverflow();
+                updateTextScrollButtons();
+                updateArabicScrollButtons();
             });
         });
     }
@@ -381,7 +384,7 @@ function updateTextScrollButtons() {
     const maxScroll = contentHeight - containerHeight;
 
     els.textScrollUp.disabled = textScrollPosition <= 0;
-    els.textScrollDown.disabled = textScrollPosition >= maxScroll - 1;
+    els.textScrollDown.disabled = textScrollPosition >= maxScroll - 5;
 }
 
 function checkArabicOverflow() {
@@ -430,7 +433,7 @@ function updateArabicScrollButtons() {
     const maxScroll = contentHeight - containerHeight;
 
     els.arabicScrollUp.disabled = arabicScrollPosition <= 0;
-    els.arabicScrollDown.disabled = arabicScrollPosition >= maxScroll - 1;
+    els.arabicScrollDown.disabled = arabicScrollPosition >= maxScroll - 5;
 }
 
 function updateNavigation() {
