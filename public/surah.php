@@ -211,49 +211,58 @@ try {
     <div id="picker-modal" class="picker-modal hidden">
         <div class="picker-modal-backdrop"></div>
         <div class="picker-modal-content">
-            <!-- Type Tabs -->
-            <div class="type-tabs">
-                <?php 
-                $totalTypes = count($types);
-                foreach ($types as $index => $type):
-                    $typeName = getLocalizedValue($type['name'], $currentLang);
-                    $active = $index === 0 ? 'active' : '';
-                    $position = $index === 0 ? 'first' : ($index === $totalTypes - 1 ? 'last' : 'middle');
-                    ?>
-                    <button class="tab <?= $active ?> <?= $position ?>" data-type="<?= htmlspecialchars($type['slug']) ?>">
-                        <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
-                        <span><?= htmlspecialchars($typeName) ?></span>
-                    </button>
-                <?php endforeach; ?>
-            </div>
+            <div class="welcome-content-wrapper">
+                <!-- Type Tabs -->
+                <section class="type-tabs">
+                    <?php 
+                    $totalTypes = count($types);
+                    foreach ($types as $index => $type):
+                        $typeName = getLocalizedValue($type['name'], $currentLang);
+                        $active = $index === 0 ? 'active' : '';
+                        $position = $index === 0 ? 'first' : ($index === $totalTypes - 1 ? 'last' : 'middle');
+                        ?>
+                        <button class="tab <?= $active ?> <?= $position ?>" data-type="<?= htmlspecialchars($type['slug']) ?>">
+                            <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
+                            <span><?= htmlspecialchars($typeName) ?></span>
+                        </button>
+                    <?php endforeach; ?>
+                </section>
 
-            <!-- Picker -->
-            <div class="picker-section">
-                <div class="picker-wrapper">
-                    <button class="picker-arrow up" id="modal-arrow-up" disabled="">
-                        <iconify-icon icon="mdi:chevron-up"></iconify-icon>
-                    </button>
-                    <div class="picker-viewport">
-                        <div class="picker-track" id="modal-picker-track" style="transform: translateY(0px);">
-                            <!-- Items populated by JS -->
-                        </div>
-                    </div>
-                    <button class="picker-arrow down" id="modal-arrow-down">
-                        <iconify-icon icon="mdi:chevron-down"></iconify-icon>
-                    </button>
+                <!-- Active Type Label (Mobile) -->
+                <div class="active-type-label" id="modal-active-type-label">
+                    <?= htmlspecialchars(getLocalizedValue($types[0]['name'], $currentLang)) ?>
                 </div>
-            </div>
 
-            <!-- Description -->
-            <div class="description-section">
-                <p class="profile-description visible" id="modal-description">description des croyants</p>
-                <cite class="description-source" id="modal-source"></cite>
-            </div>
+                <!-- Picker Section -->
+                <section class="picker-section">
+                    <div class="picker-wrapper">
+                        <button class="picker-arrow up" id="modal-arrow-up" disabled="">
+                            <iconify-icon icon="mdi:chevron-up"></iconify-icon>
+                        </button>
+                        <div class="picker-viewport">
+                            <div class="picker-track" id="modal-picker-track" style="transform: translateY(0px);">
+                                <!-- Items populated by JS -->
+                            </div>
+                        </div>
+                        <button class="picker-arrow down" id="modal-arrow-down">
+                            <iconify-icon icon="mdi:chevron-down"></iconify-icon>
+                        </button>
+                    </div>
+                </section>
 
-            <!-- Confirm Button -->
-            <button id="modal-confirm" class="cta-button">
-                <span><?= __('actions.confirm') ?></span>
-            </button>
+                <!-- Description Section -->
+                <section class="description-section">
+                    <p class="profile-description visible" id="modal-description">description des croyants</p>
+                    <cite class="description-source" id="modal-source"></cite>
+                </section>
+
+                <!-- Confirm Button -->
+                <section class="cta-section">
+                    <button id="modal-confirm" class="cta-button">
+                        <span><?= __('actions.confirm') ?></span>
+                    </button>
+                </section>
+            </div>
         </div>
     </div>
 

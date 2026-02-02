@@ -60,6 +60,8 @@ const els = {
     modalArrowUp: document.getElementById('modal-arrow-up'),
     modalArrowDown: document.getElementById('modal-arrow-down'),
     modalDescription: document.getElementById('modal-description'),
+    modalSource: document.getElementById('modal-source'),
+    modalActiveTypeLabel: document.getElementById('modal-active-type-label'),
     typeTabs: document.querySelectorAll('.tab'),
     langSelect: document.getElementById('lang-select'),
     bookSelect: document.getElementById('book-select'),
@@ -773,10 +775,23 @@ let currentPickerCategories = [];
 
 function setActiveType(typeSlug, render = true) {
     // Update Tabs UI
+    let activeTab = null;
     els.typeTabs.forEach(t => {
-        if (t.dataset.type === typeSlug) t.classList.add('active');
-        else t.classList.remove('active');
+        if (t.dataset.type === typeSlug) {
+            t.classList.add('active');
+            activeTab = t;
+        } else {
+            t.classList.remove('active');
+        }
     });
+
+    // Update active type label for mobile
+    if (els.modalActiveTypeLabel && activeTab) {
+        const tabText = activeTab.querySelector('span');
+        if (tabText) {
+            els.modalActiveTypeLabel.textContent = tabText.textContent;
+        }
+    }
 
     // Filter categories
     // Map slug to type_id
@@ -862,6 +877,12 @@ function scrollToActiveCategory() {
     const cat = currentPickerCategories[activeIdx];
     if (cat && els.modalDescription) {
         els.modalDescription.textContent = getLocalized(cat.description) || getLocalized(cat.name);
+    }
+    // Update Source
+    if (cat && els.modalSource) {
+        const sourceText = getLocalized(cat.source);
+        els.modalSource.textContent = sourceText || '';
+        els.modalSource.style.display = sourceText ? 'block' : 'none';
     }
 }
 

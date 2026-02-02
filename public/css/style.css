@@ -2670,4 +2670,58 @@ footer {
     .share-preview-container .share-card.format-square {
         transform: scale(0.25);
     }
+
+    /* Mobile Modal - Category Picker - Uses same style as welcome page */
+    .picker-modal-content {
+        width: 95%;
+        max-width: 500px;
+        padding: 1.5rem;
+        border-radius: 24px;
+    }
+
+    .picker-modal-content .welcome-content-wrapper {
+        gap: 0.75rem;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .picker-section {
+        height: 130px;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .picker-viewport {
+        height: 110px;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .picker-item {
+        height: 30px;
+        font-size: 0.85rem;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .picker-item.active {
+        font-size: 1.1rem;
+        height: 45px;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .description-section {
+        min-height: 2rem;
+        max-height: 2.5rem;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .profile-description {
+        font-size: 0.8rem;
+        line-height: 1.4;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .description-source {
+        font-size: 0.7rem;
+        margin-top: 0.2rem;
+        display: block;
+        color: var(--text-secondary);
+        opacity: 0.7;
+    }
+
+    .picker-modal-content .welcome-content-wrapper .cta-button {
+        padding: 0.6rem 2rem;
+        font-size: 0.85rem;
+        min-width: 140px;
+    }
 }
