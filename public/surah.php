@@ -176,7 +176,8 @@ try {
     <header>
         <div class="header-grid">
             <div class="h-left">
-                <select id="lang-select">
+                <!-- Desktop: Select dropdown -->
+                <select id="lang-select" class="desktop-only">
                     <?php foreach ($languages as $lang):
                         $langName = getLocalizedValue($lang['name'], $currentLang);
                         ?>
@@ -185,6 +186,10 @@ try {
                         </option>
                     <?php endforeach; ?>
                 </select>
+                <!-- Mobile: Language icon button -->
+                <button id="lang-toggle-mobile" class="btn-icon mobile-only" title="<?= __('labels.language') ?>">
+                    <iconify-icon icon="mdi:translate"></iconify-icon>
+                </button>
             </div>
             <div class="h-center">
                 <!-- Picker Trigger Button -->
@@ -195,10 +200,15 @@ try {
                 </button>
             </div>
             <div class="h-right">
-                <select id="book-select">
+                <!-- Desktop: Book select -->
+                <select id="book-select" class="desktop-only">
                     <option value=""><?= __('labels.book') ?>...</option>
                     <option value="quran"><?= __('public.quran') ?></option>
                 </select>
+                <!-- Mobile: Book icon button -->
+                <button id="book-toggle-mobile" class="btn-icon mobile-only" title="<?= __('labels.book') ?>">
+                    <iconify-icon icon="mdi:book-open-variant"></iconify-icon>
+                </button>
                 <button id="theme-toggle" class="btn-icon theme-toggle" title="Mode Sombre/Clair">
                     <iconify-icon class="icon-sun" icon="mdi:white-balance-sunny"></iconify-icon>
                     <iconify-icon class="icon-moon" icon="mdi:moon-waning-crescent"></iconify-icon>
@@ -262,6 +272,43 @@ try {
                         <span><?= __('actions.confirm') ?></span>
                     </button>
                 </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Selector Modal (Mobile) -->
+    <div id="lang-modal" class="picker-modal hidden">
+        <div class="picker-modal-backdrop"></div>
+        <div class="picker-modal-content simple-modal">
+            <h3 class="modal-title"><?= __('labels.language') ?></h3>
+            <div class="simple-options-list" id="lang-options">
+                <?php foreach ($languages as $lang):
+                    $langName = getLocalizedValue($lang['name'], $currentLang);
+                    $isActive = $currentLang === $lang['code'];
+                    ?>
+                    <button class="simple-option <?= $isActive ? 'active' : '' ?>" data-lang="<?= $lang['code'] ?>">
+                        <span class="option-icon">
+                            <?php if ($isActive): ?>
+                                <iconify-icon icon="mdi:check"></iconify-icon>
+                            <?php endif; ?>
+                        </span>
+                        <span class="option-label"><?= htmlspecialchars($langName) ?></span>
+                    </button>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>
+
+    <!-- Book Selector Modal (Mobile) -->
+    <div id="book-modal" class="picker-modal hidden">
+        <div class="picker-modal-backdrop"></div>
+        <div class="picker-modal-content simple-modal">
+            <h3 class="modal-title"><?= __('labels.book') ?></h3>
+            <div class="simple-options-list">
+                <button class="simple-option" data-book="quran">
+                    <span class="option-icon"><iconify-icon icon="mdi:book-open-variant"></iconify-icon></span>
+                    <span class="option-label"><?= __('public.quran') ?></span>
+                </button>
             </div>
         </div>
     </div>

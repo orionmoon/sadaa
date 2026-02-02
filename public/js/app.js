@@ -63,6 +63,11 @@ const els = {
     modalSource: document.getElementById('modal-source'),
     modalActiveTypeLabel: document.getElementById('modal-active-type-label'),
     typeTabs: document.querySelectorAll('.tab'),
+    // Mobile selectors
+    langToggleMobile: document.getElementById('lang-toggle-mobile'),
+    bookToggleMobile: document.getElementById('book-toggle-mobile'),
+    langModal: document.getElementById('lang-modal'),
+    bookModal: document.getElementById('book-modal'),
     langSelect: document.getElementById('lang-select'),
     bookSelect: document.getElementById('book-select'),
     groupTags: document.getElementById('group-tags'),
@@ -620,6 +625,22 @@ function setupEventListeners() {
             return;
         }
 
+        // Language modal keyboard navigation
+        if (els.langModal && !els.langModal.classList.contains('hidden')) {
+            if (e.key === 'Escape') {
+                closeSimpleModal(els.langModal);
+            }
+            return;
+        }
+
+        // Book modal keyboard navigation
+        if (els.bookModal && !els.bookModal.classList.contains('hidden')) {
+            if (e.key === 'Escape') {
+                closeSimpleModal(els.bookModal);
+            }
+            return;
+        }
+
         // Main view keyboard navigation
         if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
             e.preventDefault();
@@ -716,6 +737,67 @@ function setupEventListeners() {
     if (els.themeToggle) {
         els.themeToggle.addEventListener('click', toggleTheme);
     }
+
+    // Mobile language selector
+    if (els.langToggleMobile && els.langModal) {
+        els.langToggleMobile.addEventListener('click', () => openSimpleModal(els.langModal));
+        
+        // Language options click
+        const langOptions = els.langModal.querySelectorAll('.simple-option');
+        langOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const langCode = opt.dataset.lang;
+                if (langCode) {
+                    setCookie('sadaa_lang', langCode, 365);
+                    state.currentLanguage = langCode;
+                    window.location.reload();
+                }
+            });
+        });
+        
+        // Close on backdrop click
+        els.langModal.querySelector('.picker-modal-backdrop').addEventListener('click', () => {
+            closeSimpleModal(els.langModal);
+        });
+    }
+
+    // Mobile book selector
+    if (els.bookToggleMobile && els.bookModal) {
+        els.bookToggleMobile.addEventListener('click', () => openSimpleModal(els.bookModal));
+        
+        // Book options click
+        const bookOptions = els.bookModal.querySelectorAll('.simple-option');
+        bookOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const book = opt.dataset.book;
+                if (book === 'quran') {
+                    // Open reader modal or navigate to Quran
+                    closeSimpleModal(els.bookModal);
+                    openReader();
+                }
+            });
+        });
+        
+        // Close on backdrop click
+        els.bookModal.querySelector('.picker-modal-backdrop').addEventListener('click', () => {
+            closeSimpleModal(els.bookModal);
+        });
+    }
+}
+
+// --- Simple Modal Helpers ---
+
+function openSimpleModal(modal) {
+    modal.classList.remove('hidden');
+    void modal.offsetWidth;
+    modal.classList.add('visible');
+}
+
+function closeSimpleModal(modal) {
+    modal.classList.remove('visible');
+    setTimeout(() => {
+        modal.classList.add('hidden');
+    }, 300);
 }
 
 // --- Helpers ---

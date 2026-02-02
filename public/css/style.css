@@ -660,6 +660,15 @@ select:hover {
     .active-type-label {
         display: none;
     }
+
+    /* Desktop: show selects, hide mobile icons */
+    .desktop-only {
+        display: block !important;
+    }
+
+    .mobile-only {
+        display: none !important;
+    }
 }
 
 /* ============================================
@@ -1661,26 +1670,150 @@ footer {
     }
 
     .header-grid {
-        grid-template-columns: 1fr auto 1fr;
+        grid-template-columns: auto 1fr auto;
         gap: 0.5rem;
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 0.5rem;
         align-items: center;
     }
 
-    .picker-trigger span:not(#current-category-icon) {
-        display: none;
+    /* Hide desktop selects on mobile */
+    .desktop-only {
+        display: none !important;
+    }
+
+    /* Show mobile icon buttons */
+    .mobile-only {
+        display: flex !important;
+    }
+
+    /* Reduced selectors on sides */
+    .h-left, .h-right {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+    }
+
+    /* Category selector - prominent and full display */
+    .h-center {
+        flex: 1;
+        justify-self: stretch;
+        display: flex;
+        justify-content: center;
+        max-width: none;
+        padding: 0 0.25rem;
     }
 
     .picker-trigger {
-        padding: 0.5rem;
-        border: none;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+        max-width: none;
+        width: 100%;
+        min-width: 140px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-primary);
     }
 
-    #lang-select,
-    #book-select {
-        max-width: 100px;
-        font-size: 0.85rem;
-        padding: 0.4rem 0.6rem;
+    .picker-trigger #current-category-name {
+        display: inline !important;
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .picker-trigger iconify-icon {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* Mobile icon buttons for lang/book */
+    #lang-toggle-mobile,
+    #book-toggle-mobile {
+        width: 36px;
+        height: 36px;
+        padding: 0;
+        background: transparent;
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    #lang-toggle-mobile iconify-icon,
+    #book-toggle-mobile iconify-icon {
+        font-size: 1.1rem;
+    }
+}
+
+/* Simple Modal Styles (for lang/book selectors) */
+.picker-modal-content.simple-modal {
+    padding: 1.5rem;
+    max-width: 320px;
+    gap: 1rem;
+}
+
+.simple-modal .modal-title {
+    font-family: var(--font-inter);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    text-align: center;
+}
+
+.simple-options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.simple-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    width: 100%;
+}
+
+.simple-option:hover {
+    border-color: var(--color-primary);
+    background: var(--bg-primary);
+}
+
+.simple-option.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+.simple-option .option-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.simple-option .option-icon iconify-icon {
+    font-size: 1.2rem;
+}
+
+.simple-option .option-label {
+    font-family: var(--font-inter);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+    #lang-toggle-mobile iconify-icon,
+    #book-toggle-mobile iconify-icon {
+        font-size: 1.1rem;
     }
 
     .main-viewport {
