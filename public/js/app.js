@@ -151,8 +151,26 @@ async function loadSurah(number, startAtEnd = false) {
     els.translationText.innerHTML = '';
 
     try {
+        // Load surah data and category surahs in parallel if in category mode
+        const promises = [];
+        
+        // Main surah data
         const url = `/api.php?endpoint=surah&surah=${number}&category=${state.currentCategory || ''}`;
-        const res = await fetch(url).then(r => r.json());
+        promises.push(fetch(url).then(r => r.json()));
+        
+        // If in category mode and categorySurahs is empty, load them
+        if (state.currentCategory && state.categorySurahs.length === 0) {
+            const catUrl = `/api.php?endpoint=surahs&category_id=${state.currentCategory}`;
+            promises.push(fetch(catUrl).then(r => r.json()));
+        }
+        
+        const results = await Promise.all(promises);
+        const res = results[0];
+        
+        // If we loaded category surahs, store them
+        if (results[1] && results[1].status === 'success' && results[1].data) {
+            state.categorySurahs = results[1].data;
+        }
 
         if (res.status === 'success') {
             state.surahData = res.data;
@@ -334,7 +352,9 @@ function renderSurah() {
     // Update Navigation Links
     // When in category mode, use category boundaries instead of chronological next/prev
     if (state.currentCategory && state.categorySurahs.length > 0) {
-        const currentIndex = state.categorySurahs.findIndex(s => s.number === surah.number);
+        const currentSurahNum = parseInt(surah.number, 10);
+        const currentIndex = state.categorySurahs.findIndex(s => parseInt(s.number, 10) === currentSurahNum);
+        
         if (currentIndex !== -1) {
             state.prevSurahId = currentIndex > 0 ? state.categorySurahs[currentIndex - 1].number : null;
             state.nextSurahId = currentIndex < state.categorySurahs.length - 1 ? state.categorySurahs[currentIndex + 1].number : null;
@@ -459,9 +479,11 @@ function updateNavigation() {
     // Navigation logic:
     // Prev: Enabled if (HasPrevGroup OR HasPrevSurah)
     // Next: Enabled if (HasNextGroup OR HasNextSurah)
+    const shouldDisableNext = !(hasNextGroup || state.nextSurahId);
+    const shouldDisablePrev = !(hasPrevGroup || state.prevSurahId);
 
-    els.btnPrev.disabled = !(hasPrevGroup || state.prevSurahId);
-    els.btnNext.disabled = !(hasNextGroup || state.nextSurahId);
+    els.btnPrev.disabled = shouldDisablePrev;
+    els.btnNext.disabled = shouldDisableNext;
 }
 
 function updatePickerUI() {

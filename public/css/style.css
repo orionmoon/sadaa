@@ -927,6 +927,18 @@ header {
     transform: translateY(0);
 }
 
+.btn-icon:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-icon:disabled:hover {
+    border-color: var(--border-color);
+    color: var(--text-secondary);
+    background: transparent;
+}
+
 /* Animation utilities */
 .slide-up {
     animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
