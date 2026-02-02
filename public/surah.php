@@ -299,16 +299,36 @@ try {
         </div>
     </div>
 
+    <?php
+    // Fetch active books from database
+    $books = [];
+    try {
+        $stmt = $pdo->query("SELECT * FROM books ORDER BY id ASC");
+        $books = $stmt->fetchAll();
+    } catch (PDOException $e) {
+        // Fallback: at least include Quran
+        $books = [
+            ['id' => 1, 'slug' => 'quran', 'title' => json_encode(['fr' => 'Le Coran', 'en' => 'The Quran', 'ar' => 'القرآن الكريم', 'es' => 'El Corán', 'de' => 'Der Koran']), 'icon' => 'mdi:book-open-page-variant']
+        ];
+    }
+    ?>
+
     <!-- Book Selector Modal (Mobile) -->
     <div id="book-modal" class="picker-modal hidden">
         <div class="picker-modal-backdrop"></div>
         <div class="picker-modal-content simple-modal">
             <h3 class="modal-title"><?= __('labels.book') ?></h3>
-            <div class="simple-options-list">
-                <button class="simple-option" data-book="quran">
-                    <span class="option-icon"><iconify-icon icon="mdi:book-open-variant"></iconify-icon></span>
-                    <span class="option-label"><?= __('public.quran') ?></span>
-                </button>
+            <div class="simple-options-list" id="book-options">
+                <?php foreach ($books as $book):
+                    $bookTitle = json_decode($book['title'], true);
+                    $displayTitle = $bookTitle[$currentLang] ?? $bookTitle['en'] ?? $bookTitle['fr'] ?? $book['slug'];
+                    $bookIcon = $book['icon'] ?? 'mdi:book-open-page-variant';
+                    ?>
+                    <button class="simple-option" data-book="<?= htmlspecialchars($book['slug']) ?>">
+                        <span class="option-icon"><iconify-icon icon="<?= htmlspecialchars($bookIcon) ?>"></iconify-icon></span>
+                        <span class="option-label"><?= htmlspecialchars($displayTitle) ?></span>
+                    </button>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>

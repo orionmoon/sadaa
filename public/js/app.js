@@ -21,7 +21,7 @@ const state = {
     currentSurah: 1,
     currentCategory: null,
     currentLanguage: window.currentLang || getCookie('sadaa_lang') || 'fr',
-    currentBook: 'quran',
+    currentBook: getCookie('sadaa_book') || 'quran',
     categories: [],
     types: [],
     surahData: null,
@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Set initial selects
     if (els.langSelect) els.langSelect.value = state.currentLanguage;
+    if (els.bookSelect) els.bookSelect.value = state.currentBook;
 
     // Load Data
     await loadInitialData();
@@ -769,11 +770,32 @@ function setupEventListeners() {
         const bookOptions = els.bookModal.querySelectorAll('.simple-option');
         bookOptions.forEach(opt => {
             opt.addEventListener('click', () => {
-                const book = opt.dataset.book;
-                if (book === 'quran') {
-                    // Open reader modal or navigate to Quran
+                const bookSlug = opt.dataset.book;
+                if (bookSlug) {
+                    // Update state
+                    state.currentBook = bookSlug;
+                    
+                    // Update desktop select if exists
+                    if (els.bookSelect) {
+                        els.bookSelect.value = bookSlug;
+                    }
+                    
+                    // Save preference
+                    setCookie('sadaa_book', bookSlug, 365);
+                    
+                    // Close modal
                     closeSimpleModal(els.bookModal);
-                    openReader();
+                    
+                    // Show feedback (optional)
+                    const bookLabel = opt.querySelector('.option-label')?.textContent || bookSlug;
+                    console.log(`Switched to book: ${bookLabel}`);
+                    
+                    // Reload data for the new book
+                    if (state.currentCategory) {
+                        loadFirstSurahForCategory(state.currentCategory);
+                    } else if (state.currentSurah) {
+                        loadSurah(state.currentSurah);
+                    }
                 }
             });
         });
@@ -781,6 +803,24 @@ function setupEventListeners() {
         // Close on backdrop click
         els.bookModal.querySelector('.picker-modal-backdrop').addEventListener('click', () => {
             closeSimpleModal(els.bookModal);
+        });
+    }
+    
+    // Desktop book selector
+    if (els.bookSelect) {
+        els.bookSelect.addEventListener('change', (e) => {
+            const bookSlug = e.target.value;
+            if (bookSlug) {
+                state.currentBook = bookSlug;
+                setCookie('sadaa_book', bookSlug, 365);
+                
+                // Reload data
+                if (state.currentCategory) {
+                    loadFirstSurahForCategory(state.currentCategory);
+                } else if (state.currentSurah) {
+                    loadSurah(state.currentSurah);
+                }
+            }
         });
     }
 }
