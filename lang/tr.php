@@ -233,6 +233,10 @@ return [
         'medinan' => 'Medeni',
         'verses' => 'ayet',
         'about' => 'Hakkında',
+        'github_link' => 'Bizi GitHub\'da bulun',
+        'community_title' => 'Topluluk ve Katkılar',
+        'community_text' => 'Bu proje açık kaynaklı ve topluluk odaklıdır. Çeviriler, kategoriler veya yeni fikirler önererek bize yardımcı olabilirsiniz.',
+        'contribute_action' => 'GitHub\'da katkıda bulunun',
     ],
 
     // JavaScript translations (for frontend)
@@ -278,6 +282,10 @@ return [
             'display' => [
                 'title' => 'Kişiselleştirme',
                 'text' => 'Rahat bir okuma deneyimi için görünümü (açık/koyu) ve dili ayarlayın.',
+            ],
+            'github' => [
+                'title' => 'Topluluk',
+                'text' => 'Sadaa açık kaynaktır! Katkıda bulunmak veya iyileştirme önermek için GitHub\'da bize katılın.',
             ],
             'go' => [
                 'title' => 'Başlamaya hazır mısınız?',

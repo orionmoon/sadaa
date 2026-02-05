@@ -233,6 +233,10 @@ return [
         'medinan' => 'Médinoise',
         'verses' => 'versets',
         'about' => 'À propos',
+        'github_link' => 'Retrouvez-nous sur GitHub',
+        'community_title' => 'Communauté & Contributions',
+        'community_text' => 'Ce projet est open-source et communautaire. Vous pouvez nous aider en proposant des traductions, des catégories ou de nouvelles idées.',
+        'contribute_action' => 'Contribuer sur GitHub',
     ],
 
     // JavaScript translations (for frontend)
@@ -278,6 +282,10 @@ return [
             'display' => [
                 'title' => 'Personnalisation',
                 'text' => 'Ajustez l’apparence (clair/sombre) et la langue pour une expérience de lecture confortable.',
+            ],
+            'github' => [
+                'title' => 'Communauté',
+                'text' => 'Sadaa est open-source ! Rejoignez-nous sur GitHub pour contribuer ou suggérer des améliorations.',
             ],
             'go' => [
                 'title' => 'Prêt à commencer ?',

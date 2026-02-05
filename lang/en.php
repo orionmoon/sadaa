@@ -233,6 +233,10 @@ return [
         'medinan' => 'Medinan',
         'verses' => 'verses',
         'about' => 'About',
+        'github_link' => 'Find us on GitHub',
+        'community_title' => 'Community & Contributions',
+        'community_text' => 'This project is open-source and community-driven. You can help us by suggesting translations, categories, or new ideas.',
+        'contribute_action' => 'Contribute on GitHub',
     ],
 
     // JavaScript translations (for frontend)
@@ -278,6 +282,10 @@ return [
             'display' => [
                 'title' => 'Customization',
                 'text' => 'Adjust the appearance (light/dark) and language for a comfortable reading experience.',
+            ],
+            'github' => [
+                'title' => 'Community',
+                'text' => 'Sadaa is open-source! Join us on GitHub to contribute or suggest improvements.',
             ],
             'go' => [
                 'title' => 'Ready to begin?',

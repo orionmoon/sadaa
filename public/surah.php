@@ -127,37 +127,37 @@ try {
     <!-- JSON-LD Structured Data -->
     <?php if ($categorySlug && !empty($translatedName)): ?>
         <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "<?= htmlspecialchars($translatedName) ?>",
-      "description": "<?= htmlspecialchars($pageDesc) ?>",
-      "url": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>",
-      "inLanguage": "<?= $currentLang ?>",
-      "isPartOf": {
-        "@type": "WebSite",
-        "name": "Sadaa",
-        "url": "https://sadaa.me"
-      },
-      "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-          {
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Accueil",
-            "item": "https://sadaa.me"
-          },
-          {
-            "@type": "ListItem",
-            "position": 2,
-            "name": "<?= htmlspecialchars($translatedName) ?>",
-            "item": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>"
-          }
-        ]
-      }
-    }
-        </script>
+                {
+                  "@context": "https://schema.org",
+                  "@type": "WebPage",
+                  "name": "<?= htmlspecialchars($translatedName) ?>",
+                  "description": "<?= htmlspecialchars($pageDesc) ?>",
+                  "url": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>",
+                  "inLanguage": "<?= $currentLang ?>",
+                  "isPartOf": {
+                    "@type": "WebSite",
+                    "name": "Sadaa",
+                    "url": "https://sadaa.me"
+                  },
+                  "breadcrumb": {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                      {
+                        "@type": "ListItem",
+                        "position": 1,
+                        "name": "Accueil",
+                        "item": "https://sadaa.me"
+                      },
+                      {
+                        "@type": "ListItem",
+                        "position": 2,
+                        "name": "<?= htmlspecialchars($translatedName) ?>",
+                        "item": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>"
+                      }
+                    ]
+                  }
+                }
+                    </script>
     <?php endif; ?>
 
     <!-- Favicon -->
@@ -511,13 +511,17 @@ try {
 
     <footer>
         <div class="footer-content">
+            <button type="button" id="about-info-btn" class="info-btn footer-info-btn"
+                title=" <?= __('public.about') ?>">
+                <iconify-icon icon="mdi:information-circle"></iconify-icon>
+            </button>
             <a href="/" class="footer-signature fade-in" title="<?= __('actions.back_home') ?>">
                 <span class="logo-arabic">صَــدَى</span>
             </a>
-            <button type="button" id="about-info-btn" class="info-btn footer-info-btn"
-                title="<?= __('public.about') ?>">
-                <iconify-icon icon="mdi:information-circle"></iconify-icon>
-            </button>
+            <a href="https://github.com/orionmoon/sadaa" target="_blank" class="github-link"
+                title="<?= __('public.github_link') ?>">
+                <iconify-icon icon="mdi:github"></iconify-icon>
+            </a>
         </div>
     </footer>
 
@@ -651,6 +655,16 @@ try {
                         echo strip_tags($aboutContent['content'], $allowedTags);
                         ?>
                     </div>
+                    <div class="about-community-section" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
+                        <hr>
+                        <h3><?= __('public.community_title') ?></h3>
+                        <p><?= __('public.community_text') ?></p>
+                        <a href="https://github.com/orionmoon/sadaa/blob/main/CONTRIBUTING.md" target="_blank"
+                            class="btn-community">
+                            <iconify-icon icon="mdi:github"></iconify-icon>
+                            <?= __('public.contribute_action') ?>
+                        </a>
+                    </div>
                 <?php else: ?>
                     <p class="about-modal-text">À propos de Sadaa</p>
                 <?php endif; ?>
@@ -763,7 +777,7 @@ try {
                         }
                     ]
                 });
-                
+
                 driver.drive();
                 localStorage.setItem('sadaa_surah_tour_seen', 'true');
             }

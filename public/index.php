@@ -270,6 +270,11 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 </option>
             <?php endforeach; ?>
         </select>
+
+        <a href="https://github.com/orionmoon/sadaa" target="_blank" class="github-link"
+            title="<?= __('public.github_link') ?>">
+            <iconify-icon icon="mdi:github"></iconify-icon>
+        </a>
     </footer>
 
     <script>
@@ -299,50 +304,37 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
         // Calculate and set container width based on actual tab widths
         function getEffectiveVisibleCount() {
             const configCount = parseInt(tabsScroll.dataset.visibleCount) || 5;
-            // Mobile/Tablet adjustments: Max 2 tabs
             if (window.innerWidth < 768) return 2;
             return configCount;
         }
 
         function updateTabsContainerWidth() {
             if (!tabsScroll) return;
-
             const visibleCount = getEffectiveVisibleCount();
             const tabs = tabsScroll.querySelectorAll('.tab');
-
             if (tabs.length <= visibleCount) {
-                // All tabs fit, no need to set max-width
                 tabsScroll.style.maxWidth = 'none';
                 return;
             }
-
-            // Get gap from computed style
             const style = window.getComputedStyle(tabsScroll);
             const gap = parseFloat(style.gap) || parseFloat(style.columnGap) || 8;
-
-            // Calculate width of first N tabs + gaps
             let totalWidth = 0;
             const countToMeasure = Math.min(visibleCount, tabs.length);
             for (let i = 0; i < countToMeasure; i++) {
                 totalWidth += tabs[i].offsetWidth;
             }
-            // Add gaps
             if (countToMeasure > 1) {
                 totalWidth += gap * (countToMeasure - 1);
             }
-
             tabsScroll.style.maxWidth = totalWidth + 'px';
         }
 
         function updateTabNavArrows() {
             if (!tabsScroll || !tabNavLeft || !tabNavRight) return;
-
             const isRtl = document.documentElement.dir === 'rtl';
             const scrollLeft = tabsScroll.scrollLeft;
             const maxScroll = tabsScroll.scrollWidth - tabsScroll.clientWidth;
-
             if (isRtl) {
-                // RTL: scrollLeft is negative, starting from 0 and going to -maxScroll
                 tabNavRight.disabled = scrollLeft >= 0;
                 tabNavLeft.disabled = scrollLeft <= -maxScroll + 5;
             } else {
@@ -353,48 +345,28 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
 
         function scrollTabsBy(direction) {
             if (!tabsScroll) return;
-
-            const isRtl = document.documentElement.dir === 'rtl';
-            // Scroll by the width of visible tabs
             const visibleCount = getEffectiveVisibleCount();
             const tabs = tabsScroll.querySelectorAll('.tab');
             let scrollAmount = 0;
-            // Scroll by at most 2 tabs or visible count to enable partial navigation
-            const scrollTags = Math.min(visibleCount, 2);
-
-            // Or just scroll by visible width? The user said "1 onglet ou 2 selon largeur". 
-            // If we show 1 tab, we scroll by 1. If 2, scroll by 2 (or 1). Let's scroll by visible width.
             for (let i = 0; i < Math.min(visibleCount, tabs.length); i++) {
                 scrollAmount += tabs[i].offsetWidth;
             }
-
-            tabsScroll.scrollBy({
-                left: direction * scrollAmount,
-                behavior: 'smooth'
-            });
-
-            // Update arrows after scroll animation
+            tabsScroll.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
             setTimeout(updateTabNavArrows, 300);
         }
 
-        // Initialize tab scroll navigation
         if (tabsScroll) {
-            // Calculate width after fonts are loaded
             if (document.fonts && document.fonts.ready) {
                 document.fonts.ready.then(updateTabsContainerWidth);
             } else {
                 setTimeout(updateTabsContainerWidth, 100);
             }
-
             if (tabNavLeft && tabNavRight) {
                 tabNavLeft.addEventListener('click', () => scrollTabsBy(-1));
                 tabNavRight.addEventListener('click', () => scrollTabsBy(1));
-
                 tabsScroll.addEventListener('scroll', updateTabNavArrows);
-                setTimeout(updateTabNavArrows, 150); // After width is set
+                setTimeout(updateTabNavArrows, 150);
             }
-
-            // Recalculate on resize
             window.addEventListener('resize', updateTabsContainerWidth);
         }
 
@@ -405,7 +377,6 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
             } catch (e) { return jsonStr; }
         }
 
-        // Initialize content based on active tab
         function initType(typeId) {
             currentTypeId = typeId;
             currentCategories = categoriesData[typeId] || [];
@@ -414,14 +385,12 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
             updateSelection();
         }
 
-        // Render picker items
         function renderPicker() {
             track.innerHTML = '';
             if (currentCategories.length === 0) {
                 track.innerHTML = '<div class="picker-item active">-</div>';
                 return;
             }
-
             currentCategories.forEach((cat, idx) => {
                 const item = document.createElement('div');
                 item.className = `picker-item ${idx === 0 ? 'active' : ''}`;
@@ -433,67 +402,50 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 item.onclick = () => {
                     currentIndex = idx;
                     updateSelection();
+                    // Navigate directly on click
+                    window.location.href = `/category/${cat.slug}`;
                 };
                 track.appendChild(item);
             });
         }
 
-        // Update view state (transform, active classes, description, arrows)
         function updateSelection() {
             const items = track.querySelectorAll('.picker-item');
+            if (items.length === 0) return;
 
-            // 1. Update active class
             items.forEach((item, i) => {
                 item.classList.toggle('active', i === currentIndex);
             });
 
-            // 2. Scroll track - Fixed positioning based on index
-            // Force browser to recalculate layout after class changes
             void track.offsetHeight;
-
-            // Get actual heights from computed styles to support responsive design
             const tempItem = items[0] || track.firstElementChild;
             const tempActive = items[currentIndex] || tempItem;
+            if (!tempItem || !tempActive) return;
 
-            // Force layout recalculation to ensure we get updated styles
-            track.getBoundingClientRect();
-            tempActive.getBoundingClientRect();
-
-            // Get computed styles
             const itemStyles = window.getComputedStyle(tempItem);
             const activeStyles = window.getComputedStyle(tempActive);
-
             const ITEM_HEIGHT = parseFloat(itemStyles.height) || 40;
             const ACTIVE_HEIGHT = parseFloat(activeStyles.height) || 60;
             const VIEWPORT_HEIGHT = parseFloat(window.getComputedStyle(track.parentElement).height) || 120;
             const VIEWPORT_CENTER = VIEWPORT_HEIGHT / 2;
-
-            // Calculate position: sum of normal items + half of active item height
             const position = (currentIndex * ITEM_HEIGHT) + (ACTIVE_HEIGHT / 2);
             const translateY = VIEWPORT_CENTER - position;
-
             track.style.transform = `translateY(${translateY}px)`;
 
-            // 3. Update description
             if (currentCategories[currentIndex]) {
                 descEl.textContent = getLocalized(currentCategories[currentIndex].description);
             } else {
                 descEl.textContent = translations.no_category || "No category available";
             }
-
-            // 4. Update arrows
             arrowUp.disabled = currentIndex === 0;
             arrowDown.disabled = currentIndex === currentCategories.length - 1;
         }
 
-        // Events
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
                 initType(tab.dataset.typeId);
-
-                // Update active type label for mobile
                 const typeLabel = document.getElementById('active-type-label');
                 const tabText = tab.querySelector('span');
                 if (typeLabel && tabText) {
@@ -510,39 +462,31 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
             if (currentIndex < currentCategories.length - 1) { currentIndex++; updateSelection(); }
         });
 
-        // Theme Toggle
         document.getElementById('theme-toggle').addEventListener('click', () => {
             const html = document.documentElement;
-            const body = document.body;
             const current = html.classList.contains('dark') ? 'dark' : 'light';
             const next = current === 'dark' ? 'light' : 'dark';
-
             html.classList.remove(current);
             html.classList.add(next);
-            body.classList.remove(current);
-            body.classList.add(next);
+            document.body.classList.remove(current);
+            document.body.classList.add(next);
             document.cookie = `sadaa_theme=${next};path=/;max-age=31536000`;
         });
 
-        // Language
         function changeLanguage(code) {
             document.cookie = `sadaa_lang=${code};path=/;max-age=31536000`;
             window.location.reload();
         }
 
-        // Start
         document.getElementById('btn-start').addEventListener('click', () => {
             if (currentCategories[currentIndex]) {
                 window.location.href = `/category/${currentCategories[currentIndex].slug}`;
             }
         });
 
-        // Initialize
         const activeTab = document.querySelector('.tab.active');
         if (activeTab) {
             initType(activeTab.dataset.typeId);
-
-            // Set initial active type label for mobile
             const typeLabel = document.getElementById('active-type-label');
             const tabText = activeTab.querySelector('span');
             if (typeLabel && tabText) {
@@ -550,26 +494,20 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
             }
         }
 
-        // Keyboard Navigation
         document.addEventListener('keydown', (e) => {
-            // Only handle if no other interactive element is focused
             if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
-
             switch (e.key) {
                 case 'ArrowLeft':
                 case 'ArrowRight':
-                    // Switch Type
                     e.preventDefault();
                     navigateTypes(e.key === 'ArrowRight' ? 1 : -1);
                     break;
                 case 'ArrowUp':
                 case 'ArrowDown':
-                    // Switch Category
                     e.preventDefault();
                     navigateCategories(e.key === 'ArrowDown' ? 1 : -1);
                     break;
                 case 'Enter':
-                    // Start
                     if (currentCategories[currentIndex]) {
                         window.location.href = `/category/${currentCategories[currentIndex].slug}`;
                     }
@@ -581,11 +519,7 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
             const tabs = Array.from(document.querySelectorAll('.tab'));
             const activeIndex = tabs.findIndex(t => t.classList.contains('active'));
             if (activeIndex === -1) return;
-
-            let newIndex = activeIndex + direction;
-            if (newIndex < 0) newIndex = tabs.length - 1;
-            if (newIndex >= tabs.length) newIndex = 0;
-
+            let newIndex = (activeIndex + direction + tabs.length) % tabs.length;
             tabs[newIndex].click();
         }
 
@@ -612,9 +546,19 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                     </h2>
                     <div class="about-modal-text" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
                         <?php
-                        $allowedTags = '<h1><h2><h3><h4><h5><h6><p><br><strong><b><em><i><ul><ol><li>';
+                        $allowedTags = '<h1><h2><h3><h4><h5><h6><p><br><strong><b><em>|<i><ul><ol><li>';
                         echo strip_tags($aboutContent['content'], $allowedTags);
                         ?>
+                    </div>
+                    <div class="about-community-section" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
+                        <hr>
+                        <h3><?= __('public.community_title') ?></h3>
+                        <p><?= __('public.community_text') ?></p>
+                        <a href="https://github.com/orionmoon/sadaa/blob/main/CONTRIBUTING.md" target="_blank"
+                            class="btn-community">
+                            <iconify-icon icon="mdi:github"></iconify-icon>
+                            <?= __('public.contribute_action') ?>
+                        </a>
                     </div>
                 <?php else: ?>
                     <p class="about-modal-text">À propos de Sadaa</p>
@@ -670,10 +614,8 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
 
         // Close on Escape key
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (!aboutModal.classList.contains('hidden')) {
-                    closeAboutModal();
-                }
+            if (e.key === 'Escape' && !aboutModal.classList.contains('hidden')) {
+                closeAboutModal();
             }
         });
 
@@ -719,6 +661,15 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                         }
                     },
                     {
+                        element: '.github-link',
+                        popover: {
+                            title: translations.onboarding.steps.github.title,
+                            description: translations.onboarding.steps.github.text,
+                            side: "top",
+                            align: 'center'
+                        }
+                    },
+                    {
                         element: '.cta-button',
                         popover: {
                             title: translations.onboarding.steps.go.title,
@@ -750,7 +701,6 @@ $seoTitle = htmlspecialchars($siteName . ' | ' . $siteTagline);
                 localStorage.setItem('sadaa_onboarding_seen', 'true');
                 setTimeout(() => {
                     onboardingModal.style.display = 'none';
-                    // Start the tour after closing the welcome modal
                     startTour();
                 }, 500);
             });

@@ -233,6 +233,10 @@ return [
         'medinan' => 'Medinense',
         'verses' => 'versículos',
         'about' => 'Acerca de',
+        'github_link' => 'Encuéntranos en GitHub',
+        'community_title' => 'Comunidad y Contribuciones',
+        'community_text' => 'Este proyecto es de código abierto y dirigido por la comunidad. Puedes ayudarnos sugiriendo traducciones, categorías o nuevas ideas.',
+        'contribute_action' => 'Contribuir en GitHub',
     ],
 
     // Traducciones JavaScript (para frontend)
@@ -278,6 +282,10 @@ return [
             'display' => [
                 'title' => 'Personalización',
                 'text' => 'Ajusta la apariencia (claro/oscuro) y el idioma para una experiencia de lectura cómoda.',
+            ],
+            'github' => [
+                'title' => 'Comunidad',
+                'text' => '¡Sadaa es de código abierto! Únete a nosotros en GitHub para contribuir o sugerir mejoras.',
             ],
             'go' => [
                 'title' => '¿Listo para comenzar?',
