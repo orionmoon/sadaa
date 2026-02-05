@@ -23,6 +23,22 @@ try {
     }
 } catch (PDOException $e) {
 }
+
+// Fetch about content for modal
+$aboutContent = null;
+try {
+    $stmt = $pdo->prepare("SELECT * FROM about_content WHERE language_code = ? AND is_active = 1");
+    $stmt->execute([$currentLang]);
+    $aboutContent = $stmt->fetch();
+
+    // Fallback to Arabic
+    if (!$aboutContent) {
+        $stmt = $pdo->prepare("SELECT * FROM about_content WHERE language_code = 'ar' AND is_active = 1");
+        $stmt->execute();
+        $aboutContent = $stmt->fetch();
+    }
+} catch (PDOException $e) {
+}
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLang ?>" class="<?= $currentTheme ?>" dir="<?= isRtl() ? 'rtl' : 'ltr' ?>">
@@ -62,7 +78,7 @@ try {
         }
     } elseif (isset($_GET['category'])) {
         // Backward compatibility: redirect to slug-based URL
-        $categoryId = (int)$_GET['category'];
+        $categoryId = (int) $_GET['category'];
         try {
             $stmt = $pdo->prepare("SELECT slug FROM categories WHERE id = ?");
             $stmt->execute([$categoryId]);
@@ -96,51 +112,52 @@ try {
 
     <!-- Canonical URL -->
     <?php if ($categorySlug): ?>
-    <link rel="canonical" href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>">
+        <link rel="canonical" href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>">
     <?php endif; ?>
 
     <!-- Hreflang for multilingual -->
     <?php if ($categorySlug): ?>
         <?php foreach ($languages as $lang): ?>
-        <link rel="alternate" hreflang="<?= $lang['code'] ?>" href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?><?= $lang['code'] !== $currentLang ? '?lang=' . $lang['code'] : '' ?>">
+            <link rel="alternate" hreflang="<?= $lang['code'] ?>"
+                href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?><?= $lang['code'] !== $currentLang ? '?lang=' . $lang['code'] : '' ?>">
         <?php endforeach; ?>
         <link rel="alternate" hreflang="x-default" href="https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>">
     <?php endif; ?>
 
     <!-- JSON-LD Structured Data -->
     <?php if ($categorySlug && !empty($translatedName)): ?>
-    <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebPage",
-  "name": "<?= htmlspecialchars($translatedName) ?>",
-  "description": "<?= htmlspecialchars($pageDesc) ?>",
-  "url": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>",
-  "inLanguage": "<?= $currentLang ?>",
-  "isPartOf": {
-    "@type": "WebSite",
-    "name": "Sadaa",
-    "url": "https://sadaa.me"
-  },
-  "breadcrumb": {
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Accueil",
-        "item": "https://sadaa.me"
+        <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "<?= htmlspecialchars($translatedName) ?>",
+      "description": "<?= htmlspecialchars($pageDesc) ?>",
+      "url": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>",
+      "inLanguage": "<?= $currentLang ?>",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "Sadaa",
+        "url": "https://sadaa.me"
       },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "<?= htmlspecialchars($translatedName) ?>",
-        "item": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>"
+      "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Accueil",
+            "item": "https://sadaa.me"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "<?= htmlspecialchars($translatedName) ?>",
+            "item": "https://sadaa.me/category/<?= htmlspecialchars($categorySlug) ?>"
+          }
+        ]
       }
-    ]
-  }
-}
-    </script>
+    }
+        </script>
     <?php endif; ?>
 
     <!-- Favicon -->
@@ -149,7 +166,7 @@ try {
     <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
     <link rel="manifest" href="/assets/manifest.php">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
@@ -161,6 +178,9 @@ try {
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <!-- Library for generating images from HTML -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Driver.js for Guided Tour -->
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css" />
 </head>
 
 <body dir="<?= isRtl() ? 'rtl' : 'ltr' ?>">
@@ -223,20 +243,43 @@ try {
         <div class="picker-modal-content">
             <div class="welcome-content-wrapper">
                 <!-- Type Tabs -->
-                <section class="type-tabs">
-                    <?php 
-                    $totalTypes = count($types);
-                    foreach ($types as $index => $type):
-                        $typeName = getLocalizedValue($type['name'], $currentLang);
-                        $active = $index === 0 ? 'active' : '';
-                        $position = $index === 0 ? 'first' : ($index === $totalTypes - 1 ? 'last' : 'middle');
-                        ?>
-                        <button class="tab <?= $active ?> <?= $position ?>" data-type="<?= htmlspecialchars($type['slug']) ?>">
-                            <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
-                            <span><?= htmlspecialchars($typeName) ?></span>
+                <?php
+                $tabsVisibleCount = getSetting('tabs_visible_count', 5);
+                $needsScroll = count($types) > $tabsVisibleCount;
+                ?>
+                <div class="type-tabs-container<?= $needsScroll ? ' scrollable' : '' ?>"
+                    style="--tabs-visible: <?= $tabsVisibleCount ?>;">
+                    <?php if ($needsScroll): ?>
+                        <button class="tab-nav-arrow tab-nav-left" id="modal-tab-nav-left"
+                            aria-label="<?= __('common.previous') ?>">
+                            <iconify-icon icon="mdi:chevron-left"></iconify-icon>
                         </button>
-                    <?php endforeach; ?>
-                </section>
+                    <?php endif; ?>
+
+                    <section class="type-tabs" id="modal-type-tabs-scroll" data-visible-count="<?= $tabsVisibleCount ?>"
+                        style="--tabs-visible: <?= $tabsVisibleCount ?>">
+                        <?php
+                        $totalTypes = count($types);
+                        foreach ($types as $index => $type):
+                            $typeName = getLocalizedValue($type['name'], $currentLang);
+                            $active = $index === 0 ? 'active' : '';
+                            $position = $index === 0 ? 'first' : ($index === $totalTypes - 1 ? 'last' : 'middle');
+                            ?>
+                            <button class="tab <?= $active ?> <?= $position ?>"
+                                data-type="<?= htmlspecialchars($type['slug']) ?>">
+                                <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>
+                                <span><?= htmlspecialchars($typeName) ?></span>
+                            </button>
+                        <?php endforeach; ?>
+                    </section>
+
+                    <?php if ($needsScroll): ?>
+                        <button class="tab-nav-arrow tab-nav-right" id="modal-tab-nav-right"
+                            aria-label="<?= __('common.next') ?>">
+                            <iconify-icon icon="mdi:chevron-right"></iconify-icon>
+                        </button>
+                    <?php endif; ?>
+                </div>
 
                 <!-- Active Type Label (Mobile) -->
                 <div class="active-type-label" id="modal-active-type-label">
@@ -325,7 +368,8 @@ try {
                     $bookIcon = $book['icon'] ?? 'mdi:book-open-page-variant';
                     ?>
                     <button class="simple-option" data-book="<?= htmlspecialchars($book['slug']) ?>">
-                        <span class="option-icon"><iconify-icon icon="<?= htmlspecialchars($bookIcon) ?>"></iconify-icon></span>
+                        <span class="option-icon"><iconify-icon
+                                icon="<?= htmlspecialchars($bookIcon) ?>"></iconify-icon></span>
                         <span class="option-label"><?= htmlspecialchars($displayTitle) ?></span>
                     </button>
                 <?php endforeach; ?>
@@ -466,15 +510,21 @@ try {
     </main>
 
     <footer>
-        <a href="/" class="footer-signature fade-in" title="<?= __('actions.back_home') ?>">
-            <span class="logo-arabic">صَــدَى</span>
-        </a>
+        <div class="footer-content">
+            <a href="/" class="footer-signature fade-in" title="<?= __('actions.back_home') ?>">
+                <span class="logo-arabic">صَــدَى</span>
+            </a>
+            <button type="button" id="about-info-btn" class="info-btn footer-info-btn"
+                title="<?= __('public.about') ?>">
+                <iconify-icon icon="mdi:information-circle"></iconify-icon>
+            </button>
+        </div>
     </footer>
 
     <!-- Hidden select for backward compatibility -->
     <select id="category-select" style="display:none;">
         <?php if ($categoryId): ?>
-        <option value="<?= $categoryId ?>" selected><?= $categoryId ?></option>
+            <option value="<?= $categoryId ?>" selected><?= $categoryId ?></option>
         <?php endif; ?>
     </select>
 
@@ -485,8 +535,8 @@ try {
         window.languageEditions = <?= json_encode(array_column($languages, 'quran_edition', 'code')) ?>;
         window.importSource = '<?= $importSource ?>';
         <?php if ($categoryId): ?>
-        // Set current category ID for JavaScript
-        window.initialCategoryId = <?= $categoryId ?>;
+            // Set current category ID for JavaScript
+            window.initialCategoryId = <?= $categoryId ?>;
         <?php endif; ?>
     </script>
     <!-- JS -->
@@ -552,13 +602,13 @@ try {
 
             <!-- Arabic Text Toggle (only for non-Arabic languages) -->
             <?php if ($currentLang !== 'ar'): ?>
-            <div class="share-arabic-toggle" id="share-arabic-toggle-container">
-                <label class="toggle-label">
-                    <input type="checkbox" id="toggle-arabic-text" checked>
-                    <span class="toggle-slider"></span>
-                    <span class="toggle-text"><?= __('js.show_arabic') ?></span>
-                </label>
-            </div>
+                <div class="share-arabic-toggle" id="share-arabic-toggle-container">
+                    <label class="toggle-label">
+                        <input type="checkbox" id="toggle-arabic-text" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-text"><?= __('js.show_arabic') ?></span>
+                    </label>
+                </div>
             <?php endif; ?>
 
             <!-- Background Gallery (Optional) -->
@@ -571,15 +621,154 @@ try {
 
             <!-- Action Buttons -->
             <div class="share-action-buttons">
-                <button id="btn-download-image" class="btn-share-action btn-share-download" title="<?= __('actions.download') ?>">
+                <button id="btn-download-image" class="btn-share-action btn-share-download"
+                    title="<?= __('actions.download') ?>">
                     <iconify-icon icon="mdi:download"></iconify-icon>
                 </button>
-                <button id="btn-close-share" class="btn-share-action btn-share-close" title="<?= __('actions.close') ?>">
+                <button id="btn-close-share" class="btn-share-action btn-share-close"
+                    title="<?= __('actions.close') ?>">
                     <iconify-icon icon="mdi:close"></iconify-icon>
                 </button>
             </div>
         </div>
     </div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content about-modal-content">
+            <button type="button" id="close-about-modal" class="modal-close-btn">
+                <iconify-icon icon="mdi:close"></iconify-icon>
+            </button>
+            <div class="modal-body">
+                <?php if ($aboutContent): ?>
+                    <h2 class="about-modal-title" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
+                        <?= htmlspecialchars($aboutContent['title']) ?>
+                    </h2>
+                    <div class="about-modal-text" dir="<?= $currentLang === 'ar' ? 'rtl' : 'ltr' ?>">
+                        <?php
+                        $allowedTags = '<h1><h2><h3><h4><h5><h6><p><br><strong><b><em><i><ul><ol><li>';
+                        echo strip_tags($aboutContent['content'], $allowedTags);
+                        ?>
+                    </div>
+                <?php else: ?>
+                    <p class="about-modal-text">À propos de Sadaa</p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // About modal for surah page
+        const aboutBtn = document.getElementById('about-info-btn');
+        const aboutModal = document.getElementById('about-modal');
+        const closeAboutBtn = document.getElementById('close-about-modal');
+        const aboutBackdrop = aboutModal.querySelector('.modal-backdrop');
+
+        function openAboutModal() {
+            aboutModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAboutModal() {
+            aboutModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+
+        if (aboutBtn) {
+            aboutBtn.addEventListener('click', openAboutModal);
+        }
+
+        if (closeAboutBtn) {
+            closeAboutBtn.addEventListener('click', closeAboutModal);
+        }
+
+        if (aboutBackdrop) {
+            aboutBackdrop.addEventListener('click', closeAboutModal);
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !aboutModal.classList.contains('hidden')) {
+                closeAboutModal();
+            }
+        });
+
+        // Surah page tour guide
+        document.addEventListener('DOMContentLoaded', () => {
+            const tourSeen = localStorage.getItem('sadaa_surah_tour_seen');
+            if (!tourSeen) {
+                const driver = window.driver.js.driver({
+                    showProgress: true,
+                    animate: true,
+                    padding: 10,
+                    opacity: 0.75,
+                    nextBtnText: '<?= __("onboarding.btn_next") ?>',
+                    prevBtnText: '<?= __("onboarding.btn_prev") ?>',
+                    doneBtnText: '<?= __("onboarding.btn_done") ?>',
+                    steps: [
+                        {
+                            element: '#picker-trigger',
+                            popover: {
+                                title: '<?= __("surah_tour.category_title") ?>',
+                                description: '<?= __("surah_tour.category_text") ?>',
+                                side: "bottom",
+                                align: 'center'
+                            }
+                        },
+                        {
+                            element: '.card-container',
+                            popover: {
+                                title: '<?= __("surah_tour.reader_title") ?>',
+                                description: '<?= __("surah_tour.reader_text") ?>',
+                                side: "top",
+                                align: 'center'
+                            }
+                        },
+                        {
+                            element: '.nav-controls',
+                            popover: {
+                                title: '<?= __("surah_tour.navigation_title") ?>',
+                                description: '<?= __("surah_tour.navigation_text") ?>',
+                                side: "top",
+                                align: 'center'
+                            }
+                        },
+                        {
+                            element: '#btn-copy',
+                            popover: {
+                                title: '<?= __("surah_tour.copy_title") ?>',
+                                description: '<?= __("surah_tour.copy_text") ?>',
+                                side: "top",
+                                align: 'center'
+                            }
+                        },
+                        {
+                            element: '#btn-share',
+                            popover: {
+                                title: '<?= __("surah_tour.share_title") ?>',
+                                description: '<?= __("surah_tour.share_text") ?>',
+                                side: "top",
+                                align: 'center'
+                            }
+                        },
+                        {
+                            element: '#btn-read-quran',
+                            popover: {
+                                title: '<?= __("surah_tour.read_mode_title") ?>',
+                                description: '<?= __("surah_tour.read_mode_text") ?>',
+                                side: "top",
+                                align: 'center'
+                            }
+                        }
+                    ]
+                });
+                
+                driver.drive();
+                localStorage.setItem('sadaa_surah_tour_seen', 'true');
+            }
+        });
+    </script>
 
     <script src="/js/app.js"></script>
 </body>

@@ -44,6 +44,7 @@ if ($_POST) {
                 'app_name' => $_POST['app_name'] ?? 'Sadaa',
                 'default_language' => $_POST['default_language'] ?? 'fr',
                 'primary_color' => $_POST['primary_color'] ?? '#C99B35',
+                'tabs_visible_count' => max(3, min(10, (int) ($_POST['tabs_visible_count'] ?? 5))),
             ];
 
             foreach ($settings as $key => $value) {
@@ -193,6 +194,13 @@ adminHeader('Paramètres');
                     value="<?= htmlspecialchars($settings['primary_color'] ?? '#C99B35') ?>"
                     style="height: 42px; padding: 0.25rem;">
             </div>
+            <div class="form-group">
+                <label class="form-label">Onglets types visibles</label>
+                <input type="number" name="tabs_visible_count" class="form-input"
+                    value="<?= htmlspecialchars($settings['tabs_visible_count'] ?? '5') ?>"
+                    min="3" max="10" placeholder="5">
+                <small class="text-muted">Nombre d'onglets avant défilement (3-10)</small>
+            </div>
         </div>
 
         <!-- Tagline translations -->
@@ -209,7 +217,7 @@ adminHeader('Paramètres');
                     $isRtlLang = $lang['is_rtl'];
                     $currentTagline = $taglineSetting[$lang['code']] ?? '';
                     if (empty($currentTagline)) {
-                        $currentTagline = match($lang['code']) {
+                        $currentTagline = match ($lang['code']) {
                             'ar' => 'صدى الحكمة للروح',
                             'fr' => 'Écho de sagesse pour l\'âme',
                             'en' => 'Echo of wisdom for the soul',
@@ -222,7 +230,8 @@ adminHeader('Paramètres');
                     <div class="form-group">
                         <label class="form-label"><?= htmlspecialchars($langName['fr'] ?? $lang['code']) ?>
                             (<?= strtoupper($lang['code']) ?>)</label>
-                        <input type="text" name="tagline_<?= $lang['code'] ?>" class="form-input<?= $isRtlLang ? ' font-arabic' : '' ?>"
+                        <input type="text" name="tagline_<?= $lang['code'] ?>"
+                            class="form-input<?= $isRtlLang ? ' font-arabic' : '' ?>"
                             value="<?= htmlspecialchars($currentTagline) ?>" <?= $isRtlLang ? 'dir="rtl"' : '' ?>>
                     </div>
                 <?php endforeach; ?>

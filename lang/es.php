@@ -232,6 +232,7 @@ return [
         'meccan' => 'Mecana',
         'medinan' => 'Medinense',
         'verses' => 'versículos',
+        'about' => 'Acerca de',
     ],
 
     // Traducciones JavaScript (para frontend)
@@ -254,5 +255,50 @@ return [
         'story' => 'Story',
         'square' => 'Cuadrado',
         'show_arabic' => 'Mostrar texto en árabe',
+    ],
+
+    // Onboarding & Guided Tour
+    'onboarding' => [
+        'welcome_title' => 'Bienvenido a Sadaa',
+        'welcome_text' => 'Sada es un espacio de contemplación, donde el alma escucha el eco de la sabiduría coránica, y encuentra en los versículos una luz que la guía, y un significado que la acompaña en su camino.',
+        'btn_start' => 'Iniciar visita',
+        'btn_skip' => 'Omitir introducción',
+        'btn_next' => 'Siguiente',
+        'btn_prev' => 'Anterior',
+        'btn_done' => 'Finalizar',
+        'steps' => [
+            'themes' => [
+                'title' => 'Temáticas de exploración',
+                'text' => 'Deja que tu intuición te guíe y elige la temática que refleje tu estado mental o tu necesidad espiritual actual.',
+            ],
+            'intentions' => [
+                'title' => 'Ejes de reflexión',
+                'text' => 'Elige un eje que represente aquello que deseas reflexionar y descubre los versículos que lo tratan en distintos contextos.',
+            ],
+            'display' => [
+                'title' => 'Personalización',
+                'text' => 'Ajusta la apariencia (claro/oscuro) y el idioma para una experiencia de lectura cómoda.',
+            ],
+            'go' => [
+                'title' => '¿Listo para comenzar?',
+                'text' => 'Haz clic aquí para iniciar tu recorrido de reflexión a través de los versículos del eje elegido.',
+            ],
+        ],
+    ],
+
+    // Surah Page Tour
+    'surah_tour' => [
+        'category_title' => 'Cambiar tema',
+        'category_text' => 'Seleccione una categoría espiritual para explorar versículos relevantes',
+        'reader_title' => 'Lectura del versículo',
+        'reader_text' => 'Lea el versículo en árabe y su traducción',
+        'navigation_title' => 'Navegación',
+        'navigation_text' => 'Use las flechas para navegar entre los versículos',
+        'copy_title' => 'Copiar',
+        'copy_text' => 'Copie el texto del versículo al portapapeles',
+        'share_title' => 'Compartir',
+        'share_text' => 'Cree una imagen hermosa del versículo para compartir en redes sociales',
+        'read_mode_title' => 'Modo lectura',
+        'read_mode_text' => 'Abra el lector completo del Corán para leer toda la surah',
     ],
 ];

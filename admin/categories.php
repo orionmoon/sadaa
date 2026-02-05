@@ -88,6 +88,40 @@ if ($_POST) {
         }
     }
 
+    if (isset($_POST['reorder_category'])) {
+        try {
+            $categoryId = (int) $_POST['category_id'];
+            $direction = $_POST['direction']; // 'up' or 'down'
+
+            // Get current category's sort_order and type_id
+            $stmt = $pdo->prepare("SELECT type_id, sort_order FROM categories WHERE id = ?");
+            $stmt->execute([$categoryId]);
+            $category = $stmt->fetch();
+            $typeId = (int) $category['type_id'];
+            $currentOrder = (int) $category['sort_order'];
+
+            if ($direction === 'up' && $currentOrder > 1) {
+                // Swap with the previous category within the same type
+                $newOrder = $currentOrder - 1;
+                $pdo->prepare("UPDATE categories SET sort_order = ? WHERE type_id = ? AND sort_order = ?")->execute([$currentOrder, $typeId, $newOrder]);
+                $pdo->prepare("UPDATE categories SET sort_order = ? WHERE id = ?")->execute([$newOrder, $categoryId]);
+                $message = 'Ordre mis à jour';
+            } elseif ($direction === 'down') {
+                // Swap with the next category within the same type
+                $newOrder = $currentOrder + 1;
+                $stmt = $pdo->prepare("SELECT id FROM categories WHERE type_id = ? AND sort_order = ?");
+                $stmt->execute([$typeId, $newOrder]);
+                if ($stmt->fetch()) {
+                    $pdo->prepare("UPDATE categories SET sort_order = ? WHERE type_id = ? AND sort_order = ?")->execute([$currentOrder, $typeId, $newOrder]);
+                    $pdo->prepare("UPDATE categories SET sort_order = ? WHERE id = ?")->execute([$newOrder, $categoryId]);
+                    $message = 'Ordre mis à jour';
+                }
+            }
+        } catch (PDOException $e) {
+            $error = 'Erreur: ' . $e->getMessage();
+        }
+    }
+
     if (isset($_POST['delete_category'])) {
         try {
             $stmt = $pdo->prepare("DELETE FROM categories WHERE id = ?");
@@ -158,6 +192,9 @@ $commonIcons = [
 
 adminHeader('Gestion des Catégories');
 ?>
+
+<!-- SortableJS for drag and drop -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
 
 <div class="page-header">
     <h1 class="page-title">Catégories</h1>
@@ -379,6 +416,7 @@ adminHeader('Gestion des Catégories');
         <table class="table">
             <thead>
                 <tr>
+                    <th style="width: 60px;">Ordre</th>
                     <th>Icône</th>
                     <th>Nom</th>
                     <th>Type</th>
@@ -387,11 +425,44 @@ adminHeader('Gestion des Catégories');
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($categories as $cat):
+                <?php
+                $totalInType = [];
+                // Count categories per type for reordering logic
+                foreach ($categories as $c) {
+                    $tid = $c['type_id'];
+                    $totalInType[$tid] = ($totalInType[$tid] ?? 0) + 1;
+                }
+
+                $currentGroupIndex = [];
+                foreach ($categories as $cat):
+                    $tid = $cat['type_id'];
+                    $currentGroupIndex[$tid] = ($currentGroupIndex[$tid] ?? 0) + 1;
+                    $isFirst = $currentGroupIndex[$tid] === 1;
+                    $isLast = $currentGroupIndex[$tid] === $totalInType[$tid];
+
                     $name = json_decode($cat['name'], true);
                     $typeName = json_decode($cat['type_name'], true);
                     ?>
                     <tr>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 2px; align-items: center;">
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
+                                    <input type="hidden" name="direction" value="up">
+                                    <button type="submit" name="reorder_category" class="btn btn-sm" <?= $isFirst ? 'disabled' : '' ?> title="Monter">
+                                        <iconify-icon icon="mdi:chevron-up"></iconify-icon>
+                                    </button>
+                                </form>
+                                <span class="badge"><?= $cat['sort_order'] ?></span>
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="category_id" value="<?= $cat['id'] ?>">
+                                    <input type="hidden" name="direction" value="down">
+                                    <button type="submit" name="reorder_category" class="btn btn-sm" <?= $isLast ? 'disabled' : '' ?> title="Descendre">
+                                        <iconify-icon icon="mdi:chevron-down"></iconify-icon>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                         <td>
                             <span style="font-size: 1.5rem; color: <?= $cat['color'] ?>;">
                                 <iconify-icon icon="<?= htmlspecialchars($cat['icon']) ?>"></iconify-icon>

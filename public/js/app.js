@@ -64,6 +64,10 @@ const els = {
     modalSource: document.getElementById('modal-source'),
     modalActiveTypeLabel: document.getElementById('modal-active-type-label'),
     typeTabs: document.querySelectorAll('.tab'),
+    // Modal Tabs Scroll
+    modalTabsScroll: document.getElementById('modal-type-tabs-scroll'),
+    modalTabNavLeft: document.getElementById('modal-tab-nav-left'),
+    modalTabNavRight: document.getElementById('modal-tab-nav-right'),
     // Mobile selectors
     langToggleMobile: document.getElementById('lang-toggle-mobile'),
     bookToggleMobile: document.getElementById('book-toggle-mobile'),
@@ -153,20 +157,20 @@ async function loadSurah(number, startAtEnd = false) {
     try {
         // Load surah data and category surahs in parallel if in category mode
         const promises = [];
-        
+
         // Main surah data
         const url = `/api.php?endpoint=surah&surah=${number}&category=${state.currentCategory || ''}`;
         promises.push(fetch(url).then(r => r.json()));
-        
+
         // If in category mode and categorySurahs is empty, load them
         if (state.currentCategory && state.categorySurahs.length === 0) {
             const catUrl = `/api.php?endpoint=surahs&category_id=${state.currentCategory}`;
             promises.push(fetch(catUrl).then(r => r.json()));
         }
-        
+
         const results = await Promise.all(promises);
         const res = results[0];
-        
+
         // If we loaded category surahs, store them
         if (results[1] && results[1].status === 'success' && results[1].data) {
             state.categorySurahs = results[1].data;
@@ -354,7 +358,7 @@ function renderSurah() {
     if (state.currentCategory && state.categorySurahs.length > 0) {
         const currentSurahNum = parseInt(surah.number, 10);
         const currentIndex = state.categorySurahs.findIndex(s => parseInt(s.number, 10) === currentSurahNum);
-        
+
         if (currentIndex !== -1) {
             state.prevSurahId = currentIndex > 0 ? state.categorySurahs[currentIndex - 1].number : null;
             state.nextSurahId = currentIndex < state.categorySurahs.length - 1 ? state.categorySurahs[currentIndex + 1].number : null;
@@ -635,6 +639,17 @@ function setupEventListeners() {
         });
     });
 
+    // Modal Tab Scroll Navigation
+    if (els.modalTabsScroll) {
+        if (els.modalTabNavLeft && els.modalTabNavRight) {
+            els.modalTabNavLeft.addEventListener('click', () => scrollModalTabsBy(-1));
+            els.modalTabNavRight.addEventListener('click', () => scrollModalTabsBy(1));
+
+            els.modalTabsScroll.addEventListener('scroll', updateModalTabArrows);
+            window.addEventListener('resize', updateModalTabsWidth);
+        }
+    }
+
     // Keyboard Navigation
     document.addEventListener('keydown', (e) => {
         // Picker Modal keyboard navigation
@@ -782,7 +797,7 @@ function setupEventListeners() {
     // Mobile language selector
     if (els.langToggleMobile && els.langModal) {
         els.langToggleMobile.addEventListener('click', () => openSimpleModal(els.langModal));
-        
+
         // Language options click
         const langOptions = els.langModal.querySelectorAll('.simple-option');
         langOptions.forEach(opt => {
@@ -795,7 +810,7 @@ function setupEventListeners() {
                 }
             });
         });
-        
+
         // Close on backdrop click
         els.langModal.querySelector('.picker-modal-backdrop').addEventListener('click', () => {
             closeSimpleModal(els.langModal);
@@ -805,7 +820,7 @@ function setupEventListeners() {
     // Mobile book selector
     if (els.bookToggleMobile && els.bookModal) {
         els.bookToggleMobile.addEventListener('click', () => openSimpleModal(els.bookModal));
-        
+
         // Book options click
         const bookOptions = els.bookModal.querySelectorAll('.simple-option');
         bookOptions.forEach(opt => {
@@ -814,22 +829,22 @@ function setupEventListeners() {
                 if (bookSlug) {
                     // Update state
                     state.currentBook = bookSlug;
-                    
+
                     // Update desktop select if exists
                     if (els.bookSelect) {
                         els.bookSelect.value = bookSlug;
                     }
-                    
+
                     // Save preference
                     setCookie('sadaa_book', bookSlug, 365);
-                    
+
                     // Close modal
                     closeSimpleModal(els.bookModal);
-                    
+
                     // Show feedback (optional)
                     const bookLabel = opt.querySelector('.option-label')?.textContent || bookSlug;
                     console.log(`Switched to book: ${bookLabel}`);
-                    
+
                     // Reload data for the new book
                     if (state.currentCategory) {
                         loadFirstSurahForCategory(state.currentCategory);
@@ -839,13 +854,13 @@ function setupEventListeners() {
                 }
             });
         });
-        
+
         // Close on backdrop click
         els.bookModal.querySelector('.picker-modal-backdrop').addEventListener('click', () => {
             closeSimpleModal(els.bookModal);
         });
     }
-    
+
     // Desktop book selector
     if (els.bookSelect) {
         els.bookSelect.addEventListener('change', (e) => {
@@ -853,7 +868,7 @@ function setupEventListeners() {
             if (bookSlug) {
                 state.currentBook = bookSlug;
                 setCookie('sadaa_book', bookSlug, 365);
-                
+
                 // Reload data
                 if (state.currentCategory) {
                     loadFirstSurahForCategory(state.currentCategory);
@@ -882,10 +897,91 @@ function closeSimpleModal(modal) {
 
 // --- Helpers ---
 
+// --- Modal Tabs Scroll Logic ---
+function getEffectiveModalVisibleCount() {
+    if (!els.modalTabsScroll) return 5;
+    const configCount = parseInt(els.modalTabsScroll.dataset.visibleCount) || 5;
+    // Mobile/Tablet adjustments: Max 2 tabs
+    if (window.innerWidth < 768) return 2;
+    return configCount;
+}
+
+function updateModalTabsWidth() {
+    if (!els.modalTabsScroll) return;
+
+    const visibleCount = getEffectiveModalVisibleCount();
+    const tabs = els.modalTabsScroll.querySelectorAll('.tab');
+
+    if (tabs.length <= visibleCount) {
+        els.modalTabsScroll.style.maxWidth = 'none';
+        updateModalTabArrows();
+        return;
+    }
+
+    // Get gap from computed style
+    const style = window.getComputedStyle(els.modalTabsScroll);
+    const gap = parseFloat(style.gap) || parseFloat(style.columnGap) || 8;
+
+    let totalWidth = 0;
+    const countToMeasure = Math.min(visibleCount, tabs.length);
+    for (let i = 0; i < countToMeasure; i++) {
+        totalWidth += tabs[i].offsetWidth;
+    }
+    // Add gaps
+    if (countToMeasure > 1) {
+        totalWidth += gap * (countToMeasure - 1);
+    }
+
+    els.modalTabsScroll.style.maxWidth = totalWidth + 'px';
+    updateModalTabArrows();
+}
+
+function updateModalTabArrows() {
+    if (!els.modalTabsScroll || !els.modalTabNavLeft || !els.modalTabNavRight) return;
+
+    const isRtl = document.documentElement.dir === 'rtl';
+    const scrollLeft = els.modalTabsScroll.scrollLeft;
+    const maxScroll = els.modalTabsScroll.scrollWidth - els.modalTabsScroll.clientWidth;
+
+    if (isRtl) {
+        els.modalTabNavRight.disabled = scrollLeft >= 0;
+        els.modalTabNavLeft.disabled = scrollLeft <= -maxScroll + 5;
+    } else {
+        els.modalTabNavLeft.disabled = scrollLeft <= 5;
+        els.modalTabNavRight.disabled = scrollLeft >= maxScroll - 5;
+    }
+}
+
+function scrollModalTabsBy(direction) {
+    if (!els.modalTabsScroll) return;
+
+    const isRtl = document.documentElement.dir === 'rtl';
+    const visibleCount = getEffectiveModalVisibleCount();
+    const tabs = els.modalTabsScroll.querySelectorAll('.tab');
+
+    let scrollAmount = 0;
+    // Scroll by visible width or at most 2 tabs for better navigation on mobile
+    const scrollTags = Math.min(visibleCount, 2);
+
+    for (let i = 0; i < Math.min(scrollTags, tabs.length); i++) {
+        scrollAmount += tabs[i].offsetWidth;
+    }
+
+    els.modalTabsScroll.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+    });
+
+    setTimeout(updateModalTabArrows, 300);
+}
+
 function openPicker() {
     els.pickerModal.classList.remove('hidden');
     void els.pickerModal.offsetWidth;
     els.pickerModal.classList.add('visible');
+
+    // Init scrollable tabs width now that modal is visible
+    updateModalTabsWidth();
 
     // Sync UI with current category state
     const currentCat = state.categories.find(c => c.id == state.currentCategory);
@@ -1029,31 +1125,31 @@ function scrollToActiveCategory() {
     // Same dynamic calculation as index page
     // Force browser to recalculate layout
     void els.modalPickerTrack.offsetHeight;
-    
+
     // Get all picker items
     const items = els.modalPickerTrack.querySelectorAll('.picker-item');
     if (!items.length) return;
-    
+
     const tempItem = items[0];
     const tempActive = items[activeIdx];
-    
+
     // Force layout recalculation
     els.modalPickerTrack.getBoundingClientRect();
     tempActive.getBoundingClientRect();
-    
+
     // Get computed styles (same technique as index page)
     const itemStyles = window.getComputedStyle(tempItem);
     const activeStyles = window.getComputedStyle(tempActive);
-    
+
     const ITEM_HEIGHT = parseFloat(itemStyles.height) || 40;
     const ACTIVE_HEIGHT = parseFloat(activeStyles.height) || 60;
     const VIEWPORT_HEIGHT = parseFloat(window.getComputedStyle(els.modalPickerTrack.parentElement).height) || 140;
     const VIEWPORT_CENTER = VIEWPORT_HEIGHT / 2;
-    
+
     // Calculate position: sum of normal items + half of active item height
     const position = (activeIdx * ITEM_HEIGHT) + (ACTIVE_HEIGHT / 2);
     const translateY = VIEWPORT_CENTER - position;
-    
+
     els.modalPickerTrack.style.transform = `translateY(${translateY}px)`;
 
     // Update arrows state
@@ -1090,7 +1186,7 @@ function renderPickerItems() {
         };
         container.appendChild(item);
     });
-    
+
     // Ensure scroll position is updated after DOM render
     requestAnimationFrame(() => {
         scrollToActiveCategory();

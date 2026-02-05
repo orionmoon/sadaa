@@ -232,6 +232,7 @@ return [
         'meccan' => 'Mecquoise',
         'medinan' => 'Médinoise',
         'verses' => 'versets',
+        'about' => 'À propos',
     ],
 
     // JavaScript translations (for frontend)
@@ -254,5 +255,50 @@ return [
         'story' => 'Story',
         'square' => 'Carré',
         'show_arabic' => 'Afficher le texte arabe',
+    ],
+
+    // Onboarding & Guided Tour
+    'onboarding' => [
+        'welcome_title' => 'Bienvenue sur Sadaa',
+        'welcome_text' => 'Sada est un espace de contemplation, où l\'âme écoute l\'écho de la sagesse coranique, et trouve dans les versets une lumière qui la guide, et un sens qui l\'accompagne dans son cheminement.',
+        'btn_start' => 'Commencer la visite',
+        'btn_skip' => 'Passer l\'introduction',
+        'btn_next' => 'Suivant',
+        'btn_prev' => 'Précédent',
+        'btn_done' => 'Terminer',
+        'steps' => [
+            'themes' => [
+                'title' => 'Thématiques d’exploration',
+                'text' => 'Laissez votre ressenti vous guider et choisissez la thématique qui reflète votre état d’esprit ou votre besoin spirituel du moment.',
+            ],
+            'intentions' => [
+                'title' => 'Axes de méditation',
+                'text' => 'Choisissez un axe correspondant à ce que vous souhaitez méditer, afin de découvrir les versets qui l’abordent dans leurs différents contextes.',
+            ],
+            'display' => [
+                'title' => 'Personnalisation',
+                'text' => 'Ajustez l’apparence (clair/sombre) et la langue pour une expérience de lecture confortable.',
+            ],
+            'go' => [
+                'title' => 'Prêt à commencer ?',
+                'text' => 'Cliquez ici pour commencer votre parcours de méditation à travers les versets liés à l’axe choisi.',
+            ],
+        ],
+    ],
+
+    // Surah Page Tour
+    'surah_tour' => [
+        'category_title' => 'Changer de thème',
+        'category_text' => 'Sélectionnez une catégorie spirituelle pour explorer des versets adaptés',
+        'reader_title' => 'Lecture du verset',
+        'reader_text' => 'Lisez le verset en arabe et sa traduction',
+        'navigation_title' => 'Navigation',
+        'navigation_text' => 'Utilisez les flèches pour parcourir les versets',
+        'copy_title' => 'Copier',
+        'copy_text' => 'Copiez le texte du verset dans le presse-papiers',
+        'share_title' => 'Partager',
+        'share_text' => 'Créez une belle image du verset pour la partager sur les réseaux sociaux',
+        'read_mode_title' => 'Mode lecture',
+        'read_mode_text' => 'Ouvrez le lecteur complet pour lire la sourate entière',
     ],
 ];

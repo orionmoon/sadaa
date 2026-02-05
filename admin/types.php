@@ -78,6 +78,38 @@ if ($_POST) {
             $error = 'Erreur: ' . $e->getMessage();
         }
     }
+
+    if (isset($_POST['reorder_type'])) {
+        try {
+            $typeId = (int) $_POST['type_id'];
+            $direction = $_POST['direction']; // 'up' or 'down'
+
+            // Get current type's sort_order
+            $stmt = $pdo->prepare("SELECT sort_order FROM types WHERE id = ?");
+            $stmt->execute([$typeId]);
+            $currentOrder = (int) $stmt->fetchColumn();
+
+            if ($direction === 'up' && $currentOrder > 1) {
+                // Swap with the previous type
+                $newOrder = $currentOrder - 1;
+                $pdo->prepare("UPDATE types SET sort_order = ? WHERE sort_order = ?")->execute([$currentOrder, $newOrder]);
+                $pdo->prepare("UPDATE types SET sort_order = ? WHERE id = ?")->execute([$newOrder, $typeId]);
+                $message = 'Ordre mis à jour';
+            } elseif ($direction === 'down') {
+                // Swap with the next type
+                $newOrder = $currentOrder + 1;
+                $stmt = $pdo->prepare("SELECT id FROM types WHERE sort_order = ?");
+                $stmt->execute([$newOrder]);
+                if ($stmt->fetch()) {
+                    $pdo->prepare("UPDATE types SET sort_order = ? WHERE sort_order = ?")->execute([$currentOrder, $newOrder]);
+                    $pdo->prepare("UPDATE types SET sort_order = ? WHERE id = ?")->execute([$newOrder, $typeId]);
+                    $message = 'Ordre mis à jour';
+                }
+            }
+        } catch (PDOException $e) {
+            $error = 'Erreur: ' . $e->getMessage();
+        }
+    }
 }
 
 // Get all types
@@ -297,6 +329,7 @@ adminHeader('Gestion des Types');
         <table class="table">
             <thead>
                 <tr>
+                    <th style="width: 60px;">Ordre</th>
                     <th>Icône</th>
                     <th>Nom</th>
                     <th>Catégories</th>
@@ -304,10 +337,33 @@ adminHeader('Gestion des Types');
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($types as $type):
+                <?php 
+                $totalTypes = count($types);
+                foreach ($types as $index => $type):
                     $name = json_decode($type['name'], true);
+                    $isFirst = $index === 0;
+                    $isLast = $index === $totalTypes - 1;
                     ?>
                     <tr>
+                        <td>
+                            <div style="display: flex; flex-direction: column; gap: 2px; align-items: center;">
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="type_id" value="<?= $type['id'] ?>">
+                                    <input type="hidden" name="direction" value="up">
+                                    <button type="submit" name="reorder_type" class="btn btn-sm" <?= $isFirst ? 'disabled' : '' ?> title="Monter">
+                                        <iconify-icon icon="mdi:chevron-up"></iconify-icon>
+                                    </button>
+                                </form>
+                                <span class="badge"><?= $type['sort_order'] ?></span>
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="type_id" value="<?= $type['id'] ?>">
+                                    <input type="hidden" name="direction" value="down">
+                                    <button type="submit" name="reorder_type" class="btn btn-sm" <?= $isLast ? 'disabled' : '' ?> title="Descendre">
+                                        <iconify-icon icon="mdi:chevron-down"></iconify-icon>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                         <td>
                             <span style="font-size: 1.5rem; color: <?= $type['color'] ?>;">
                                 <iconify-icon icon="<?= htmlspecialchars($type['icon']) ?>"></iconify-icon>

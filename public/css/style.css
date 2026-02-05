@@ -177,6 +177,7 @@ body {
     color: var(--text-secondary);
     margin-top: 0.75rem;
     letter-spacing: 0.5px;
+    white-space: nowrap;
 }
 
 /* Type Tabs */
@@ -208,6 +209,9 @@ body {
     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     min-width: 120px;
     position: relative;
+    /* Prevent text wrapping */
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* Tab positioning for rounded corners - LTR (default) */
@@ -260,6 +264,15 @@ body {
     border-radius: 0 9999px 9999px 0;
 }
 
+@media (max-width: 650px) {
+
+    /* Hide active type label on mobile as requested */
+    .active-type-label,
+    #modal-active-type-label {
+        display: none !important;
+    }
+}
+
 .tab.active.first.last {
     border-radius: 9999px;
 }
@@ -271,6 +284,85 @@ body {
 
 [dir="rtl"] .tab.active.last {
     border-radius: 9999px 0 0 9999px;
+}
+
+/* Type Tabs Container (Scrollable) */
+.type-tabs-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    max-width: 100%;
+}
+
+.type-tabs-container.scrollable {
+    gap: 0.5rem;
+}
+
+.type-tabs-container.scrollable .type-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE/Edge */
+    flex: 0 0 auto;
+    /* Max-width is set dynamically by JavaScript based on actual tab widths */
+    /* Scroll snapping - always stop on complete tabs */
+    scroll-snap-type: x mandatory;
+}
+
+/* Individual tabs snap to start */
+.type-tabs-container.scrollable .type-tabs .tab {
+    scroll-snap-align: start;
+}
+
+.type-tabs-container.scrollable .type-tabs::-webkit-scrollbar {
+    display: none;
+    /* Chrome/Safari */
+}
+
+/* Tab Navigation Arrows */
+.tab-nav-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.tab-nav-arrow:hover:not(:disabled) {
+    background: var(--bg-secondary);
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+}
+
+.tab-nav-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.tab-nav-arrow iconify-icon {
+    font-size: 1.25rem;
+}
+
+/* RTL support for navigation arrows */
+[dir="rtl"] .tab-nav-left iconify-icon {
+    transform: scaleX(-1);
+}
+
+[dir="rtl"] .tab-nav-right iconify-icon {
+    transform: scaleX(-1);
 }
 
 /* Picker Section (Carousel style) */
@@ -556,7 +648,8 @@ select:hover {
 
     .type-tabs {
         display: inline-flex;
-        justify-content: center;
+        justify-content: flex-start;
+        /* Fix for hidden tabs scrolling */
     }
 
     .tab {
@@ -567,9 +660,7 @@ select:hover {
         min-width: auto;
     }
 
-    .tab span {
-        display: none;
-    }
+    /* .tab span { display: none; } REMOVED to show text on mobile */
 
     .active-type-label {
         display: block;
@@ -599,7 +690,7 @@ select:hover {
 
     .welcome-header .tagline {
         font-size: 0.75rem;
-        max-width: 250px;
+        max-width: none;
     }
 
     .welcome-main {
@@ -1699,7 +1790,8 @@ footer {
     }
 
     /* Reduced selectors on sides */
-    .h-left, .h-right {
+    .h-left,
+    .h-right {
         display: flex;
         gap: 0.25rem;
         align-items: center;
@@ -1823,44 +1915,44 @@ footer {
     font-weight: 500;
 }
 
-    #lang-toggle-mobile iconify-icon,
-    #book-toggle-mobile iconify-icon {
-        font-size: 1.1rem;
-    }
+#lang-toggle-mobile iconify-icon,
+#book-toggle-mobile iconify-icon {
+    font-size: 1.1rem;
+}
 
-    .main-viewport {
-        padding: 0.5rem;
-        gap: 0;
-    }
+.main-viewport {
+    padding: 0.5rem;
+    gap: 0;
+}
 
-    .bottom-section {
-        gap: 0.4rem;
-    }
+.bottom-section {
+    gap: 0.4rem;
+}
 
-    .surah-title {
-        font-size: 1.1rem;
-    }
+.surah-title {
+    font-size: 1.1rem;
+}
 
-    .verse-ref {
-        font-size: 0.75rem;
-    }
+.verse-ref {
+    font-size: 0.75rem;
+}
 
-    .btn-icon.large {
-        width: 38px;
-        height: 38px;
-        font-size: 1.1rem;
-    }
+.btn-icon.large {
+    width: 38px;
+    height: 38px;
+    font-size: 1.1rem;
+}
 
-    .btn-icon.large iconify-icon {
-        font-size: 1.3rem;
-        width: 1.3rem;
-        height: 1.3rem;
-    }
+.btn-icon.large iconify-icon {
+    font-size: 1.3rem;
+    width: 1.3rem;
+    height: 1.3rem;
+}
 
-    .footer-signature {
-        font-size: 1rem;
-        padding: 0.25rem 0;
-    }
+.footer-signature {
+    font-size: 1rem;
+    padding: 0.25rem 0;
+}
 }
 
 /* ============================================
@@ -2447,13 +2539,21 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    height: 32px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
     cursor: pointer;
     transition: all 0.2s ease;
+    opacity: 0.6;
+}
+
+.btn-share-action:hover {
+    color: var(--color-primary);
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 .btn-share-action iconify-icon {
@@ -2525,12 +2625,12 @@ footer {
     transition: all 0.2s ease;
 }
 
-.toggle-label input:checked + .toggle-slider {
+.toggle-label input:checked+.toggle-slider {
     background: var(--color-primary);
     border-color: var(--color-primary);
 }
 
-.toggle-label input:checked + .toggle-slider::after {
+.toggle-label input:checked+.toggle-slider::after {
     background: white;
     left: 20px;
 }
@@ -2688,18 +2788,17 @@ footer {
     margin-bottom: 10px;
 }
 
+.theme-light .card-category {
+    color: #8B6B23;
+}
+
 /* Larger font for Arabic text */
 .card-category[dir="rtl"] {
     font-size: 36px;
 }
 
-.card-surah-title {
-    font-family: var(--font-display);
-    font-size: 48px;
-    color: var(--color-primary);
-    font-weight: 700;
-    opacity: 0.95;
-    margin-bottom: 8px;
+.theme-light .card-surah-title {
+    color: #8B6B23;
 }
 
 .share-card .card-ayah-number {
@@ -2708,6 +2807,10 @@ footer {
     color: var(--color-primary);
     opacity: 0.8;
     letter-spacing: 4px;
+}
+
+.theme-light .card-ayah-number {
+    color: #8B6B23;
 }
 
 /* Larger font for Arabic ayah number */
@@ -2723,6 +2826,11 @@ footer {
     direction: rtl;
     padding: 0 40px;
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.theme-light .card-arabic {
+    color: #8B6B23;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .share-card .card-translation {
@@ -2759,11 +2867,20 @@ footer {
     vertical-align: middle;
 }
 
+.theme-light .ayah-number {
+    border-color: #8B6B23;
+    color: #8B6B23;
+}
+
 .share-card .ayah-ornament {
     color: var(--color-primary);
     font-family: var(--font-amiri);
     font-size: 1.2em;
     margin: 0 10px;
+}
+
+.theme-light .ayah-ornament {
+    color: #8B6B23;
 }
 
 
@@ -2785,6 +2902,10 @@ footer {
     color: var(--color-primary);
     font-weight: 700;
     line-height: 1;
+}
+
+.theme-light .card-logo {
+    color: #8B6B23;
 }
 
 .share-card .card-url {
@@ -2837,9 +2958,15 @@ footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-secondary);
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
     color: var(--text-secondary);
-    font-size: 1.5rem;
+    font-size: 1.2rem;
+    box-shadow: none !important;
+}
+
+[data-theme="light"] .btn-bg-none {
+    border-color: rgba(0, 0, 0, 0.1) !important;
 }
 
 @media (max-width: 768px) {
@@ -2913,7 +3040,9 @@ footer {
         font-size: 0.85rem;
         min-width: 140px;
     }
-}/* ============================================
+}
+
+/* ============================================
    About Modal & Info Button Styles
    ============================================ */
 
@@ -3021,19 +3150,20 @@ footer {
         max-height: 85vh;
         padding: 1.5rem;
     }
-    
+
     .about-modal-title {
         font-size: 1.5rem;
     }
-    
+
     .about-modal-text {
         font-size: 1rem;
     }
-    
+
     .info-btn iconify-icon {
         font-size: 1rem;
     }
 }
+
 /* ============================================
    Modal Base Styles
    ============================================ */
@@ -3078,31 +3208,298 @@ footer {
 
 .modal-close-btn {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 1.2rem;
+    right: 1.2rem;
     background: transparent;
     border: none;
     color: var(--text-secondary);
+    opacity: 0.5;
     cursor: pointer;
-    padding: 0.5rem;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
     transition: all 0.2s ease;
     z-index: 1002;
+    width: 20px;
+    height: 20px;
 }
 
 .modal-close-btn:hover {
-    background: var(--bg-secondary);
     color: var(--color-primary);
+    opacity: 1;
+    background: transparent;
 }
 
 .modal-close-btn iconify-icon {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
 
 .modal-body {
     padding: 1rem;
 }
 
+/* Footer content wrapper */
+.footer-content {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Footer info button for surah page */
+.footer-info-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.footer-info-btn:hover {
+    color: var(--color-primary);
+    background: var(--bg-secondary);
+}
+
+.footer-info-btn iconify-icon {
+    font-size: 1.2rem;
+}
+
+@media (max-width: 768px) {
+    .footer-info-btn iconify-icon {
+        font-size: 1rem;
+    }
+}
+
+/* Onboarding Modal */
+#onboarding-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(12px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+#onboarding-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.onboarding-content {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 32px;
+    padding: 3.5rem;
+    max-width: 650px;
+    width: 90%;
+    text-align: center;
+    color: white;
+    box-shadow: 0 40px 100px rgba(0, 0, 0, 0.6);
+    transform: scale(0.9) translateY(30px);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+#onboarding-modal.active .onboarding-content {
+    transform: scale(1) translateY(0);
+}
+
+.onboarding-logo {
+    margin-bottom: 2.5rem;
+}
+
+.onboarding-logo span {
+    font-family: var(--font-noto-logo);
+    font-size: 4.5rem;
+    color: #C99B35;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.onboarding-title {
+    font-size: 2.8rem;
+    font-weight: 800;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #FFF 30%, #C99B35 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.onboarding-text {
+    font-size: 1.2rem;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 300;
+}
+
+.btn-onboarding {
+    background: linear-gradient(135deg, #C99B35 0%, #B08527 100%);
+    color: white;
+    padding: 1.2rem 3.5rem;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 20px 40px rgba(201, 155, 53, 0.25);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.btn-onboarding:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 30px 60px rgba(201, 155, 53, 0.35);
+    filter: brightness(1.1);
+}
+
+.btn-onboarding:active {
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .onboarding-content {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .onboarding-title {
+        font-size: 2rem;
+    }
+
+    .onboarding-text {
+        font-size: 1rem;
+    }
+}
+
+/* Driver.js Customization */
+.driver-popover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    backdrop-filter: blur(20px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 20px !important;
+    color: white !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4) !important;
+    font-family: var(--font-inter), sans-serif !important;
+}
+
+[data-theme="light"] .driver-popover {
+    background: rgba(255, 255, 255, 0.8) !important;
+    color: #333 !important;
+    border-color: rgba(201, 155, 53, 0.3) !important;
+}
+
+.driver-popover-title {
+    color: #C99B35 !important;
+    font-size: 1.4rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.driver-popover-description {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+[data-theme="light"] .driver-popover-description {
+    color: #555 !important;
+}
+
+.driver-popover-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding-top: 1rem !important;
+    margin-top: 1rem !important;
+}
+
+.driver-popover-next-btn,
+.driver-popover-prev-btn {
+    background: rgba(201, 155, 53, 0.2) !important;
+    color: #C99B35 !important;
+    text-shadow: none !important;
+    border: 1px solid rgba(201, 155, 53, 0.3) !important;
+    border-radius: 6px !important;
+    padding: 0.3rem 0.8rem !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    transition: all 0.2s ease !important;
+}
+
+.driver-popover-close-btn {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    border: none !important;
+    padding: 0 !important;
+    position: absolute !important;
+    top: 15px !important;
+    right: 15px !important;
+    font-size: 1.2rem !important;
+    width: 20px !important;
+    height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+
+[data-theme="light"] .driver-popover-close-btn {
+    color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.driver-popover-close-btn:hover {
+    color: #C99B35 !important;
+    background: transparent !important;
+}
+
+.driver-popover-next-btn:hover,
+.driver-popover-prev-btn:hover {
+    background: #C99B35 !important;
+    color: white !important;
+    transform: translateY(-1px) !important;
+}
+
+.driver-popover-progress-text {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+[data-theme="light"] .driver-popover-progress-text {
+    color: #888 !important;
+}
+
+.driver-popover-arrow {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* RTL Support for Arabic tour steps */
+[dir="rtl"] .driver-popover {
+    text-align: right !important;
+}
+
+[dir="rtl"] .driver-popover-footer {
+    flex-direction: row-reverse !important;
+}
+
+[dir="rtl"] .driver-popover-close-btn {
+    right: auto !important;
+    left: 15px !important;
+}
+
+[dir="rtl"] .driver-popover-progress-text {
+    direction: ltr !important;
+    unicode-bidi: embed !important;
+}

@@ -5,8 +5,46 @@
  * Simple PHP-based translation system using language files.
  */
 
-// Get current language from cookie or default to 'fr'
-$GLOBALS['current_locale'] = $_COOKIE['sadaa_lang'] ?? 'fr';
+// Supported languages
+$GLOBALS['supported_locales'] = ['ar', 'fr', 'en', 'es', 'de', 'tr'];
+
+/**
+ * Detect language from cookie or browser Accept-Language header
+ */
+function detectLocale(): string
+{
+    $supported = $GLOBALS['supported_locales'];
+
+    // 1. Check cookie first (user explicit choice)
+    if (isset($_COOKIE['sadaa_lang']) && in_array($_COOKIE['sadaa_lang'], $supported)) {
+        return $_COOKIE['sadaa_lang'];
+    }
+
+    // 2. Check Accept-Language header
+    $acceptLang = $_SERVER['HTTP_ACCEPT_LANGUAGE'] ?? '';
+    if ($acceptLang) {
+        // Parse Accept-Language header (e.g., "en-US,en;q=0.9,fr;q=0.8")
+        $languages = explode(',', $acceptLang);
+        foreach ($languages as $lang) {
+            // Extract language code (remove quality factor and region)
+            $lang = trim($lang);
+            if (strpos($lang, ';') !== false) {
+                $lang = substr($lang, 0, strpos($lang, ';'));
+            }
+            // Check full code first (e.g., "en-US")
+            $langCode = strtolower(substr($lang, 0, 2));
+            if (in_array($langCode, $supported)) {
+                return $langCode;
+            }
+        }
+    }
+
+    // 3. Default fallback to English
+    return 'en';
+}
+
+// Get current language using detection logic
+$GLOBALS['current_locale'] = detectLocale();
 
 // Cache for loaded translations
 $GLOBALS['translations'] = [];
@@ -14,7 +52,8 @@ $GLOBALS['translations'] = [];
 /**
  * Load translations for a given language
  */
-function loadTranslations(string $lang): array {
+function loadTranslations(string $lang): array
+{
     $langFile = __DIR__ . '/../lang/' . $lang . '.php';
 
     if (file_exists($langFile)) {
@@ -38,7 +77,8 @@ function loadTranslations(string $lang): array {
  * @param string|null $lang Override the current language
  * @return string The translated string or the key if not found
  */
-function __(string $key, array $params = [], ?string $lang = null): string {
+function __(string $key, array $params = [], ?string $lang = null): string
+{
     $lang = $lang ?? $GLOBALS['current_locale'];
 
     // Load translations if not cached
@@ -75,10 +115,25 @@ function __(string $key, array $params = [], ?string $lang = null): string {
 }
 
 /**
+ * Get an entire section of translations (returns array)
+ */
+function getTranslationSection(string $section, ?string $lang = null): array
+{
+    $lang = $lang ?? $GLOBALS['current_locale'];
+
+    if (!isset($GLOBALS['translations'][$lang])) {
+        $GLOBALS['translations'][$lang] = loadTranslations($lang);
+    }
+
+    return $GLOBALS['translations'][$lang][$section] ?? [];
+}
+
+/**
  * Get all translations for JavaScript usage
  * Returns a JSON-encodable array of translations
  */
-function getJsTranslations(?string $lang = null): array {
+function getJsTranslations(?string $lang = null): array
+{
     $lang = $lang ?? $GLOBALS['current_locale'];
 
     if (!isset($GLOBALS['translations'][$lang])) {
@@ -91,21 +146,24 @@ function getJsTranslations(?string $lang = null): array {
 /**
  * Get current locale
  */
-function getCurrentLocale(): string {
+function getCurrentLocale(): string
+{
     return $GLOBALS['current_locale'];
 }
 
 /**
  * Set current locale
  */
-function setCurrentLocale(string $lang): void {
+function setCurrentLocale(string $lang): void
+{
     $GLOBALS['current_locale'] = $lang;
 }
 
 /**
  * Check if current language is RTL
  */
-function isRtl(?string $lang = null): bool {
+function isRtl(?string $lang = null): bool
+{
     $lang = $lang ?? $GLOBALS['current_locale'];
     return in_array($lang, ['ar', 'fa', 'ur', 'he']);
 }

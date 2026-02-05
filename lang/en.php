@@ -232,6 +232,7 @@ return [
         'meccan' => 'Meccan',
         'medinan' => 'Medinan',
         'verses' => 'verses',
+        'about' => 'About',
     ],
 
     // JavaScript translations (for frontend)
@@ -254,5 +255,50 @@ return [
         'story' => 'Story',
         'square' => 'Square',
         'show_arabic' => 'Show Arabic text',
+    ],
+
+    // Onboarding & Guided Tour
+    'onboarding' => [
+        'welcome_title' => 'Welcome to Sadaa',
+        'welcome_text' => 'Sada is a space for contemplation, where the soul listens to the echo of Quranic wisdom, and finds in the verses a light that guides it, and a meaning that accompanies it on its journey.',
+        'btn_start' => 'Start Tour',
+        'btn_skip' => 'Skip Introduction',
+        'btn_next' => 'Next',
+        'btn_prev' => 'Previous',
+        'btn_done' => 'Finish',
+        'steps' => [
+            'themes' => [
+                'title' => 'Exploration Themes',
+                'text' => 'Let your intuition guide you and choose the theme that reflects your current state of mind or spiritual need.',
+            ],
+            'intentions' => [
+                'title' => 'Reflection Axes',
+                'text' => 'Choose an axis that reflects what you wish to contemplate, and explore the verses that address it across different contexts.',
+            ],
+            'display' => [
+                'title' => 'Customization',
+                'text' => 'Adjust the appearance (light/dark) and language for a comfortable reading experience.',
+            ],
+            'go' => [
+                'title' => 'Ready to begin?',
+                'text' => 'Click here to begin your journey of reflecting on the verses within your chosen axis.',
+            ],
+        ],
+    ],
+
+    // Surah Page Tour
+    'surah_tour' => [
+        'category_title' => 'Change Theme',
+        'category_text' => 'Select a spiritual category to explore relevant verses',
+        'reader_title' => 'Verse Reading',
+        'reader_text' => 'Read the verse in Arabic and its translation',
+        'navigation_title' => 'Navigation',
+        'navigation_text' => 'Use arrows to browse through verses',
+        'copy_title' => 'Copy',
+        'copy_text' => 'Copy the verse text to clipboard',
+        'share_title' => 'Share',
+        'share_text' => 'Create a beautiful image of the verse to share on social media',
+        'read_mode_title' => 'Reading Mode',
+        'read_mode_text' => 'Open the full Quran reader to read the entire surah',
     ],
 ];

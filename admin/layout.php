@@ -188,6 +188,7 @@ $navItems = [
     ['page' => 'types', 'icon' => 'mdi:shape', 'label' => __('nav.types')],
     ['page' => 'categories', 'icon' => 'mdi:tag-multiple', 'label' => __('nav.categories')],
     ['page' => 'assignments', 'icon' => 'mdi:link-variant', 'label' => __('nav.assignments')],
+    ['page' => 'about', 'icon' => 'mdi:information-circle', 'label' => 'À Propos'],
     ['page' => 'import', 'icon' => 'mdi:cloud-download', 'label' => __('nav.import')],
     ['page' => 'imports', 'icon' => 'mdi:history', 'label' => __('nav.history')],
     ['page' => 'backup', 'icon' => 'mdi:database-sync', 'label' => __('nav.backup')],

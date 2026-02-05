@@ -10,7 +10,7 @@ $uri = urldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
 $query = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
 
 // Admin section - serve from /admin directory
-if (preg_match('#^/admin(/|$)#', $uri)) {
+if (preg_match('#^/admin(/|$)#i', $uri)) {
     $adminPath = __DIR__ . $uri;
 
     // If it's a directory, serve index.php
@@ -22,9 +22,15 @@ if (preg_match('#^/admin(/|$)#', $uri)) {
         }
     }
 
-    // Try with .php extension
-    if (file_exists($adminPath . '.php')) {
+    // Try with .php extension if it doesn't have one
+    if (!str_ends_with($adminPath, '.php') && file_exists($adminPath . '.php')) {
         require $adminPath . '.php';
+        exit;
+    }
+
+    // Try as is (especially if it ends in .php)
+    if (file_exists($adminPath) && is_file($adminPath)) {
+        require $adminPath;
         exit;
     }
 
@@ -37,14 +43,31 @@ if (preg_match('#^/admin(/|$)#', $uri)) {
 // Everything else is served from /public directory
 $publicPath = __DIR__ . '/public' . $uri;
 
-// Serve static files directly from /public
-if ($uri !== '/' && file_exists($publicPath) && is_file($publicPath)) {
-    return false; // Serve the file as-is
-}
-
-// Serve API, CSS, JS, assets directly from /public
-if (preg_match('#^/(api\.php|css/|js/|assets/)#', $uri)) {
-    return false; // Let PHP serve from public directory
+// Serve CSS, JS, assets directly from /public
+if (preg_match('#^/(css/|js/|assets/)#', $uri)) {
+    $staticPath = realpath(__DIR__ . '/public' . $uri);
+    if ($staticPath && file_exists($staticPath) && is_file($staticPath)) {
+        $ext = pathinfo($staticPath, PATHINFO_EXTENSION);
+        $mimes = [
+            'css' => 'text/css',
+            'js' => 'application/javascript',
+            'svg' => 'image/svg+xml',
+            'png' => 'image/png',
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'gif' => 'image/gif',
+            'ico' => 'image/x-icon',
+            'woff' => 'font/woff',
+            'woff2' => 'font/woff2',
+            'webp' => 'image/webp'
+        ];
+        if (isset($mimes[$ext])) {
+            header("Content-Type: " . $mimes[$ext]);
+        }
+        header("Content-Length: " . filesize($staticPath));
+        readfile($staticPath);
+        exit;
+    }
 }
 
 // Pretty URLs: /category/slug → public/surah.php?slug=slug
@@ -72,6 +95,15 @@ if ($uri === '/robots.txt') {
     }
 }
 
+// Serve .php files from /public
+if (str_ends_with($uri, '.php')) {
+    $phpFile = __DIR__ . '/public' . $uri;
+    if (file_exists($phpFile)) {
+        require $phpFile;
+        exit;
+    }
+}
+
 // Remove .php extension: /surah → public/surah.php
 $phpFile = __DIR__ . '/public' . $uri . '.php';
 if ($uri !== '/' && !is_dir($publicPath) && file_exists($phpFile)) {
@@ -86,8 +118,28 @@ if ($uri === '/' || $uri === '/index') {
 }
 
 // Try to serve any other file from /public
-if (file_exists($publicPath)) {
-    return false;
+$fallbackPath = realpath(__DIR__ . '/public' . $uri);
+if ($fallbackPath && file_exists($fallbackPath) && is_file($fallbackPath)) {
+    $ext = pathinfo($fallbackPath, PATHINFO_EXTENSION);
+    $mimes = [
+        'css' => 'text/css',
+        'js' => 'application/javascript',
+        'svg' => 'image/svg+xml',
+        'png' => 'image/png',
+        'jpg' => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'ico' => 'image/x-icon',
+        'woff' => 'font/woff',
+        'woff2' => 'font/woff2',
+        'webp' => 'image/webp'
+    ];
+    if (isset($mimes[$ext])) {
+        header("Content-Type: " . $mimes[$ext]);
+    }
+    header("Content-Length: " . filesize($fallbackPath));
+    readfile($fallbackPath);
+    exit;
 }
 
 // 404 - File not found

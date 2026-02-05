@@ -232,6 +232,7 @@ return [
         'meccan' => 'Mekkanisch',
         'medinan' => 'Medinensisch',
         'verses' => 'Verse',
+        'about' => 'Über uns',
     ],
 
     // JavaScript translations (for frontend)
@@ -254,5 +255,50 @@ return [
         'story' => 'Story',
         'square' => 'Quadrat',
         'show_arabic' => 'Arabischen Text anzeigen',
+    ],
+
+    // Onboarding & Geführte Tour
+    'onboarding' => [
+        'welcome_title' => 'Willkommen bei Sadaa',
+        'welcome_text' => 'Sada ist ein Raum der Kontemplation, wo die Seele dem Echo der koranischen Weisheit lauscht und in den Versen ein Licht findet, das sie leitet, und einen Sinn, der sie auf ihrem Weg begleitet.',
+        'btn_start' => 'Tour starten',
+        'btn_skip' => 'Einführung überspringen',
+        'btn_next' => 'Weiter',
+        'btn_prev' => 'Zurück',
+        'btn_done' => 'Fertig',
+        'steps' => [
+            'themes' => [
+                'title' => 'Erkundungsthemen',
+                'text' => 'Lassen Sie sich von Ihrem Empfinden leiten und wählen Sie das Thema, das Ihren geistigen Zustand oder Ihr aktuelles spirituelles Bedürfnis widerspiegelt.',
+            ],
+            'intentions' => [
+                'title' => 'Betrachtungsachsen',
+                'text' => 'Wählen Sie eine Achse, die widerspiegelt, was Sie betrachten möchten, und entdecken Sie die Verse, die sie in unterschiedlichen Kontexten behandeln.',
+            ],
+            'display' => [
+                'title' => 'Anpassung',
+                'text' => 'Passen Sie das Erscheinungsbild (hell/dunkel) und die Sprache für ein angenehmes Leseerlebnis an.',
+            ],
+            'go' => [
+                'title' => 'Bereit zu beginnen?',
+                'text' => 'Klicken Sie hier, um Ihre Reise der Betrachtung durch die Verse innerhalb der gewählten Achse zu beginnen.',
+            ],
+        ],
+    ],
+
+    // Surah Page Tour
+    'surah_tour' => [
+        'category_title' => 'Thema wechseln',
+        'category_text' => 'Wählen Sie eine spirituelle Kategorie, um relevante Verse zu erkunden',
+        'reader_title' => 'Verslesen',
+        'reader_text' => 'Lesen Sie den Vers auf Arabisch und seine Übersetzung',
+        'navigation_title' => 'Navigation',
+        'navigation_text' => 'Verwenden Sie die Pfeile, um durch die Verse zu blättern',
+        'copy_title' => 'Kopieren',
+        'copy_text' => 'Kopieren Sie den Vers-Text in die Zwischenablage',
+        'share_title' => 'Teilen',
+        'share_text' => 'Erstellen Sie ein schönes Bild des Verses, um es in sozialen Medien zu teilen',
+        'read_mode_title' => 'Lesemodus',
+        'read_mode_text' => 'Öffnen Sie den vollständigen Koran-Leser, um die gesamte Sure zu lesen',
     ],
 ];
