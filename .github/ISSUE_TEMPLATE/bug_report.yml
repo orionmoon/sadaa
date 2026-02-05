@@ -1,0 +1,22 @@
+name: 🐛 Signalement de Bug | Bug Report
+description: Signalez un problème technique ou un défaut d'affichage
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vous avez remarqué quelque chose qui ne fonctionne pas ? Dites-le nous ici ! 🛠️
+  - type: textarea
+    id: bug
+    attributes:
+      label: Description du problème
+      description: Que s'est-il passé et à quel moment ?
+      placeholder: "Exemple: Le bouton de partage ne s'affiche pas sur mon téléphone..."
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Appareil utilisé
+      description: (Optionnel) Quel téléphone ou navigateur utilisiez-vous ?
+      placeholder: "Exemple: iPhone 13, Chrome..."

@@ -25,21 +25,14 @@ L'application supporte déjà plusieurs langues (FR, AR, EN, DE, ES, TR), mais n
 
 ---
 
-## 💻 Contributions Techniques
+## ✨ Suggestions de Nouvelles Fonctionnalités
 
-Pour les développeurs souhaitant contribuer au code :
+Vous avez une idée pour rendre Sadaa encore plus utile ou agréable à utiliser ? Nous adorons les nouvelles idées !
 
-1. **Forkez** le projet.
-2. Créez une **branche** pour votre fonctionnalité (`git checkout -b feat/ma-super-idee`).
-3. **Commitez** vos changements (`git commit -m 'feat: ajout de...'`).
-4. **Pushez** votre branche (`git push origin feat/ma-super-idee`).
-5. Ouvrez une **Pull Request**.
-
-### Structure du Code
-- `public/` : Interface utilisateur (HTML/JS/CSS).
-- `admin/` : Panel de gestion.
-- `lang/` : Fichiers de traduction PHP (faciles à modifier !).
-- `app/` : Logique API.
+- **Améliorations de l'interface** : Pour rendre la navigation plus fluide.
+- **Nouvelles options de partage** : Pour diffuser la sagesse plus facilement.
+- **Outils de méditation** : Toute fonction qui encourage le recueillement.
+- **Comment faire ?** : Utilisez l'onglet **[Discussions](https://github.com/orionmoon/sadaa/discussions)** pour proposer vos idées et en débattre avec nous, ou ouvrez une **[Issue](https://github.com/orionmoon/sadaa/issues)** de type "Feature Suggestion".
 
 ---
 

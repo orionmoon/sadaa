@@ -1,0 +1,21 @@
+name: ✨ Suggestion de Fonctionnalité | Feature Suggestion
+description: Proposez une nouvelle idée ou une amélioration pour l'application
+labels: [enhancement, feature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Partagez votre vision pour améliorer Sadaa ! 🚀
+  - type: textarea
+    id: feature
+    attributes:
+      label: Description de l'idée
+      description: Que souhaiteriez-vous voir dans l'application ?
+      placeholder: "Exemple: Ajouter un bouton pour copier le verset directement dans le presse-papier..."
+    validations:
+      required: true
+  - type: textarea
+    id: pourquoi
+    attributes:
+      label: Quel serait l'avantage ?
+      description: En quoi cela améliorerait l'expérience des utilisateurs ?
