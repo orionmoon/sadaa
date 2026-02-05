@@ -1,0 +1,25 @@
+name: 📝 Suggestion de Traduction | Translation Suggestion
+description: Proposez une nouvelle langue ou une amélioration de traduction
+labels: [translation, enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de contribuer à rendre Sadaa accessible à plus d'âmes ! 🌍
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type de contribution
+      options:
+        - Ajouter une nouvelle langue
+        - Améliorer une traduction existante
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Votre proposition
+      description: Détaillez les corrections ou les textes à ajouter.
+      placeholder: "Exemple: Dans la langue X, le mot Y devrait être traduit par Z car..."
+    validations:
+      required: true

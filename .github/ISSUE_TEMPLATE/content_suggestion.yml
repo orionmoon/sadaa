@@ -1,0 +1,16 @@
+name: 💡 Suggestion de Contenu | Content Suggestion
+description: Proposez de nouveaux thèmes ou catégories de versets
+labels: [content, contribution]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Vous avez une idée pour enrichir les thématiques de l'application ? Partagez-la ! ✨
+  - type: textarea
+    id: content
+    attributes:
+      label: Détails de la proposition
+      description: Quel Type ou quelle Catégorie souhaiterie-vous ajouter ?
+      placeholder: "Exemple: Ajouter une catégorie 'Gratitude' dans le type 'État d'esprit'..."
+    validations:
+      required: true
