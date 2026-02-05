@@ -1,5 +1,7 @@
 # صدى | Sadaa
 
+[sadaa Main logo](brand/sadaa-main-logo.png)
+
 🌍 **اللغة / Language**: **العربية** • [English](README.en.md) • [Deutsch](README.de.md) • [Español](README.es.md) • [Français](README.fr.md) • [Türkçe](README.tr.md)
 
 🌐 **استخدم التطبيق** : [sadaa.me](https://sadaa.me)
