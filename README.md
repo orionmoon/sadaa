@@ -1,70 +1,70 @@
 # صدى | Sadaa
 
-🌍 **Langue / Language**: [العربية](README.ar.md) • [English](README.en.md) • [Deutsch](README.de.md) • [Español](README.es.md) • **Français** • [Türkçe](README.tr.md)
+🌍 **اللغة / Language**: **العربية** • [English](README.en.md) • [Deutsch](README.de.md) • [Español](README.es.md) • [Français](README.fr.md) • [Türkçe](README.tr.md)
 
-🌐 **Consultez l'application** : [sadaa.me](https://sadaa.me)
-
----
-
-## 🌟 Notre Vision
-
-**Sadaa — écho de la sagesse pour l'âme du Coran** est une application née d'une conviction profonde : **le Coran ne s'adresse pas à un lecteur abstrait, mais à l'être humain tel qu'il est, dans ce qu'il vit et ressent**.
-
-Selon l'état intérieur — apaisement, questionnement, épreuve ou espérance — certains versets résonnent plus intensément que d'autres.
-
-Sadaa met en lumière ces résonances en proposant des versets du Coran **organisés par thématiques humaines, spirituelles et existentielles**, afin d'accompagner l'utilisateur dans l'instant qu'il traverse.
-
-Sadaa ne remplace pas la lecture complète du Coran. Elle vise plutôt à :
-
-- Orienter vers **des versets qui parlent à l'âme ici et maintenant**
-- Encourager **la réflexion et le recueillement**
-- Rappeler que le Coran accompagne l'être humain **tout au long de son chemin**
-
-> **Le Coran vous parle tel que vous êtes, accompagne vos émotions et vous guide dans votre cheminement.**
-
-### 📚 Exemples de Thèmes et Catégories
-
-L'application propose des versets organisés par :
-
-- **Messages à** : Croyants, Mécréants, L'humanité, Enfants d'Israël, Peuple du Livre...
-- **Sciences** : Sciences de la terre, Cosmologie, Biologie, Astronomie...
-- **Invocations** : Du'as et prières issues du Coran
-- **Expéditions** : Événements historiques et récits coraniques
+🌐 **استخدم التطبيق** : [sadaa.me](https://sadaa.me)
 
 ---
 
-## 🤝 Comment Contribuer
+## 🌟 رؤيتنا
 
-Ce projet est **ouvert à tous**, même sans compétences techniques ! Voici comment vous pouvez aider :
+**صدى — صدى الحكمة للروح من القرآن** هو تطبيق وُلِد من قناعة عميقة مفادها أن **القرآن الكريم لا يخاطب قارئًا مجردًا، بل يخاطب الإنسان في واقعه، ومشاعره، وما يمرّ به في حياته**.
 
-### 📝 Traductions
-Aidez-nous à rendre Sadaa accessible dans plus de langues. Si vous maîtrisez une langue qui n'est pas encore proposée, ou si vous remarquez une traduction à améliorer, faites-le nous savoir !
+فبحسب حالتك النفسية والروحية — سكينةً كانت، أو تساؤلًا، أو ابتلاءً، أو رجاءً — تأتي آياتٌ بعينها لتلامس قلبك أكثر من غيرها.
 
-### 💡 Propositions de Catégories
-Vous avez une idée de thème ou de catégorie qui pourrait enrichir l'application ? Partagez-la avec nous !
+يهدف تطبيق صدى إلى إبراز هذه الأصداء، من خلال عرض آيات من القرآن الكريم **مصنّفة حسب موضوعات إنسانية وروحية ومعنوية**، لتكون أقرب إلى القارئ في لحظته الراهنة.
 
-### 🐛 Signalement de Bugs
-Quelque chose ne fonctionne pas correctement ? Un affichage bizarre sur votre appareil ? Dites-le nous pour que nous puissions corriger le problème.
+لا يسعى صدى إلى أن يكون بديلًا عن التلاوة الكاملة للقرآن، بل إلى:
 
-### ✨ Idées d'Amélioration
-Toute suggestion pour améliorer l'expérience utilisateur est précieuse.
+- توجيه المستخدم نحو **آيات تخاطبه كما هو وفي اللحظة التي يعيشها**
+- تشجيع **التدبّر والتأمل**
+- إبراز أن القرآن الكريم يرافق الإنسان في **جميع مراحل مسيرته**
 
----
+> **القرآن يخاطبك كما أنت، يواكب مشاعرك، ويهديك في مسيرتك.**
 
-## 💬 Rejoindre la Communauté
+### 📚 أمثلة على المواضيع والتصنيفات
 
-Rendez-vous sur notre **[page GitHub](https://github.com/orionmoon/sadaa)** pour :
+يقدم التطبيق آيات مرتبة حسب:
 
-- **Ouvrir une discussion** : Posez vos questions, proposez vos idées ou discutez avec d'autres utilisateurs.
-- **Signaler un problème** : Créez une "issue" pour nous alerter d'un bug ou d'une suggestion.
-- **Suivre les mises à jour** : Restez informés des nouvelles fonctionnalités et améliorations.
-
----
-
-## 📜 Licence
-
-Ce projet est sous licence **MIT** — vous êtes libre de l'utiliser, le modifier et le partager, tant que vous mentionnez la source originale.
+- **رسائل إلى** : المؤمنون، الكافرون، الإنسانية، بنو إسرائيل، أهل الكتاب...
+- **العلوم** : علوم الأرض، الكونيات، الأحياء، الفلك...
+- **الأدعية** : دعوات وأذكار من القرآن الكريم
+- **الغزوات** : أحداث تاريخية وقصص قرآنية
 
 ---
 
-صدى — *Écho de sagesse pour l'âme* ✨
+## 🤝 كيف تساهم
+
+هذا المشروع **مفتوح للجميع**، حتى بدون مهارات تقنية! إليك كيف يمكنك المساعدة:
+
+### 📝 الترجمات
+ساعدنا في جعل صدى متاحًا بلغات أكثر. إذا كنت تتقن لغة غير متوفرة حاليًا، أو لاحظت ترجمة تحتاج تحسين، أخبرنا!
+
+### 💡 اقتراح تصنيفات جديدة
+هل لديك فكرة لموضوع أو تصنيف يمكن أن يثري التطبيق؟ شاركها معنا!
+
+### 🐛 الإبلاغ عن الأخطاء
+هل شيء لا يعمل بشكل صحيح؟ عرض غريب على جهازك؟ أخبرنا حتى نتمكن من إصلاح المشكلة.
+
+### ✨ أفكار للتحسين
+كل اقتراح لتحسين تجربة المستخدم قيّم.
+
+---
+
+## 💬 انضم إلى المجتمع
+
+توجه إلى **[صفحتنا على GitHub](https://github.com/orionmoon/sadaa)** من أجل:
+
+- **فتح نقاش** : اطرح أسئلتك، شارك أفكارك أو تحدث مع مستخدمين آخرين.
+- **الإبلاغ عن مشكلة** : أنشئ "issue" لتنبيهنا بخطأ أو اقتراح.
+- **متابعة التحديثات** : ابقَ على اطلاع بالميزات والتحسينات الجديدة.
+
+---
+
+## 📜 الترخيص
+
+هذا المشروع مرخص تحت **رخصة MIT** — يمكنك استخدامه، تعديله ومشاركته بحرية، طالما تذكر المصدر الأصلي.
+
+---
+
+صدى — *صدى الحكمة لكل روح* ✨

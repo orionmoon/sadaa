@@ -1,6 +1,6 @@
 # صدى | Sadaa
 
-🌍 **Language**: [العربية](README.ar.md) • **English** • [Deutsch](README.de.md) • [Español](README.es.md) • [Français](README.md) • [Türkçe](README.tr.md)
+🌍 **Language**: [العربية](README.ar.md) • **English** • [Deutsch](README.de.md) • [Español](README.es.md) • [Français](README.fr.md) • [Türkçe](README.tr.md)
 
 🌐 **Visit the app**: [sadaa.me](https://sadaa.me)
 
