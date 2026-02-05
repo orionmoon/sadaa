@@ -1,6 +1,8 @@
 # صدى | Sadaa
 
-[sadaa Main logo](brand/sadaa-main-logo.png)
+<p align="center">
+  <img src="brand/sadaa Main Logo.png" alt="Sadaa Logo" width="200">
+</p>
 
 🌍 **Langue / Language**: [العربية](README.ar.md) • [English](README.en.md) • [Deutsch](README.de.md) • [Español](README.es.md) • **Français** • [Türkçe](README.tr.md)
 
