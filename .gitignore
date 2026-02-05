@@ -1,0 +1,12 @@
+# OS files
+.DS_Store
+Thunbs.db
+
+# Temp and maintenance scripts
+migration_fix_sort_order.php
+temp_fetch_data.php
+update_tr_db.php
+public/check_limits.php
+
+# Logs
+*.log
