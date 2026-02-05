@@ -1,45 +1,51 @@
-# Guide de Contribution | Contribution Guide
+# دليل المساهمة | Contribution Guide
 
-Merci de l'intérêt que vous portez à **Sadaa** ! Ce projet est communautaire et nous accueillons toutes les formes d'aide, qu'elles soient techniques ou non.
+<p align="center">
+  <img src="brand/sadaa Main Logo.png" alt="Sadaa Logo" width="150">
+</p>
 
----
+🌍 **اللغة / Language**: **العربية** • [English](CONTRIBUTING.en.md) • [Deutsch](CONTRIBUTING.de.md) • [Español](CONTRIBUTING.es.md) • [Français](CONTRIBUTING.fr.md) • [Türkçe](CONTRIBUTING.tr.md)
 
-## 🌍 Contributions Non-Techniques (Ouvert à tous)
-
-Vous n'avez pas besoin de savoir coder pour améliorer l'application ! Voici comment vous pouvez aider :
-
-### 📝 Traductions
-L'application supporte déjà plusieurs langues (FR, AR, EN, DE, ES, TR), mais nous voulons aller plus loin :
-- **Améliorer l'existant** : Si vous voyez une faute d'orthographe ou une tournure de phrase maladroite.
-- **Ajouter une langue** : Vous parlez une langue non listée ? Proposez-la nous !
-- **Comment faire ?** : Ouvrez une [Issue](https://github.com/orionmoon/sadaa/issues) ou lancez une [Discussion](https://github.com/orionmoon/sadaa/discussions) avec votre proposition.
-
-### 💡 Suggestions de Contenu
-- Proposez de nouveaux **Types** (ex: Bien-être, Relations sociales).
-- Suggérez des **Catégories** pertinentes (ex: "La patience dans l'épreuve").
-- **Comment faire ?** : Utilisez l'onglet **Discussions** pour partager vos idées thématiques.
-
-### 🐛 Retours d'Expérience
-- Signalez un bug ou un problème d'affichage.
-- Proposez une idée pour rendre l'interface plus simple ou plus belle.
+شكراً لاهتمامكم بتطبيق **صدى**! هذا المشروع مجتمعي ونرحب بكل أشكال المساعدة، سواء كانت تقنية أو غير تقنية.
 
 ---
 
-## ✨ Suggestions de Nouvelles Fonctionnalités
+## 🌍 مساهمات غير تقنية (متاحة للجميع)
 
-Vous avez une idée pour rendre Sadaa encore plus utile ou agréable à utiliser ? Nous adorons les nouvelles idées !
+لا تحتاج إلى مهارات برمجية لتحسين التطبيق! إليك كيف يمكنك المساعدة:
 
-- **Améliorations de l'interface** : Pour rendre la navigation plus fluide.
-- **Nouvelles options de partage** : Pour diffuser la sagesse plus facilement.
-- **Outils de méditation** : Toute fonction qui encourage le recueillement.
-- **Comment faire ?** : Utilisez l'onglet **[Discussions](https://github.com/orionmoon/sadaa/discussions)** pour proposer vos idées et en débattre avec nous, ou ouvrez une **[Issue](https://github.com/orionmoon/sadaa/issues)** de type "Feature Suggestion".
+### 📝 الترجمات
+يدعم التطبيق بالفعل عدة لغات، لكننا نسعى للمزيد:
+- **تحسين الموجود**: إذا لاحظت خطأً إملائياً أو عبارة غير دقيقة.
+- **إضافة لغة**: هل تتحدث لغة غير مدرجة؟ اقترحها علينا!
+- **كيف تفعل ذلك؟**: افتح [Issue](https://github.com/orionmoon/sadaa/issues) أو ابدأ [Discussion](https://github.com/orionmoon/sadaa/discussions) مع اقتراحك.
+
+### 💡 اقتراحات المحتوى
+- اقترح **أنواعاً** جديدة (مثل: الرفاهية، العلاقات الاجتماعية).
+- اقترح **تصنيفات** ملائمة (مثل: "الصبر عند الابتلاء").
+- **كيف تفعل ذلك؟**: استخدم تبويب **Discussions** لمشاركة أفكارك حول المواضيع.
+
+### 🐛 ملاحظات المستخدمين
+- أبلغ عن خطأ برمجي أو مشكلة في العرض.
+- اقترح فكرة لجعل الواجهة أبسط أو أجمل.
 
 ---
 
-## 📜 Code de Conduite
+## ✨ اقتراحات ميزات جديدة
 
-Ce projet est basé sur la bienveillance et le respect. Nous attendons de tous les contributeurs qu'ils fassent preuve de courtoisie et d'ouverture d'esprit.
+هل لديك فكرة لجعل "صدى" أكثر فائدة أو سهولة في الاستخدام؟ نحن نحب الأفكار الجديدة!
+
+- **تحسينات الواجهة**: لجعل التصفح أكثر سلاسة.
+- **خيارات مشاركة جديدة**: لنشر الحكمة بسهولة أكبر.
+- **أدوات تأمل**: أي ميزة تشجع على التدبّر والسكينة.
+- **كيف تفعل ذلك؟**: استخدم تبويب **[Discussions](https://github.com/orionmoon/sadaa/discussions)** لاقتراح أفكارك ومناقشتها معنا، أو افتح **[Issue](https://github.com/orionmoon/sadaa/issues)** من نوع "Feature Suggestion".
 
 ---
 
-Merci encore pour votre soutien à **Sadaa** ! ✨
+## 📜 ميثاق الأخلاق
+
+هذا المشروع قائم على اللطف والاحترام. نتوقع من جميع المساهمين التحلي بلين الجانب والانفتاح.
+
+---
+
+شكراً مرة أخرى لدعمكم لتطبيق **صدى**! ✨
